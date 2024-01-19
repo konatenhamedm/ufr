@@ -1,0 +1,78 @@
+{% extends 'base-layout.html.twig' %}
+
+{% block title %}Liste des versements{% endblock %}
+{% block header %}Comptabilité{% endblock %}
+{% block breadcrumb %}{% endblock %}
+{% block body %}
+<div class="card shadow-sm">
+    <div class="card-header card-header-sm">
+        <h3 class="card-title"> Liste des versements</h3>
+        {% if not is_granted('ROLE_ETUDIANT') %}
+        
+        <div class="card-toolbar">
+             <a href="{{ path('app_comptabilite_versement_index', {id: inscription.id}) }}" class="btn btn-light-main btn-sm font-weight-bolder" >
+                    <span class="svg-icon svg-icon-md"><i class="ki ki-solid-plus"></i></span>
+                    Retour à la fiche de l'étudiant
+                </a>
+             <a href="{{ path('app_comptabilite_versement_new', {id: inscription.id}) }}" class="btn btn-main btn-sm"  
+                data-bs-toggle="modal" data-bs-target="#modal-lg">
+                <i class="bi bi-plus-square text-light"></i>
+                Nouveau
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <div class="row">
+                {% if inscription %}
+              <div class="col-sm-5">
+                <div class="form-group row">
+                    <label for="staticNom" class="col-sm-4 col-form-label fw-bolder">Nom</label>
+                    <div class="col-sm-8">
+                        <input type="text" readonly class="form-control-plaintext" id="staticNom" value="{{ inscription.etudiant.nom }}">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="staticPrenom" class="col-sm-4 col-form-label fw-bolder">Prénoms</label>
+                    <div class="col-sm-8">
+                        <input type="text" readonly class="form-control-plaintext" id="staticPrenom" value="{{ inscription.etudiant.prenom }}">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="staticPrenom" class="col-sm-4 col-form-label fw-bolder">Niveau</label>
+                    <div class="col-sm-8">
+                        <input type="text" readonly class="form-control-plaintext" id="staticPrenom" value="{{ inscription.niveau.libelle }}">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="staticPrenom" class="col-sm-4 col-form-label fw-bolder">Date d'inscription</label>
+                    <div class="col-sm-8">
+                        <input type="text" readonly class="form-control-plaintext" id="staticPrenom" value="{{ inscription.dateInscription | date('d-m-Y') }}">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            <div class="col-sm-{% if inscription %}7{% else %}12{% endif %}">
+                <div id="grid_app_comptabilite_versement_{{ inscription.id | default('') }}" class="grid-dt-wrapper">Chargement....</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block java %}
+    <script src="{{ asset('assets/js/datatables.js') }}"></script>
+    <script> 
+        $(function() { 
+            const id = "{{ inscription.id | default('') }}";
+              $(`#grid_app_comptabilite_versement_${id}`).initDataTables({{ datatable_settings(datatable) }}, {
+                  searching: true,
+                  ajaxUrl: "{{ path(app.request.attributes.get('_route'), {id: inscription.id|default(null)}) }}",
+                  language: {
+                      url: asset_base_path + "/js/i18n/French.json"
+                  }
+              });
+        });
+    </script>
+{% endblock %}

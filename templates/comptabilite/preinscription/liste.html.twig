@@ -1,0 +1,30 @@
+{% block body %}
+
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <div id="grid_app_comptabilite_preinscription_{{ etat }}" class="grid-dt-wrapper">Chargement....</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block java %}
+    <script src="{{ asset('assets/js/datatables.js') }}"></script>
+    <script> 
+        $(function () {
+            const etat = "{{etat}}";
+            $(function() { 
+                $(`#grid_app_comptabilite_preinscription_${etat}`).initDataTables({{ datatable_settings(datatable) }}, {
+                    searching: true,
+                    ajaxUrl: "{{ path('app_comptabilite_preinscription_ls', {etat: etat}) }}",
+                    language: {
+                        url: asset_base_path + "/js/i18n/French.json"
+                    }
+                });
+            });
+        })
+        
+    </script>
+{% endblock %}

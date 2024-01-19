@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<!--
+Author: Keenthemes
+Product Name: Metronic | Bootstrap HTML, VueJS, React, Angular, Asp.Net Core, Blazor, Django, Flask & Laravel Admin Dashboard Theme 
+Purchase: https://1.envato.market/EA4JP
+Website: http://www.keenthemes.com
+Contact: support@keenthemes.com
+Follow: www.twitter.com/keenthemes
+Dribbble: www.dribbble.com/keenthemes
+Like: www.facebook.com/keenthemes
+License: For each use you must have a valid license purchased only from above link in order to legally use the theme for your project.
+-->
+<html lang="fr">
+<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+<head>
+		<title>{% block title %}Bienvenue{% endblock %}</title>
+		<meta charset="utf-8" />
+		<meta name="description" content="The most advanced Bootstrap Admin Theme on Themeforest trusted by 100,000 beginners and professionals. Multi-demo, Dark Mode, RTL support and complete React, Angular, Vue, Asp.Net Core, Blazor, Django, Flask & Laravel versions. Grab your copy now and get life-time updates for free." />
+		<meta name="keywords" content="metronic, bootstrap, bootstrap 5, angular, VueJs, React, Asp.Net Core, Blazor, Django, Flask & Laravel starter kits, admin themes, web design, figma, web development, free templates, free admin themes, bootstrap theme, bootstrap template, bootstrap dashboard, bootstrap dak mode, bootstrap button, bootstrap datepicker, bootstrap timepicker, fullcalendar, datatables, flaticon" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		{#<meta property="og:locale" content="fr_FR" />
+		<meta property="og:type" content="article" />
+		<meta property="og:title" content="Metronic | Bootstrap HTML, VueJS, React, Angular, Asp.Net Core, Blazor, Django, Flask & Laravel Admin Dashboard Theme" />
+		<meta property="og:url" content="https://keenthemes.com/metronic" />
+		<meta property="og:site_name" content="Keenthemes | Metronic" />#}
+		
+		<link rel="shortcut icon" href="{{ asset('assets/media/logos/favicon.ico') }}" />
+
+		<!--begin::Fonts-->
+		{#<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />#}
+		<!--end::Fonts-->
+		<!--begin::Vendor Stylesheets(used by this page)-->
+		<link href="{{ asset('assets/plugins/custom/fullcalendar/fullcalendar.bundle.css') }}" rel="stylesheet" type="text/css" />
+		<link href="{{ asset('assets/plugins/custom/datatables/datatables.bundle.css') }}" rel="stylesheet" type="text/css" />
+		<!--end::Vendor Stylesheets-->
+		<!--begin::Global Stylesheets Bundle(used by all pages)-->
+		<link href="{{ asset('assets/plugins/global/plugins.bundle.css') }}" rel="stylesheet" type="text/css" />
+		<link href="{{ asset('assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('assets/plugins/datagrid/grid.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('assets/css/spectrum.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('assets/css/admin.css') }}" rel="stylesheet" type="text/css" />
+		<!--end::Global Stylesheets Bundle-->
+		<!--Begin::Google Tag Manager -->
+
+        {% block inline_stylesheets %}{% endblock %}
+        <style>
+			
+			table.dataTable tbody tr.seuil_superieur {
+				background-color: red !important;
+			}
+			.table.dataTable thead .entete {
+				background-color: var(--color-main) !important;
+
+			}
+            .form-group select + .select2-container, .select2-container .select2-selection {
+                width: 100%!important;
+                height: calc(1.5em + 1.3rem + 2px);
+            }
+
+            .form-group select.form-control-sm:not(.form-select-addon) + .select2-container,  .form-group select.form-control-sm:not(.form-select-addon) + .select2-container .select2-selection {
+                width: 100%!important;
+                /*height: calc(1.3em + 1.1rem + 2px);*/
+				min-height: calc(1.5em + 1.1rem + 2px);
+            }
+
+
+			.form-group .form-select-addon + .select2-container, .form-group .form-select-addon + .select2-container .select2-selection,
+			.form-group .form-select-addon + .select2-container .selection {
+				min-height: calc(1.5em + 1.1rem + 2px);
+				height: 1px;
+				width: 1%;
+				font-size: .925rem;
+				/*padding: .55rem .75rem;*/
+			}
+
+
+
+			.form-group .form-select-addon.select2_multiple + .select2-container, .form-group .form-select-addon.select2_multiple + .select2-container .select2-selection,
+			.form-group .form-select-addon.select2_multiple + .select2-container .selection {
+				min-height: calc(1.5em + 1.1rem + 2px);
+				height: auto;
+				width: 1%;
+				font-size: .925rem;
+				/*padding: .55rem .75rem;*/
+			}
+
+
+
+
+
+            .form-group select.select2_multiple + .select2-container, .select2-container .select2-selection {
+                min-height: calc(1.5em + 1.3rem + 2px);
+                height: auto;
+            }
+
+            .input-group select + .select2-container {
+                position: relative;
+                -ms-flex: 1 1 auto;
+                flex: 1 1 auto;
+                width: 1%!important;
+                min-width: 0;
+                margin-bottom: 0;
+            }
+
+            .select2-container--default .select2-results__option {
+                word-break: break-all;
+            }
+
+            .disabled-select {
+                background-color: #d5d5d5;
+                opacity: 0.5;
+                border-radius: 3px;
+                cursor: not-allowed;
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                right: 0;
+                left: 0;
+            }
+
+            select[readonly].select2-hidden-accessible + .select2-container {
+                pointer-events: none;
+                touch-action: none;
+            }
+
+            select[readonly].select2-hidden-accessible + .select2-container .select2-selection {
+                background: #eee;
+                box-shadow: none;
+            }
+
+            select[readonly].select2-hidden-accessible + .select2-container .select2-selection__arrow,
+            select[readonly].select2-hidden-accessible + .select2-container .select2-selection__clear {
+                display: none;
+            }
+
+           
+        </style>
+        <script>
+            var asset_base_path = "{{ asset('assets') }}";
+            var current_user_id = "{{ app.user.id|default(0) }}";
+        </script>
+		<!--End::Google Tag Manager -->
+	</head>
+	<!--end::Head-->
+	<!--begin::Body-->
+	<body id="kt_body" class="header-fixed header-tablet-and-mobile-fixed toolbar-enabled toolbar-fixed toolbar-tablet-and-mobile-fixed aside-enabled aside-fixed" style="--kt-toolbar-height:55px;--kt-toolbar-height-tablet-and-mobile:55px">
+		<!--begin::Theme mode setup on page load-->
+		<script>var defaultThemeMode = "light"; var themeMode; if ( document.documentElement ) { if ( document.documentElement.hasAttribute("data-theme-mode")) { themeMode = document.documentElement.getAttribute("data-theme-mode"); } else { if ( localStorage.getItem("data-theme") !== null ) { themeMode = localStorage.getItem("data-theme"); } else { themeMode = defaultThemeMode; } } if (themeMode === "system") { themeMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; } document.documentElement.setAttribute("data-theme", themeMode); }</script>
+		<!--end::Theme mode setup on page load-->
+		<!--Begin::Google Tag Manager (noscript) -->
+		
+		<!--End::Google Tag Manager (noscript) -->
+		<!--begin::Main-->
+		<!--begin::Root-->
+		<div class="d-flex flex-column flex-root">
+			<!--begin::Page-->
+			<div class="page d-flex flex-row flex-column-fluid">
+				<!--begin::Aside-->
+				{{ include('_includes/aside.html.twig') }}
+				<!--begin::Wrapper-->
+				<div class="wrapper d-flex flex-column flex-row-fluid" id="kt_wrapper">
+					<!--begin::Header-->
+					<div id="kt_header" style="" class="header align-items-stretch">
+						<!--begin::Container-->
+						<div class="container-fluid d-flex align-items-stretch justify-content-between">
+							<!--begin::Aside mobile toggle-->
+							<div class="d-flex align-items-center d-lg-none ms-n3 me-1" title="Show aside menu">
+								<div class="btn btn-icon btn-active-color-white" id="kt_aside_mobile_toggle">
+									<i class="bi bi-list fs-1"></i>
+								</div>
+							</div>
+							<!--end::Aside mobile toggle-->
+							<!--begin::Mobile logo-->
+							<div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0">
+								<a href="index-2.html" class="d-lg-none">
+									<img alt="Logo" src="assets/media/logos/demo13-small.svg" class="h-25px" />
+								</a>
+							</div>
+							<!--end::Mobile logo-->
+							<!--begin::Wrapper-->
+							<div class="d-flex align-items-stretch justify-content-end flex-lg-grow-1">
+								<!--begin::Navbar-->
+								<!--begin::Toolbar wrapper-->
+								<div class="topbar d-flex align-items-stretch flex-shrink-0">
+									<!--begin::Search-->
+									
+									<!--end::Theme mode-->
+									<!--begin::User-->
+									<div class="d-flex align-items-stretch" id="kt_header_user_menu_toggle">
+										<!--begin::ServiceRouter wrapper-->
+										<div class="text-white topbar-item cursor-pointer symbol px-3 px-lg-5 me-n3 me-lg-n5 symbol-30px symbol-md-35px" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end" data-kt-menu-flip="bottom">
+											<img src="{{ asset('assets/media/avatars/default-avatar.png') }}" alt="avatar" ><span class="pl-5"></span>{{ app.user.nomComplet | default('') }}
+										</div>
+																				
+										<!--begin::User account menu-->
+										<div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg menu-state-color fw-semibold py-4 fs-6 w-275px" data-kt-menu="true">
+											<!--begin::ServiceRouter item-->
+											
+											<!--end::ServiceRouter item-->
+											<!--begin::ServiceRouter separator-->
+											<div class="separator my-2"></div>
+											<!--end::ServiceRouter separator-->
+											<!--begin::ServiceRouter item-->
+											{#<div class="menu-item px-5 d-nonz">
+												<a href="{{path('app_default')}}" class="menu-link px-5">Mon Profil</a>
+											</div>#}
+											<div class="menu-item px-5">
+											 	<a title="Modifier le mot de passe" 
+												href="{{ path('app_utilisateur_utilisateur_edit_password', {id: app.user.id, r: app.request.uri}) }}" 
+												class="menu-link px-5" 
+												data-bs-toggle="modal" data-bs-target="#exampleModalSizeLg2">
+													Modifier le mot de passe
+												</a>
+											 </div>
+											<!--end::ServiceRouter item-->
+											<!--begin::ServiceRouter item-->
+											{# <div class="menu-item px-5">
+												<a href="apps/projects/list.html" class="menu-link px-5">
+													<span class="menu-text">My Projects</span>
+													<span class="menu-badge">
+														<span class="badge badge-light-danger badge-circle fw-bold fs-7">3</span>
+													</span>
+												</a>
+											</div> #}
+											<!--end::ServiceRouter item-->
+											<!--begin::ServiceRouter item-->
+											{# <div class="menu-item px-5" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-placement="left-start">
+												<a href="#" class="menu-link px-5">
+													<span class="menu-title">My Subscription</span>
+													<span class="menu-arrow"></span>
+												</a>
+												<!--begin::ServiceRouter sub-->
+												<div class="menu-sub menu-sub-dropdown w-175px py-4">
+													<!--begin::ServiceRouter item-->
+													<div class="menu-item px-3">
+														<a href="account/referrals.html" class="menu-link px-5">Referrals</a>
+													</div>
+													<!--end::ServiceRouter item-->
+													<!--begin::ServiceRouter item-->
+													<div class="menu-item px-3">
+														<a href="account/billing.html" class="menu-link px-5">Billing</a>
+													</div>
+													<!--end::ServiceRouter item-->
+													<!--begin::ServiceRouter item-->
+													<div class="menu-item px-3">
+														<a href="account/statements.html" class="menu-link px-5">Payments</a>
+													</div>
+													<!--end::ServiceRouter item-->
+													<!--begin::ServiceRouter item-->
+													<div class="menu-item px-3">
+														<a href="account/statements.html" class="menu-link d-flex flex-stack px-5">Statements 
+														<i class="fas fa-exclamation-circle ms-2 fs-7" data-bs-toggle="tooltip" title="View your statements"></i></a>
+													</div>
+													<!--end::ServiceRouter item-->
+													<!--begin::ServiceRouter separator-->
+													<div class="separator my-2"></div>
+													<!--end::ServiceRouter separator-->
+													<!--begin::ServiceRouter item-->
+													<div class="menu-item px-3">
+														<div class="menu-content px-3">
+															<label class="form-check form-switch form-check-custom form-check-solid">
+																<input class="form-check-input w-30px h-20px" type="checkbox" value="1" checked="checked" name="notifications" />
+																<span class="form-check-label text-muted fs-7">Notifications</span>
+															</label>
+														</div>
+													</div>
+													<!--end::ServiceRouter item-->
+												</div>
+												<!--end::ServiceRouter sub-->
+											</div> #}
+											<!--end::ServiceRouter item-->
+											<!--begin::ServiceRouter item-->
+											{# <div class="menu-item px-5">
+												<a href="account/statements.html" class="menu-link px-5">My Statements</a>
+											</div> #}
+											<!--end::ServiceRouter item-->
+											<!--begin::ServiceRouter separator-->
+											{# <div class="separator my-2 d-none"></div> #}
+											<!--end::ServiceRouter separator-->
+									
+											{# <div class="menu-item px-5 my-1">
+												<a href="account/settings.html" class="menu-link px-5">Account Settings</a>
+											</div> #}
+											<!--end::ServiceRouter item-->
+											<!--begin::ServiceRouter item-->
+											<div class="menu-item px-5">
+												<a href="{{ path('app_logout') }}" class="menu-link px-5">Déconnexion</a>
+											</div>
+											<!--end::ServiceRouter item-->
+										</div>
+										<!--end::User account menu-->
+										<!--end::ServiceRouter wrapper-->
+									</div>
+									<!--end::User -->
+									<!--begin::Heaeder menu toggle-->
+									<div class="d-flex align-items-stretch d-lg-none px-3 me-n3" title="Show header menu">
+										<div class="topbar-item" id="kt_header_menu_mobile_toggle">
+											<i class="bi bi-text-left fs-1"></i>
+										</div>
+									</div>
+									<!--end::Heaeder menu toggle-->
+								</div>
+								<!--end::Toolbar wrapper-->
+							</div>
+							<!--end::Wrapper-->
+						</div>
+						<!--end::Container-->
+					</div>
+					<!--end::Header-->
+					<!--begin::Content-->
+					<div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+						<!--begin::Toolbar-->
+						<div class="toolbar" id="kt_toolbar">
+							<!--begin::Container-->
+							<div id="kt_toolbar_container" class="container-fluid d-flex flex-stack">
+								<!--begin::Page title-->
+								<div data-kt-swapper="true" data-kt-swapper-mode="prepend" data-kt-swapper-parent="{default: '#kt_content_container', 'lg': '#kt_toolbar_container'}" class="page-title d-flex align-items-center me-3 flex-wrap mb-5 mb-lg-0 lh-1">
+									<!--begin::Title-->
+									<h1 class="d-flex align-items-center text-dark fw-bold my-1 fs-3">{% block header %}Tableau de bord{% endblock %}</h1>
+									<!--end::Title-->
+									<!--begin::Separator-->
+									<span class="h-20px border-gray-200 border-start mx-4"></span>
+
+									{% block breadcrumb %}{% endblock %}
+                                    <!--end::Separator-->
+                                    <!--begin::Breadcrumb-->
+                                    {#{ breadcrumb | default(' ') | raw }#}
+                                    <!--end::Breadcrumb-->
+									
+								</div>
+								<!--end::Page title-->
+							</div>
+							<!--end::Container-->
+						</div>
+						<!--end::Toolbar-->
+						<!--begin::Post-->
+						<div class="post d-flex flex-column-fluid" id="kt_post">
+							<!--begin::Container-->
+							<div id="kt_content_container" class="container-xxl">
+								
+								{% block body %}{% endblock %}
+							</div>
+							<!--end::Container-->
+						</div>
+						<!--end::Post-->
+					</div>
+					<!--end::Content-->
+					<!--begin::Footer-->
+					{{ include('_includes/footer.html.twig') }}
+					<!--end::Footer-->
+				</div>
+				<!--end::Wrapper-->
+			</div>
+
+			<!--end::Page-->
+		</div>
+		<!--end::Root-->
+		<!--begin::Drawers-->
+	
+
+		<!--end::Engage toolbar-->
+		<!--begin::Scrolltop-->
+		<div id="kt_scrolltop" class="scrolltop" data-kt-scrolltop="true">
+			<!--begin::Svg Icon | path: icons/duotune/arrows/arr066.svg-->
+			<span class="svg-icon">
+				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect opacity="0.5" x="13" y="6" width="13" height="2" rx="1" transform="rotate(90 13 6)" fill="currentColor" />
+					<path d="M12.5657 8.56569L16.75 12.75C17.1642 13.1642 17.8358 13.1642 18.25 12.75C18.6642 12.3358 18.6642 11.6642 18.25 11.25L12.7071 5.70711C12.3166 5.31658 11.6834 5.31658 11.2929 5.70711L5.75 11.25C5.33579 11.6642 5.33579 12.3358 5.75 12.75C6.16421 13.1642 6.83579 13.1642 7.25 12.75L11.4343 8.56569C11.7467 8.25327 12.2533 8.25327 12.5657 8.56569Z" fill="currentColor" />
+				</svg>
+			</span>
+			<!--end::Svg Icon-->
+		</div>
+		
+		
+		{{ include('_includes/modal.html.twig') }}
+		
+		<!--begin::Global Javascript Bundle(used by all pages)-->
+		<script src="{{ asset('assets/plugins/global/plugins.bundle.js') }}"></script>
+		<script src="{{ asset('assets/js/scripts.bundle.js') }}"></script>
+		<!--end::Global Javascript Bundle-->
+		<!--begin::Vendors Javascript(used by this page)-->
+        <!-- begin::modal -->
+	
+        <!-- end::modal -->
+		<script src="{{ asset('assets/plugins/custom/fullcalendar/fullcalendar.bundle.js') }}"></script>
+		
+		<script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
+		<!--end::Vendors Javascript-->
+		<!--begin::Custom Javascript(used by this page)-->
+		<script src="{{ asset('assets/js/widgets.bundle.js') }}"></script>
+		<script src="{{ asset('assets/plugins/global/jquery.form.js') }}"></script>
+		<script src="{{ asset('assets/js/custom/widgets.js') }}"></script>
+		<script src="{{ asset('bundles/fosjsrouting/js/router.min.js') }}"></script>
+		{% if app.environment == 'dev' %}
+			<script src="{{ path('fos_js_routing_js', { callback: 'fos.Router.setData' }) }}"></script>
+		{% else %}
+			<script src="{{ asset('js/fos_js_routes.js') }}"></script>
+		{% endif %}
+        <script src="{{ asset('assets/scripts/admin.js') }}"></script>
+        <script src="{{ asset('assets/js/spectrum.js') }}"></script>
+        <script src="{{ asset('assets/scripts/init.js') }}"></script>
+        <script src="{{ asset('assets/scripts/thousand-sep.js') }}"></script>
+        <script src="{{ asset('assets/js/tab-load.js') }}"></script>
+		<!--end::Custom Javascript-->
+		<!--end::Javascript-->
+
+
+          {% block java %}{% endblock %}
+
+	</body>
+	<!--end::Body-->
+
+<!-- Mirrored from preview.keenthemes.com/metronic8/demo13/ by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 28 Aug 2022 17:06:46 GMT -->
+</html>

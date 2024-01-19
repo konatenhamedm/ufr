@@ -1,0 +1,70 @@
+{% macro prototype_ligne_frais(form) %}
+    <table class="table table-bordered table-custom">
+        <thead class="thead-dark">
+            <tr>
+                <th width="70%" class="p-2">Frais</th>
+                <th width="30%" class="p-2">Montant</th>
+            </tr>
+        </thead>
+        <tbody  class="row-container">
+            {% for item in form.frais %}
+                {{ _self.ligne_frais(item|e) }}
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th class="text-end p-2">TOTAL</th>
+                <th class="total text-end p-2 fw-bolder">0</td>
+            </tr>
+        </tfoot>
+    </table>
+    
+{% endmacro %}
+
+{% macro ligne_frais(frais) %}
+   
+    <tr class="row-colonne even pointer table-light">
+        <td class="p-2">
+            {{ frais.typeFrais.vars.data.libelle }}
+            <div style="display:none">{{ form_widget(frais.typeFrais) }}</div>
+        </td>
+        <td class="p-2">{{ form_widget(frais.montant) }}</td>
+    </tr>
+{% endmacro %}
+
+
+
+{% macro prototype_ligne_matiere(form) %}
+    <div class="proto-container" data-prototype="{{ _self.ligne_matiere(form.matiereExamens.vars.prototype)|e }}"></div>
+    <button type="button" data-protoname="__name__" class="btn btn-default add-collection add-ligne btn-xs" id="add_ligne" data-protoclass=".proto-container" data-container=".row-container">
+        <i class="fa fa-plus"></i>
+        Ajouter une ligne
+    </button>
+    <table class="table table-bordered table-custom">
+        <thead class="thead-dark">
+            <tr>
+                <th width="70%" class="p-2">Matière</th>
+                <th width="25%" class="p-2">Coefficient</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody  class="row-container">
+            {% for item in form.matiereExamens %}
+                {{ _self.ligne_matiere(item|e) }}
+            {% endfor %}
+        </tbody>
+    </table>
+    
+{% endmacro %}
+
+{% macro ligne_matiere(data) %}
+   
+    <tr class="row-colonne even pointer table-light">
+        <td class="p-2">
+            <span class="label">{{ data.matiere.vars.data.libelle | default('') }}</span>
+            <div style="display:none " class="field-matiere">{{ form_widget(data.matiere) }}</div>
+        </td>
+        <td class="p-2">{{ form_widget(data.coefficient) }}</td>
+        <td class="p-2 del-col"><a href="#" class="btn btn-danger btn-xs"><span class="bi bi-trash"></span></a></td>
+    </tr>
+{% endmacro %}

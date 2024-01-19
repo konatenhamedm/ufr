@@ -1,0 +1,108 @@
+{% macro table_header() %}
+  <thead>
+      <tr style="text-align:center;text-transform:uppercase;">
+            <th style="border:1px solid #000;padding: 10px;vertical-align: middle">N°</th>
+            <th style="border:1px solid #000;padding: 10px;vertical-align: middle">Nom et Prénom(s)</th>
+            <th style="border:1px solid #000;padding: 10px;vertical-align: middle">SEXE<br>M/F</th>
+            <th style="border:1px solid #000;padding: 10px;vertical-align: middle">Fonction</th>
+            <th style="border:1px solid #000;padding: 10px;vertical-align: middle">Structure</th>
+            <th style="border:1px solid #000;padding: 10px;vertical-align: middle">Contacts</th>
+            <th style="border:1px solid #000;padding: 10px;vertical-align: middle">Emargement</th>
+        </tr>
+    </thead>
+{% endmacro %}
+
+{% macro table_row(index, employe) %}
+  <tr>
+    <td style="width:5%;border:1px solid #000;text-align:center;padding: 10px;">{#{{ index }}#}</td>
+    <td style="width:25%;border:1px solid #000;padding: 10px;vertical-align:top;">{#{{ employe.nomComplet | default('') }}#}</td>
+    <td style="width:5%;border:1px solid #000;padding: 10px;">{#{{ employe.sexe | default('') }}#}</td>
+    <td style="width:10%;border:1px solid #000;padding: 10px;">{#{{ employe.fonction.libelle | default('') }}#}</td>
+    <td style="width:10%;border:1px solid #000;padding: 10px;">{#{{ employe.partenaire.sigle | default('') }}#}</td>
+    <td style="width:25%;border:1px solid #000;padding: 10px;font-weight:bold;font-size: 13px;">
+      <div style="margin-bottom: 2px;">Tel:</div>
+      <div style="margin-bottom: 2px;">Cel: {#{{ employe.contact | default('') }}#}</div>
+      <div>
+        Email: {#{{ employe.emailEmploye|default('') }}#}
+
+      </div>
+    </td>
+    <td style="width:10%;border:1px solid #000;padding: 10px;"></td>
+  </tr>
+{% endmacro %}
+{% extends 'print_table.html.twig' %}
+{% from  'print_table.html.twig' import page_header_pmn %}
+{% block table_header_style %}font-size: 11px;{% endblock %}
+  {% block left_img_style %}height: 20px;{% endblock %}
+  {% block right_img_style %}height: 20px;{% endblock %}
+{% block page_css %}
+
+  @page {
+  margin-top: 0.5cm;
+  margin-header: 10cm; /* <any of the usual CSS values for margins> */
+  margin-footer: 5mm; /* <any of the usual CSS values for margins> */
+  /*header: html_headerContent;*/
+  /*footer: html_pageFooterInfo;*/
+   footer: html_pageFooterPmn;
+  /*background: ...
+  background-image: ...
+  background-position ...
+  background-repeat ...
+  background-color ...
+  background-gradient: ...*/
+}
+
+
+  {% endblock %}
+  {% block page_header %}
+    {{ page_header_pmn() }}{% endblock %}
+{% block content %}
+
+  <div style="width: 70%;text-align:center;text-transform:uppercase;padding:5px 3px;border:1px solid #000;border-radius:5px;margin-left:auto;margin-right:auto;margin-bottom: 10px;margin-top: 10px;">
+    <h2 style="font-size: 14px;margin-bottom:0;margin-top:0">FICHE D’ANALYSE ET DE TRANSMISSION DU COURRIER</h2>
+  </div>
+  <div class="clearfix">
+  <div style="width: 60%;padding:5px 10px;border:1px solid #000;float:left;font-size: 11px;">
+    <p>Expéditeur: <strong>{#{{ courrier.expediteur }}#}</strong></p>
+    <p>Date du courrier: <strong>{#{{ courrier.dateCourrier|date('d/m/Y') }}#}</strong></p>
+    <p>Référence: <strong>{#{{ courrier.refCourrier }}#}</strong></p>
+  </div>
+  <div style="width: 30%;padding:5px 10px;border:1px solid #000;float:right;font-size: 11px;">
+    <p>Date d'arrivé: <strong>{#{{ courrier.dateReception|date('d/m/Y') }}#}</strong></p>
+    <p>N° d'enregistrement : <strong>{#{{ courrier.numEnregistrementCourrier }}#}</strong></p>
+    <p>&nbsp;</p>
+  </div>
+
+    </div>
+     <div style="width: 100%;padding:8px;border:1px solid #000;margin-left:auto;margin-right:auto;margin-bottom: 10px;margin-top: 10px;font-size: 11px;">
+    Objet: <strong>{#{{ courrier.objetCourrier }}#}</strong>
+  </div>
+  <div style="width: 50%;text-align:center;text-transform:uppercase;padding:10px;border:1px solid #000;margin-left:auto;margin-right:auto;margin-bottom: 10px;margin-top: 10px;border-radius:5px;">
+    <strong>Imputation Chef de Projet</strong>
+  </div>
+  <p style="text-align:center"><span style="display:inline-block;margin-right:10px;"><strong>CDP&nbsp;</strong></span><span style="display:inline-block;border:1px solid #000;width:10px;height:5px;margin-left:5px;">&nbsp;&nbsp;&nbsp;</span></p>
+  <table style="width:100%">
+    {% for fonctions in [1..5] %}
+      <tr>
+      {% for fonction in fonctions %}
+        <td style="vertical-align:top;"></span><span style="display:inline-block;border:1px solid #000;width:10px;height:5px;margin-left:5px;font-size:11px">&nbsp;&nbsp;&nbsp;</span> {#{{ fonction.description }}#}</td>
+      {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+   <div style="width: 100%;padding:10px 10px;border:1px solid #000;margin-left:auto;margin-right:auto;margin-bottom: 10px;margin-top: 10px;text-align:center;">
+    <strong>INSTRUCTIONS</strong>
+  </div>
+  <table style="width:100%">
+    {% for _actions in [1..6] %}
+      <tr>
+      {% for action in _actions %}
+        <td style="vertical-align:top;"></span><span style="display:inline-block;border:1px solid #000;width:12px;height:5px;margin-left:5px;font-size:11px">&nbsp;&nbsp;&nbsp;</span>{# {{ action.libAction }}#}</td>
+      {% endfor %}
+        </tr>
+      {% endfor %}
+    </table>
+     <div style="width: 100%;padding:8px;border:1px solid #000;margin-left:auto;margin-right:auto;margin-bottom: 10px;margin-top: 10px;font-size: 13px;height:150px;">
+    <u><b>INSTRUCTIONS PARTICULIERES</b></u>
+  </div>
+{% endblock %}

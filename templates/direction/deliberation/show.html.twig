@@ -1,0 +1,126 @@
+{% extends 'base-layout.html.twig' %}
+
+{% block title %}
+    DETAILS
+{% endblock %}
+{% block header %}Examen: {{ examen.libelle }} {% endblock %}
+{% block breadcrumb %}{% endblock %}
+{% block body %}
+    
+    <div class="card card-custom card-sticky gutter-b" id="kt_page_sticky_card">
+        <div class="card-header  flex-wrap border-1 pt-0 pb-0">
+            <div class="card-title">
+                <h3 class="card-label">FICHE INDIVIDUELLE DE DELIBERATION - {{ examen.libelle }} <span class="d-block text-muted pt-0 font-size-sm"></h3>
+            </div>
+            <div class="card-toolbar">
+                <a href="{{ path('app_direction_deliberation_index') }}" class="btn btn-light-main btn-sm font-weight-bolder" >
+                    <span class="svg-icon svg-icon-md"><i class="ki ki-solid-plus"></i></span>
+                    Retours à la liste des examens
+                </a>
+            </div>
+        </div>
+       
+        <div class="card-body">
+            {{ include('_includes/ajax/response.html.twig') }}
+            <div class="row">
+                <div class="d-flex flex-column content-justify-center flex-row-fluid">
+                    <!--begin::Label-->
+                    <div class="d-flex fw-semibold align-items-center">
+                        <!--begin::Bullet-->
+                        <div class="bullet w-8px h-3px rounded-2 bg-success me-3"></div>
+                        <!--end::Bullet-->
+
+                        <!--begin::Label-->
+                        <div class="text-gray-500 flex-grow-1 me-4">Date D'examen</div>
+                        <!--end::Label-->
+
+                        <!--begin::Stats-->
+                        <div class="fw-bolder text-gray-700 text-xxl-end">{{ deliberation.dateExamen | date('d-m-Y') }}</div>
+                        <!--end::Stats-->
+                    </div>
+                    <!--end::Label-->
+                     <div class="d-flex fw-semibold align-items-center">
+                        <!--begin::Bullet-->
+                        <div class="bullet w-8px h-3px rounded-2 bg-success me-3"></div>
+                        <!--end::Bullet-->
+
+                        <!--begin::Label-->
+                        <div class="text-gray-500 flex-grow-1 me-4">Mention</div>
+                        <!--end::Label-->
+
+                        <!--begin::Stats-->
+                        <div class="fw-bolder text-gray-700 text-xxl-end">{{ deliberation.mention.libelle }}</div>
+                        <!--end::Stats-->
+                    </div>
+
+           
+                </div>
+                
+            </div>
+            <table class="table table-bordered table-custom">
+                <thead class="thead-dark">
+                    <tr>
+                        <th width="40%" class="p-2">Matière</th>
+                        <th width="20%" class="p-2">Coefficient</th>
+                        <th width="20%" class="p-2">Note</th>
+                        <th width="20%" class="p-2">Total</th>
+                    </tr>
+                </thead>
+                {% set total_coeff = 0%}
+                {% set total_note = 0 %}
+                {% set total_total = 0 %}
+                <tbody  class="row-container">
+                {% for row in deliberation.ligneDeliberations %}
+                    <tr class="row-colonne even pointer table-light">
+                    <td class="p-2">
+                        {{row.matiere.libelle }}
+                    </td>
+                    <td class="p-2 text-end col-coeff" data-class="col-coeff">
+                        {{ row.coefficient }}
+                        {% set total_coeff = row.coefficient + total_coeff %}
+                        
+                    </td>
+                    <td class="p-2 text-end col-note"  data-class="col-note">
+                        {{ row.note }}
+                    </td>
+                    <td class="p-2 col-total text-end col-total"  data-class="col-total">
+                        {{ row.coefficient * row.note }}
+                    </td>
+                </tr>
+                    {% set total_note = total_note + row.note %}
+                    {% set total_total = total_total + (row.coefficient * row.note) %}
+                {% endfor %}
+            </tbody>
+                <tfoot>
+
+                    <tr>
+                        <th class="text-end p-2">TOTAUX</th>
+                        <th class="total text-end p-2 fw-bolder total-col-coeff">{{ total_coeff }}</td>
+                        <th class="total text-end p-2 fw-bolder  total-col-note">{{ total_note }}</td>
+                        <th class="total text-end p-2 fw-bolder total-col-total">{{ total_total }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-end p-2">MOYENNE</th>
+                        <th class="total text-end p-2 fw-bolde" colspan="2">&nbsp;</td>
+                        <th class="total text-end p-2 fw-bolder total-moyenne">{{ deliberation.moyenne }}</td>
+                    </tr>
+                    
+                </tfoot>
+            </table>
+            <div class="row">
+                <h4>Observations</h4>
+                <p>{{ deliberation.commentaire }}</p>
+            </div>
+        </div>      
+    </div>
+{% endblock %}
+
+{% block java %}
+    <script>
+        $(function () {
+        });
+             
+
+       
+    </script>
+{% endblock %}

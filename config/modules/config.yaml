@@ -1,0 +1,7 @@
+config:
+  name: Configuration
+  controllers:
+    - {name: Dashboard, title: Paramètres, namespace: Parametre }
+    - {name: Employe, title: Employés, namespace: Utilisateur}
+    - {name: Groupe, title: Gestion des groupes, namespace: Utilisateur}
+    - {name: Utilisateur, title: Gestion des utilisateurs, namespace: Utilisateur}

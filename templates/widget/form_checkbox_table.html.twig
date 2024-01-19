@@ -1,0 +1,59 @@
+{% use "widget/fields-block.html.twig" %}
+
+{% block choice_widget_expanded -%}
+    <table class="table table-row-bordered align-middle gs-0 gy-3">
+        <thead class="thead-dark">
+            <tr class="fw-bold text-muted bg-light">
+                <th style="width:10%">
+                    &nbsp;
+                </th>
+                <th>Libellé</th>
+                <th style="width:25%">Banque</th>
+                <th style="width:10%">Facture</th>
+            </tr>
+        </thead>
+        <tbody class="tbody-rows">
+            {%- for child in form %}
+                
+                <tr class="row-checkbox row-parent {% if child.vars.attr['data-expired'] %}bg-warning{% endif %}" data-echeance="{{ child.vars.attr['data-echeance'] }}">
+                {{- form_widget(child, {
+                    parent_label_class: label_attr.class|default(''),
+                    translation_domain: choice_translation_domain,
+                    valid: valid,
+                }) -}}
+                </tr>
+            {% endfor -%}
+           
+        </tbody>
+        
+    </table>
+{%- endblock choice_widget_expanded %}
+
+{% block checkbox_widget -%}
+     {%- if label is empty -%}
+        {% set label = name|humanize %}
+    {%- endif -%}
+    {% apply spaceless %}
+    <td class="text-center" data-row-parent="{{ value }}">
+        <label class="checkbox checkbox-square">
+             <input type="checkbox" {{ block('widget_attributes') }} {% if value is defined %} value="{{ value }}"{% endif %}{% if checked %} checked="checked"{% endif %} >
+             <span></span>
+        </label>
+    </td>
+    <td class="text-center">
+       
+    </td>
+    <td class="label-infos">
+        <span class="label-parent" data-span-parent="{{ value }}">{{ label }}</span>
+        {% if attr['data-expired'] %}
+            (Echue depuis le {{ attr['data-echeance'] }})
+        {% endif %}
+    </td>
+    <td>
+        <a class="text-center" target="_blank" href="{{ attr['data-file'] }}" title="Voir la copie">
+            <i class="bi bi-cloud-arrow-down  text-white fs-2x fw-2x"></i>
+        </a>
+    </td>
+    {% endapply %}
+{%- endblock checkbox_widget %}
+

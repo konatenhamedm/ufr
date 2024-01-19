@@ -1,0 +1,248 @@
+{% macro page_header() %}
+
+   <table style="width:100%;font-family:Times;{% block table_header_style %}{% endblock %}">
+       <tr>
+        <td align="center">
+            <img src="{{ absolute_url(asset('assets/media/logos/logo.png')) }}" alt="logo" style="max-width: 100%;{% block left_img_style %}height: 50px;{% endblock %}" >
+        </td>
+      </tr>
+   </table>
+   <div style="height:1px;border:2px solid #333"></div>
+   
+
+
+{% endmacro %}
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ title | raw  }}</title>
+  <style>
+  {% block page_css %}
+  @page {
+  margin-top: 0.5cm;
+  margin-header: 10cm; /* <any of the usual CSS values for margins> */
+  margin-footer: 5mm; /* <any of the usual CSS values for margins> */
+  /*header: html_headerContent;*/
+  footer: html_pageFooter;
+  /*background: ...
+  background-image: ...
+  background-position ...
+  background-repeat ...
+  background-color ...
+  background-gradient: ...*/
+}
+  {% endblock %}
+
+  .clearfix:before, .clearfix:after {
+  content: " ";
+  display: table; }
+
+.clearfix:after {
+  clear: both; }
+
+
+/*@page :first {
+   header: html_headerContent;
+}*/
+
+  .table {
+  width: 100%;
+  max-width: 100%;
+
+}
+.table {page-break-before:auto;}
+
+body { font-family: Arial,Helvetica,DejaVu Sans; }
+
+.table th,
+.table td {
+  padding: 0.5rem;
+  vertical-align: top;
+  border-top: 1px solid #191919;
+}
+
+.table thead th {
+  vertical-align: bottom;
+  border-bottom: 2px solid #191919;
+}
+
+.table tbody + tbody {
+  border-top: 2px solid #191919;
+}
+
+.table .table {
+  background-color: #fff;
+}
+
+.table-sm th,
+.table-sm td {
+  padding: 0.3rem;
+}
+
+.table-bordered {
+  border: 1px solid #191919;
+}
+
+.table-bordered th,
+.table-bordered td {
+  border: 1px solid #191919;
+}
+
+.table-bordered thead th,
+.table-bordered thead td {
+  border-bottom-width: 2px;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.075);
+}
+
+.table-active,
+.table-active > th,
+.table-active > td {
+  background-color: rgba(0, 0, 0, 0.075);
+}
+
+.table-hover .table-active:hover {
+  background-color: rgba(0, 0, 0, 0.075);
+}
+
+.table-hover .table-active:hover > td,
+.table-hover .table-active:hover > th {
+  background-color: rgba(0, 0, 0, 0.075);
+}
+
+.table-success,
+.table-success > th,
+.table-success > td {
+  background-color: #dff0d8;
+}
+
+.table-hover .table-success:hover {
+  background-color: #d0e9c6;
+}
+
+.table-hover .table-success:hover > td,
+.table-hover .table-success:hover > th {
+  background-color: #d0e9c6;
+}
+
+.table-info,
+.table-info > th,
+.table-info > td {
+  background-color: #d9edf7;
+}
+
+.table-hover .table-info:hover {
+  background-color: #c4e3f3;
+}
+
+.table-hover .table-info:hover > td,
+.table-hover .table-info:hover > th {
+  background-color: #c4e3f3;
+}
+
+.table-warning,
+.table-warning > th,
+.table-warning > td {
+  background-color: #fcf8e3;
+}
+
+.table-hover .table-warning:hover {
+  background-color: #faf2cc;
+}
+
+.table-hover .table-warning:hover > td,
+.table-hover .table-warning:hover > th {
+  background-color: #faf2cc;
+}
+
+.table-danger,
+.table-danger > th,
+.table-danger > td {
+  background-color: #f2dede;
+}
+
+.table-hover .table-danger:hover {
+  background-color: #ebcccc;
+}
+
+.table-hover .table-danger:hover > td,
+.table-hover .table-danger:hover > th {
+  background-color: #ebcccc;
+}
+
+.thead-inverse th {
+  color: #fff;
+  background-color: #292b2c;
+}
+
+.thead-default th {
+  color: #464a4c;
+  background-color: #191919;
+}
+
+.table-inverse {
+  color: #fff;
+  background-color: #292b2c;
+}
+
+.table-inverse th,
+.table-inverse td,
+.table-inverse thead th {
+  border-color: #fff;
+}
+
+.table-inverse.table-bordered {
+  border: 0;
+}
+
+.table-responsive {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+h1{text-align: center;font-size: 16px;text-decoration: underline;}
+@media all {
+    /*.content { display: block; page-break-inside: avoid; }*/
+}
+
+.content {
+  /*margin-top: 18cm;*/
+}
+
+.table-responsive.table-bordered {
+  border: 0;
+}</style>
+</head>
+<body style="font-size:11px;">
+  <div>
+    {% block header %}{{ _self.page_header() }}{% endblock %}
+    
+    {% block content %}{% endblock %}
+    {% block footer %} {% endblock %}
+    {% block page_footer %}
+      <htmlpagefooter name="pageFooter">
+        <div style="height:2px;border:1px solid #000"></div>
+        <table style="width:100%;">
+          <tr>
+            <td style="color:rgb(0,0,0);text-align:center;font-family:Arial;dejavusans,font-size:8px;font-style:italic;font-weight:bold;">
+              <span style="font-size:10px;">KPL - Zone industrielle Vridi Côte d’ivoire – Abidjan –</span><br>
+              <span style="font-size:10px;">Tél. : (+225) 27 21 2 72604 – Adresse Mail : info@kuyopipeline.com</span>
+            </td>
+                
+          </tr>
+      </table>
+    </htmlpagefooter>
+    {% endblock %}
+ 
+    
+  </div>
+</body>
+</html>

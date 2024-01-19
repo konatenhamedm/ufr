@@ -1,0 +1,84 @@
+{% extends 'base-layout.html.twig' %}
+
+{% block title %}Infos documents{% endblock %}
+   {% from '_macros/macro_document.html.twig' import prototype_ligne_colonne %}
+
+{% block body %}
+    <div class="card shadow-sm">
+        <div class="card-header card-header-sm">
+            <h3 class="card-title"> Informations étudiant</h3>
+            <div class="card-toolbar">
+               {# <a href="{{ path('app_utilisateur_utilisateur_new') }}" class="btn btn-main btn-sm"
+                   data-bs-toggle="modal" data-bs-target="#exampleModalSizeLg2">
+                    <i class="bi bi-plus-square text-light"></i>
+                    Nouveau
+                </a>#}
+            </div>
+        </div>
+        <div class="card-body document">
+            {% form_theme form 'widget/fields-block.html.twig' %}
+            {{ form_start(form, {'attr': {'role':'form', 'class': 'form'}}) }}
+
+                {{ include('_includes/ajax/response.html.twig') }}
+            <div class="row mb-4">
+                <h6>Vos documents</h6>
+            </div>
+            <br>
+
+            {{ prototype_ligne_colonne(form) }}
+            <br>
+
+
+
+            <div class="row">
+                <div class="col-md-8"><button type="button" class="btn btn-default btn-sm" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-main  btn-sm  btn-ajax">
+                        <span class="spinner-border d-none  spinner-ajax spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Valider</button></div>
+                <div class="col-md-4">
+
+                </div>
+            </div>
+
+            {{ form_widget(form._token) }}
+            {{ form_end(form, {render_rest: false}) }}
+
+
+
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block java %}
+<script src="{{ asset('assets/parcours/universitaitre.js') }}"></script>
+    <script>
+        if ($('select').length) {
+            console.log('XXXX');
+            $('select').select2();
+            $('.no-auto').each(function () {
+                const $this = $(this);
+                const $id = $('#' + $this.attr('id'));
+                init_date_picker($id,  'up', (start, e) => {
+                    //$this.val(start.format('DD/MM/YYYY'));
+                }, null, null, false);
+
+                $id.on('apply.daterangepicker', function (ev, picker) {
+                    $(this).val(picker.startDate.format('DD/MM/YYYY'));
+                });
+            });
+        }
+
+        $('.no-auto').each(function () {
+            const $this = $(this);
+            const $id = $('#' + $this.attr('id'));
+            init_date_picker($id,  'down', (start, e) => {
+                //$this.val(start.format('DD/MM/YYYY'));
+            }, null, null, false);
+
+            $id.on('apply.daterangepicker', function (ev, picker) {
+                $(this).val(picker.startDate.format('DD/MM/YYYY'));
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% macro prototype_ligne_deliberation(form) %}
+    <table class="table table-bordered table-custom">
+        <thead class="thead-dark">
+            <tr>
+                <th width="40%" class="p-2">Matière</th>
+                <th width="20%" class="p-2">Coefficient</th>
+                <th width="20%" class="p-2">Note</th>
+                <th width="20%" class="p-2">Total</th>
+            </tr>
+        </thead>
+        <tbody  class="row-container">
+            {% for item in form.ligneDeliberations %}
+                {{ _self.ligne_deliberation(item|e) }}
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th class="text-end p-2">TOTAUX</th>
+                <th class="total text-end p-2 fw-bolder total-col-coeff">0</td>
+                <th class="total text-end p-2 fw-bolder  total-col-note">0</td>
+                <th class="total text-end p-2 fw-bolder total-col-total">0</td>
+            </tr>
+            <tr>
+                <th class="text-end p-2">MOYENNE</th>
+                <th class="total text-end p-2 fw-bolde" colspan="2">&nbsp;</td>
+                <th class="total text-end p-2 fw-bolder total-moyenne">0</td>
+            </tr>
+             <tr>
+                <th class="text-end p-2">MENTION</th>
+                <th class="total text-end p-2 fw-bolde" colspan="2">&nbsp;</td>
+                <th class="total text-end p-2 fw-bolder col-mention"></td>
+            </tr>
+        </tfoot>
+    </table>
+    
+{% endmacro %}
+
+{% macro ligne_deliberation(data) %}
+   
+    <tr class="row-colonne even pointer table-light">
+        <td class="p-2">
+            {{ data.matiereExamen.vars.data.matiere.libelle }}
+            <div style="display:none">{{ form_widget(data.matiereExamen) }}</div>
+        </td>
+        <td class="p-2 text-end col-coeff" data-class="col-coeff">
+            {{ data.coefficient.vars.value }}
+            <div style="display:none">{{ form_widget(data.coefficient) }}</div>
+        </td>
+        <td class="p-2 text-end col-note"  data-class="col-note">
+            {{ form_widget(data.note) }}
+        </td>
+        <td class="p-2 col-total text-end col-total"  data-class="col-total">
+            
+        </td>
+    </tr>
+{% endmacro %}
+
+
+

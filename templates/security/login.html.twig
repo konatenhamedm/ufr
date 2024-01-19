@@ -1,0 +1,85 @@
+{% extends 'security/layout.html.twig' %}
+
+{% block title %}Connexion!{% endblock %}
+
+{% block body %}
+
+
+<form class="form w-100"  id="kt_sign_in_form" action="{{ path('app_login') }}" method="POST">
+	<div class="text-center mb-11">
+        <a href="../../../index-2.html" class="mb-0 mb-lg-12">
+            <img alt="Logo" src="{{ asset('assets/media/logos/logo.png') }}" class="h-60px h-lg-75px" />
+        </a>
+									<!--begin::Title-->
+		<h1 class="text-dark fw-bolder mb-3">Connexion</h1>
+		<div class="text-gray-500 fw-semibold fs-6">UFR SEG</div>
+			{% if error %}
+				<div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+			{% endif %}
+
+			{% if app.user %}
+				<div class="mb-3">
+					Vous êtes connecté en tant que {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Déconnexion</a>
+				</div>
+			{% endif %}
+			{% for message in app.flashes('success') %}
+				<div class="alert alert-succes">
+					{{ message }}
+				</div>
+			{% endfor %}
+
+				{% include "_partial/_flash.html.twig" %}
+			
+									<!--end::Subtitle=-->
+		</div>
+		<!--begin::Heading-->
+		<!--begin::Login options-->
+		<div class="row g-3 mb-9">
+			<!--begin::Col-->
+			
+			<!--end::Col-->
+		</div>
+	<!--end::Login options-->
+	<!--begin::Separator-->
+	
+	<!--end::Separator-->
+	<!--begin::Input group=-->
+	<div class="fv-row mb-8">
+		<!--begin::Email-->
+		<input type="email" placeholder="Email (login)"  value="{{ last_username }}" name="username" autocomplete="off" class="form-control bg-transparent" />
+		<!--end::Email-->
+	</div>
+	<!--end::Input group=-->
+	<div class="fv-row mb-3">
+		<!--begin::Password-->
+		<input type="password" placeholder="Password" name="password" autocomplete="off" class="form-control bg-transparent" />
+		<!--end::Password-->
+	</div>
+	<!--end::Input group=-->
+	<!--begin::Wrapper-->
+	
+	<!--end::Wrapper-->
+	<!--begin::Submit button-->
+	<div class="d-grid mb-10">
+		<button type="submit" class="btn btn-main">
+			<!--begin::Indicator label-->
+			<span class="indicator-label">Connexion</span>
+			<!--end::Indicator progress-->
+		</button>
+	</div>
+	<div class="text-gray-500 text-center fw-semibold fs-6">
+	
+		<a href="{{ path("forget_password") }}" class="link-primary">
+				mot de passe oublié?
+
+		</a>
+	</div>
+	
+	
+	<!--end::Submit button-->
+	<!--begin::Sign up-->
+		<input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" />
+
+	<!--end::Sign up-->
+</form>
+{% endblock %}

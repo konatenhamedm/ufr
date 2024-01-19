@@ -1,0 +1,107 @@
+{% extends 'base-layout.html.twig' %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+
+{% from '_macros/utilisateur.html.twig' import module as kpl_module %}
+{% from '_macros/utilisateur.html.twig' import module_children as kpl_module_children %}
+{% block body %}
+    {% form_theme form 'widget/fields-block.html.twig' %}
+    {{ form_start(form, {'attr': {'role':'form', 'class': 'form'}}) }}    
+    <div class="card card-custom card-sticky gutter-b" id="kt_page_sticky_card">
+        <div class="card-header  flex-wrap border-1 pt-0 pb-0">
+            <div class="card-title">
+                <h3 class="card-label">NOUVEAU GROUPE <span class="d-block text-muted pt-0 font-size-sm"></h3>
+            </div>
+            <div class="card-toolbar">
+                <a href="{{ path('app_utilisateur_groupe_index') }}" class="btn btn-light-main btn-sm font-weight-bolder" >
+                    <span class="svg-icon svg-icon-md"><i class="ki ki-solid-plus"></i></span>
+                    Retours à la liste des groupes
+                </a>
+                <button name="sticky-submit" id="sticky-submit" class="btn btn-main btn-sm btn-ajax">
+                    <span class="spinner-border d-none  spinner-ajax spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Valider
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            {{ include('_includes/ajax/response.html.twig') }}
+            <div class="row">
+                <div class="col-md-4">{{ form_row(form.libelle) }}</div>
+                <div class="col-md-8">{{ form_row(form.description) }}</div>
+            </div>
+          
+            <div class="card">
+                <div class="card-header pt-0 pb-0" id="heading4">
+                    <div class="card-title m-0">
+                        <i class="flaticon-pie-chart-1"></i> Gestion des permissions
+                    </div>
+                </div>
+                <div class="card-body">
+                   <div class="accordion accordion-light accordion-toggle-arrow" id="accordion-groupe-permission">
+                      {% for _index, _module in modules %}
+                            <div class="accordion-item">
+                                 <h2 class="accordion-header" id="#heading-module-{{ _index }}">
+                                    <button class="accordion-button fs-4 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-mod-{{ _index }}" aria-expanded="true" aria-controls="heading-module-{{ _index }}">
+                                        {{ module_labels[_module|upper] | default(_module) | upper }}
+                                    </button>
+                                </h2>
+                               
+                                <div id="collapse-mod-{{ _index }}" class="accordion-collapse collapse show" aria-labelledby="heading-module-{{ _index }}" data-bs-parent="#collapse-mod-{{ _index }}">
+                                    <div class="accordion-body">
+                                        <div class="mt-5"></div>
+                                        {% set roles = module_roles[_module] %}
+                                       
+                                        {% for name, list_roles in roles %}
+                                            <div class="row p-4" style="border-bottom:1px dashed #cccc">
+                                                <div class="col-md-3">
+                                                    <h4 class="mt-0  text-main">{{ titles[name] }}</h4>
+                                                </div>
+                                                <div class="col-md-9">
+                                                    <select class="has-select2 form-control form-control-sm" multiple name="group_roles[]">
+                                                    {% for _role in list_roles %}
+                                                        <option value="{{ _role.role }}">{{ _role.label }}</option>
+                                                    {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>      
+    </div>
+    {{ form_widget(form._token) }}
+    {{ form_end(form, {render_rest: false}) }}
+{% endblock %}
+
+{% block java %}
+    <script>
+        init_select2('select');
+
+        $('.checkbox-role').on('click', function () {
+            const $this = $(this);
+            const _ref = $this.attr('data-ref');
+            if (_ref) {
+                const $select = $('.select2-wk-' + _ref);
+                const $div =  $select.closest('div');
+               
+               
+                if (!$this.is(':checked')) {
+                    $div.addClass('d-none');
+                    $select.val([]).trigger('change');
+                } else {
+                    $div.removeClass('d-none');
+                }
+            }
+           
+        });
+    </script>
+{% endblock %}

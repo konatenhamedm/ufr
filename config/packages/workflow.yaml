@@ -1,0 +1,93 @@
+framework:
+    workflows:
+        deliberation:
+            type: 'state_machine'
+            audit_trail:
+                enabled: true
+            marking_store:
+                type: 'method'
+                property: 'etat'
+            supports:
+                - App\Entity\Deliberation
+            initial_marking: cree
+            places:
+                - cree
+                - valide
+                - rejete
+            transitions:
+                validation:
+                    from: cree
+                    to: valide
+                rejet:
+                    from: cree
+                    to: rejete
+        
+        preinscription:
+            type: 'state_machine'
+            audit_trail:
+                enabled: true
+            marking_store:
+                type: 'method'
+                property: 'etat'
+            supports:
+                - App\Entity\Preinscription
+            initial_marking: attente_validation
+            places:
+                - attente_validation
+                - rejete
+                - attente_paiement
+                - valide
+                - attente_inscription
+                - inscription
+                - ajourne_inscription
+                - paiement_confirmation
+            transitions:
+                validation:
+                    from: attente_validation
+                    to: attente_paiement
+                rejet:
+                    from: attente_validation
+                    to: rejete
+                paiement:
+                    from: attente_paiement
+                    to: valide
+                creation_inscription:
+                    from: valide
+                    to: attente_inscription
+                rejet_inscription:
+                    from: valide
+                    to: ajourne_inscription
+                inscription:
+                    from: attente_inscription
+                    to: inscription
+                paiement_confirmation:
+                    from: attente_paiement
+                    to: paiement_confirmation
+
+        niveau_etudiant:
+            type: 'state_machine'
+            audit_trail:
+                enabled: true
+            marking_store:
+                type: 'method'
+                property: 'etat'
+            supports:
+                - App\Entity\NiveauEtudiant
+            initial_marking: attente_validation
+            places:
+                - attente_validation
+                - rejete
+                - attente_paiement
+                - valide
+            transitions:
+                validation:
+                    from: attente_validation
+                    to: attente_paiement
+                rejet:
+                    from: attente_validation
+                    to: rejete
+                paiement:
+                    from: attente_paiement
+                    to: valide
+               
+

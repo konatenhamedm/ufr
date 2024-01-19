@@ -1,0 +1,88 @@
+{% block page_content %}
+    {% form_theme form 'widget/fields-block.html.twig' %}
+    <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Nouveau Versement</h5>
+        <div class="btn btn-icon btn-sm  ms-2" data-bs-dismiss="modal" aria-label="Close">
+            <span class="svg-icon svg-icon-2x text-white">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor"></rect>
+					<rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor"></rect>
+				</svg>
+            </span>
+        </div>
+    </div>
+    {{ form_start(form, {'attr': {'role':'form', 'class': 'form'}}) }}
+    <div class="modal-body">
+        {{ include('_includes/ajax/response.html.twig') }}
+        <div class="row">
+             <div class="col-sm-5">
+                <div class="form-group row">
+                    <label for="staticNom" class="col-sm-4 col-form-label fw-bolder">Nom</label>
+                    <div class="col-sm-8">
+                        <input type="text" readonly class="form-control-plaintext" id="staticNom" value="{{ inscription.etudiant.nom }}">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="staticPrenom" class="col-sm-4 col-form-label fw-bolder">Prénoms</label>
+                    <div class="col-sm-8">
+                        <input type="text" readonly class="form-control-plaintext" id="staticPrenom" value="{{ inscription.etudiant.prenom }}">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="staticPrenom" class="col-sm-4 col-form-label fw-bolder">Niveau</label>
+                    <div class="col-sm-8">
+                        <input type="text" readonly class="form-control-plaintext" id="staticPrenom" value="{{ inscription.niveau.libelle }}">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="staticPrenom" class="col-sm-4 col-form-label fw-bolder">Date d'inscription</label>
+                    <div class="col-sm-8">
+                        <input type="text" readonly class="form-control-plaintext" id="staticPrenom" value="{{ inscription.dateInscription | date('d-m-Y') }}">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                {{ form_row(form.dateVersement)}}
+                {{ form_row(form.fraisInscription)}}
+                {{ form_row(form.montant)}}
+                {{ form_row(form.nature)}}
+            </div>
+        </div>
+        
+    </div>
+    <div class="modal-footer">
+        {# {{ include('_includes/ajax/loader.html.twig') }} #}
+        <button type="button" class="btn btn-default btn-sm" data-bs-dismiss="modal">Annuler</button>
+        <button type="submit" class="btn btn-main btn-ajax btn-sm"><span class="spinner-border d-none  spinner-ajax spinner-border-sm" role="status" aria-hidden="true"></span> Valider</button>
+    </div>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block java %}
+    <script>
+        $(function () {
+            init_select2('select');
+             $('.no-auto').each(function () {
+                const $this = $(this);
+                const $id = $('#' + $this.attr('id'));
+                init_date_picker($id,  'down', (start, e) => {
+                    //$this.val(start.format('DD/MM/YYYY'));
+                }, null, null, false);
+
+                $id.on('apply.daterangepicker', function (ev, picker) {
+                    $(this).val(picker.startDate.format('DD/MM/YYYY'));
+                });
+            });
+
+            const $frais = $('#{{ form.fraisInscription.vars.id }}');
+            const $montant = $('#{{ form.montant.vars.id }}');
+            $frais.on('change', function () {
+                const $this = $(this);
+                if ($this.val()) {
+                    $montant.val(setValue(+$this.find('option:selected').attr('data-solde')));
+                }
+            });
+        });
+       
+    </script>
+{% endblock %}

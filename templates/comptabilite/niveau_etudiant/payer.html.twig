@@ -1,0 +1,74 @@
+{% block page_content %}
+    {% form_theme form 'widget/fields-block.html.twig' %}
+    <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modification NiveauEtudiant</h5>
+        <div class="btn btn-icon btn-sm  ms-2" data-bs-dismiss="modal" aria-label="Close">
+            <span class="svg-icon svg-icon-2x text-white">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor"></rect>
+					<rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor"></rect>
+				</svg>
+            </span>
+        </div>
+    </div>
+    {{ form_start(form, {'attr': {'role':'form', 'class': 'form'}}) }}
+    <div class="modal-body">
+        {{ include('_includes/ajax/response.html.twig') }}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="fv-row mb-2 justification">
+                    <label class="required fw-semibold fs-6 mb-2">Date paiement </label>
+                    {{ form_widget(form.datePaiement) }}
+                </div>
+            </div>
+            <div class="d-flex col-md-6 align-items-center rounded py-5 px-5 bg-light-primary ">
+
+                <div class="text-gray-700 fw-bold fs-6">
+                    <font style="vertical-align: inherit;"> Montant Préinscription</font>
+                </div>    <!--end::Description-->
+               </div>   <div class="d-flex col-md-6 align-items-center rounded py-5 px-5 bg-light-primary ">
+
+                <div class="text-gray-700 fw-bold fs-6">
+                    <font style="vertical-align: inherit;"> {{ niveau_etudiant.filiere.montantPreinscription }} FrCFA  </font>
+                </div>    <!--end::Description-->
+               </div>
+           {# <div class="col-md-12">
+                <div class="fv-row mb-2 justification">
+                    <label class="required fw-semibold fs-6 mb-2">Motant</label>
+                    {{ form_widget(form.montantPreinscription,{'attr':{'readonly' : true}}) }}
+                </div>
+            </div>#}
+        </div>
+
+    </div>
+    <div class="modal-footer">
+        {# {{ include('_includes/ajax/loader.html.twig') }} #}
+        {{ form_widget(form.annuler) }}
+        {#{{ form_widget(form.save) }}
+        {{ form_widget(form.passer) }}#}
+        {{ form_widget(form.payer) }}
+    </div>
+    {{ form_widget(form._token) }}
+    {{ form_end(form, {render_rest: false}) }}
+
+{% endblock %}
+
+{% block javascripts_inline %}
+    <script>
+        $(function () {
+            init_select2('select', null, '#modal-lg');
+            $('.no-auto').each(function () {
+                const $this = $(this);
+                const $id = $('#' + $this.attr('id'));
+                init_date_picker($id,  'down', (start, e) => {
+                    //$this.val(start.format('DD/MM/YYYY'));
+                }, null, null, false);
+
+                $id.on('apply.daterangepicker', function (ev, picker) {
+                    $(this).val(picker.startDate.format('DD/MM/YYYY'));
+                });
+            });
+        });
+        
+    </script>
+{% endblock %}

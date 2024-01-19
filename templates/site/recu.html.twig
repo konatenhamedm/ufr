@@ -1,0 +1,97 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table, th, td {
+
+  border-collapse: collapse;
+}
+.ok{
+  width: 30%;
+    border: 1px solid black;
+    text-align: center;
+}
+.deuxieme{
+  width: 38%;
+}
+.montant{
+    font-weight: bolder;
+}
+h4{
+  font-weight: bolder;
+}
+h6{
+    text-align: center;
+    vertical-align: text-top;
+}
+hr{
+    background-color: black;
+    border: 2px solid black;
+}
+span{
+    font-size: 10px;
+    margin-top: -10px;
+    font-weight: bold;
+    text-align: center;
+    horiz-align: center;
+}
+</style>
+</head>
+<body>
+ <div class="Info_client">
+            <br>
+            <div>
+                <img height="60px" width="100px" src="K:\PROJET\GOMBOS\new_ufrseg\public\assets\lg.jpeg">
+            </div>
+     
+        </div>
+<h4 style="font-weight: bolder;"><strong>UFR-SEG</strong></h4>
+
+
+
+<table style="width:100%">
+  <tr>
+    <td >N :</td>
+    <td span="2" class="deuxieme">{{ data.code }}</td>
+    <td span="3"   class="ok" >
+        <h6>Le comptable</h6>
+    </td>
+  </tr>
+
+  <tr>
+    <td>Nom :</td>
+    <td>{{ data.etudiant.getNomComplet }}</td>
+    <td rowspan="5" class="ok"></td>
+
+  </tr>
+  <tr>
+    <td>Filière :</td>
+    <td>{{ data.niveau.filiere.libelle }}</td>
+  
+  </tr>
+  <tr>
+    <td>Année academique :</td>
+    <td>2023 - 2024</td>
+
+  </tr>
+    <tr>
+    <td>Date paiement :</td>
+    <td>{{ data.infoPreinscription.datePaiement | date("m/d/Y") }}</td>
+
+  </tr>
+    <tr>
+    <td>Montant payé :</td>
+    <td class="montant"><strong>{{ data.infoPreinscription.montant | number_format(0, '.') }} FCFA</strong></td>
+
+  </tr>
+
+</table>
+ <hr>
+ <span>Cel:(225) 01 15 44 44 - BPV 43 Abidjan -Email: ufrseg-sf2@gmail.com</span>
+
+
+</body>
+</html>
+

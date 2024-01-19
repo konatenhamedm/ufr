@@ -1,0 +1,100 @@
+{% extends 'base-layout.html.twig' %}
+
+{% block title %}Comptabilité{% endblock %}
+{% block header %}Comptabilité{% endblock %}
+{% block breadcrumb %}{% endblock %}
+{% block body %}
+<div class="card shadow-sm">
+    <div class="card-header card-header-sm">
+        <h3 class="card-title"> Frais d'écolage</h3>
+        <div class="card-toolbar">
+            <a href="{{ path('app_comptabilite_versement_historique', {id: inscription.id}) }}" class="btn btn-main btn-sm"  >
+                <i class="bi bi-plus-square text-light"></i>
+                Versements
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-5">
+                <div class="form-group row">
+                    <label for="staticNom" class="col-sm-4 col-form-label fw-bolder">Nom</label>
+                    <div class="col-sm-8">
+                        <input type="text" readonly class="form-control-plaintext" id="staticNom" value="{{ inscription.etudiant.nom }}">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="staticPrenom" class="col-sm-4 col-form-label fw-bolder">Prénoms</label>
+                    <div class="col-sm-8">
+                        <input type="text" readonly class="form-control-plaintext" id="staticPrenom" value="{{ inscription.etudiant.prenom }}">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="staticPrenom" class="col-sm-4 col-form-label fw-bolder">Niveau</label>
+                    <div class="col-sm-8">
+                        <input type="text" readonly class="form-control-plaintext" id="staticPrenom" value="{{ inscription.niveau.libelle }}">
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="staticPrenom" class="col-sm-4 col-form-label fw-bolder">Date d'inscription</label>
+                    <div class="col-sm-8">
+                        <input type="text" readonly class="form-control-plaintext" id="staticPrenom" value="{{ inscription.datePreinscription| date('d-m-Y') }}">
+                    </div>
+                </div>
+            </div>
+             <div class="col-sm-7">
+                <table class="table table-bordered table-custom">
+                <thead class="thead-dark">
+                    <tr>
+                        <th width="40%" class="p-2">Libellé</th>
+                        <th width="20%" class="p-2">Montant dû</th>
+                        <th width="20%" class="p-2">Montant Payé</th>
+                        <th width="20%" class="p-2">Montant restant</th>
+                    </tr>
+                </thead>
+                {% set total_total = 0%}
+                {% set total_paye = 0 %}
+                {% set total_restant = 0 %}
+                <tbody  class="row-container">
+                {% for row in inscription.fraisInscriptions %}
+                    <tr class="row-colonne even pointer table-light">
+                    <td class="p-2">
+                        {{row.typeFrais.libelle }}
+                    </td>
+                    <td class="p-2 text-end col-coeff" data-class="col-coeff">
+                        {{ row.montant | format_number }}
+                    </td>
+                    <td class="p-2 text-end col-note"  data-class="col-note">
+                        {{ row.total | format_number }}
+                    </td>
+                    <td class="p-2 col-total text-end col-total"  data-class="col-total">
+                        {{ row.solde | format_number }}
+                    </td>
+                </tr>
+                    {% set total_paye = total_paye + row.total %}
+                    {% set total_total = total_total + row.montant %}
+                    {% set total_restant = total_restant + row.solde %}
+                {% endfor %}
+            </tbody>
+                <tfoot>
+
+                    <tr>
+                        <th class="text-end p-2">TOTAUX</th>
+                        <th class="total text-end p-2 fw-bolder total-col-coeff">{{ total_total | format_number  }}</td>
+                        <th class="total text-end p-2 fw-bolder  total-col-note">{{ total_paye | format_number  }}</td>
+                        <th class="total text-end p-2 fw-bolder total-col-total">{{ total_restant | format_number }}</td>
+                    </tr>
+                    
+                    
+                </tfoot>
+            </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block java %}
+    
+{% endblock %}

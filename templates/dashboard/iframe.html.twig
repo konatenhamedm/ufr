@@ -1,0 +1,46 @@
+{% block page_content %}
+   
+    <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">{{ title | default('Impression') }}</h5>
+        <div class="btn btn-icon btn-sm  ms-2" data-bs-dismiss="modal" aria-label="Close">
+            <span class="svg-icon svg-icon-2x text-white">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor"></rect>
+					<rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor"></rect>
+				</svg>
+            </span>
+        </div>
+    </div>
+   
+    <div class="modal-body">
+        {% if facture %}
+            <label for="proforma">
+                <input type="checkbox" name="proforma" value="1" id="proforma" class="gen-pro" />Proforma
+            </label>
+        {% endif %}
+       <iframe width="100%" height="600px" id="iframe-global" src="{{ iframe_url }}" data-url="{{ iframe_url }}"></iframe>
+    </div>
+    <div class="modal-footer">
+        {# {{ include('_includes/ajax/loader.html.twig') }} #}
+        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Fermer</button>
+       
+    </div>
+    
+{% endblock %}
+
+{% block java %}
+    <script>
+        $(function () {
+            const $iframe = $('#iframe-global');
+            const old_src = $iframe.attr('data-url');
+            $('.gen-pro').on('click', function (e) {
+                const $this = $(this);
+                if ($this.is(':checked')) {
+                    $iframe.attr('src', old_src + '&proforma=1');
+                } else {
+                     $iframe.attr('src', old_src);
+                }
+            });
+        });
+    </script>
+{% endblock %}
