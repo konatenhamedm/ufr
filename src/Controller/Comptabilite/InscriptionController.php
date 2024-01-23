@@ -21,11 +21,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Controller\FileTrait;
 use Symfony\Component\Security\Core\User\UserInterface;
+
 
 #[Route('/admin/comptabilite/inscription')]
 class InscriptionController extends AbstractController
 {
+    use FileTrait;
     #[Route('/', name: 'app_comptabilite_inscription_index', methods: ['GET', 'POST'])]
     public function index(Request $request, DataTableFactory $dataTableFactory, UserInterface $user): Response
     {
@@ -97,13 +100,26 @@ class InscriptionController extends AbstractController
                                 'render' => $renders['edit']
                             ],
                             'imprime' => [
+                                'url' => $this->generateUrl('default_print_iframe', [
+                                    'r' => 'app_comptabilite_print',
+                                    'params' => [
+                                        'id' => $value,
+                                    ]
+                                ]),
+                                'ajax' => true,
+                                'target' =>  '#exampleModalSizeSm2',
+                                'icon' => '%icon% bi bi-printer',
+                                'attrs' => ['class' => 'btn-main btn-stack']
+                                //, 'render' => new ActionRender(fn() => $source || $etat != 'cree')
+                            ],
+                            /*  'imprime' => [
                                 'url' => $this->generateUrl('app_comptabilite_print', ['id' => $value]),
                                 'ajax' => false,
                                 'stacked' => false,
                                 'icon' => '%icon% fa fa-print',
                                 'attrs' => ['class' => 'btn-main', 'title' => 'Frais \'écolage'],
                                 'render' => $renders['imprime']
-                            ],
+                            ], */
 
                         ]
 
@@ -130,29 +146,21 @@ class InscriptionController extends AbstractController
      * @throws MpdfException
      */
     #[Route('/{id}/imprime', name: 'app_comptabilite_print', methods: ['GET'])]
-    public function imprimer($id,Preinscription $preinscription,InfoPreinscriptionRepository $infoPreinscriptionRepository)
+    public function imprimer($id, Preinscription $preinscription, InfoPreinscriptionRepository $infoPreinscriptionRepository): Response
     {
-        $html = $this->render("site/recu.html.twig",[
-            'data'=>$preinscription,
+        return $this->renderPdf("site/recu.html.twig", [
+            'data' => $preinscription,
             //'data_info'=>$infoPreinscriptionRepository->findOneByPreinscription($preinscription)
-        ]);
+        ], [
+            'orientation' => 'P',
+            'protected' => true,
+            'showWaterkText' => true,
+            'fontDir' => [
+                $this->getParameter('font_dir') . '/arial',
+                $this->getParameter('font_dir') . '/trebuchet',
+            ]
+        ], true, "");
         //return $this->renderForm("stock/sortie/imprime.html.twig");
-
-
-        $mpdf = new \Mpdf\Mpdf([
-
-            'mode' => 'utf-8', 'format' => 'A5'
-        ]);
-        $mpdf->PageNumSubstitutions[] = [
-            'from' => 1,
-            'reset' => 0,
-            'type' => 'I',
-            'suppress' => 'on'
-        ];
-
-        $mpdf->WriteHTML($html);
-        $mpdf->SetFontSize(6);
-        $mpdf->Output();
 
     }
 

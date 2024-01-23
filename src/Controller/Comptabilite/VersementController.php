@@ -23,11 +23,39 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Route('/admin/comptabilite/versement')]
 class VersementController extends AbstractController
 {
+
+
     use FileTrait;
+
+    #[Route(path: '/print-iframe', name: 'default_print_iframe', methods: ["DELETE", "GET"], condition: "request.query.get('r')", options: ["expose" => true])]
+    public function defaultPrintIframe(Request $request, UrlGeneratorInterface $urlGenerator)
+    {
+        $all = $request->query->all();
+        //print-iframe?r=foo_bar_foo&params[']
+        $routeName = $request->query->get('r');
+        $title = $request->query->get('title');
+        $params = $all['params'] ?? [];
+        $stacked = $params['stacked'] ?? false;
+        $redirect = isset($params['redirect']) ? $urlGenerator->generate($params['redirect'], $params) : '';
+        $iframeUrl = $urlGenerator->generate($routeName, $params);
+
+        $isFacture = isset($params['mode']) && $params['mode'] == 'facture' && $routeName == 'facturation_facture_print';
+
+        return $this->render('home/iframe.html.twig', [
+            'iframe_url' => $iframeUrl,
+            'id' => $params['id'] ?? null,
+            'stacked' => $stacked,
+            'redirect' => $redirect,
+            'title' => $title,
+            'facture' => 0/*$isFacture*/
+        ]);
+    }
+
     #[Route('/{id}/gestion', name: 'app_comptabilite_versement_index', methods: ['GET', 'POST'])]
     public function index(Request $request, Inscription $inscription, DataTableFactory $dataTableFactory): Response
     {
@@ -95,7 +123,7 @@ class VersementController extends AbstractController
                         'target' => '#modal-lg',
 
                         'actions' => [
-                            'print' => [
+                            /*  'print' => [
                                 'url' => $this->generateUrl('app_dashboard_iframe', [
                                     'r' => 'app_comptabilite_versement_print',
                                     'params' => [
@@ -106,6 +134,22 @@ class VersementController extends AbstractController
                                 'target' =>  '#modal-lg',
                                 'icon' => '%icon% bi bi-printer',
                                 'attrs' => ['class' => 'btn-success btn-stack']
+                            ], */
+
+
+
+                            'print' => [
+                                'url' => $this->generateUrl('default_print_iframe', [
+                                    'r' => 'app_comptabilite_versement_print',
+                                    'params' => [
+                                        'id' => $value,
+                                    ]
+                                ]),
+                                'ajax' => true,
+                                'target' =>  '#exampleModalSizeSm2',
+                                'icon' => '%icon% bi bi-printer',
+                                'attrs' => ['class' => 'btn-main btn-stack']
+                                //, 'render' => new ActionRender(fn() => $source || $etat != 'cree')
                             ],
                             /*'delete' => [
                                 'target' => '#modal-small',
@@ -294,14 +338,14 @@ class VersementController extends AbstractController
         return $this->renderPdf('comptabilite/versement/print_recu_versement.html.twig', [
             'versement' => $versement,
         ],  [
-
-            'format' => 'A4',
             'orientation' => 'P',
+            'protected' => true,
+            'showWaterkText' => true,
             'fontDir' => [
                 $this->getParameter('font_dir') . '/arial',
                 $this->getParameter('font_dir') . '/trebuchet',
             ]
-        ]);
+        ], true, "");
     }
 
 

@@ -1,20 +1,12 @@
 <?php
+
 namespace App\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Security;
 
 trait FileTrait
 {
-
-    public function getIframeUrl($route, $params = [])  
-    {
-        $routeParams = ['r' => $route];
-        $urlParams = [];
-        $urlParams = array_merge($urlParams, $params);
-        $params = array_merge($routeParams, ['params' => $urlParams]);
-        return $this->generateUrl('app_dashboard_iframe', $params);
-    }
-
 
     /**
      * @return mixed
@@ -30,11 +22,11 @@ trait FileTrait
 
 
 
-     /**
+    /**
      * @param $template
      * @param $vars
      */
-    private function renderPdf($template, $vars, $options=[], $showResponse = true)
+    private function renderPdf($template, $vars, $options = [], $showResponse = true, $entreprise)
     {
 
         $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
@@ -49,8 +41,8 @@ trait FileTrait
         $fileName = $options['file_name'] ?? null;
 
         $mpdf = new \Mpdf\Mpdf([
-            'orientation' => $orientation, 
-            'format' => ($options['format'] ?? 'A4').$formatSuffix,
+            'orientation' => $orientation,
+            'format' => ($options['format'] ?? 'A4') . $formatSuffix,
             'mode' => 'utf-8',
             'fontDir' => array_merge($fontDirs, $options['fontDir'] ?? []),
             'fontdata' => $fontData + [
@@ -90,15 +82,21 @@ trait FileTrait
         $mpdf->showWatermarkText = $options['showWaterkText'] ?? false;
 
 
-        $mpdf->watermark("UFR SEG", 45, 90, 0.1);
+        $mpdf->watermark($entreprise, 45, 90, 0.1);
 
-                
+        /*$mpdf->SetAlpha(0.5); // default is 0.2
+        $mpdf->Rotate(45);
+        $mpdf->Text(50, 10, 'PAID!'); // specify position here
+        // reset
+        $mpdf->Rotate(0);
+        $mpdf->SetAlpha(1);*/
+
 
         if (isset($options['addPage'])) {
             $mpdf->AddPage();
         }
 
-        
+
         $data = $mpdf->Output($fileName, $destination);
 
         if ($showResponse) {
@@ -106,5 +104,4 @@ trait FileTrait
         }
         return $data;
     }
-    
 }

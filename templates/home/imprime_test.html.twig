@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bon de commande ffff</title>
+    <style>
+      {% block page_css %}
+        @page {
+
+          margin-footer: 0.5cm;
+
+          /*header: html_headerContent;*/
+          footer: html_pageFooter;
+          margin-top: 0.5cm;
+          margin-header: 0cm;
+          margin-left: 1cm;
+           margin-right: 1cm;
+          /*background: ...
+  background-image: ...
+  background-position ...
+  background-repeat ...
+  background-color ...
+  background-gradient: ...*/
+        }
+        .clearfix:after,
+        {% endblock %} .clearfix:before {
+          content: " ";
+          display: table;
+        }
+
+        .clearfix:after {
+          clear: both;
+        }
+
+        .mention {
+  position: absolute;
+  bottom: 100px;
+}
+
+        /*@page :first {
+   header: html_headerContent;
+}*/
+
+        .table {
+          width: 100%;
+          max-width: 100%;
+          border-collapse: collapse;
+
+        }
+        .table {
+          page-break-before: auto;
+        }
+
+        body {
+          font-family: Trebuchet,Arial,Helvetica;
+        }
+
+        .table td,
+        .table th {
+          padding: 2px;
+          vertical-align: top;
+          border-top: 1px solid #191919;
+        }
+
+        .table thead th {
+          vertical-align: bottom;
+          border-bottom: 2px solid #191919;
+        }
+
+        .table tbody + tbody {
+          border-top: 1px solid #191919;
+        }
+
+        .table .table {
+          background-color: #fff;
+        }
+
+        .table-sm td,
+        .table-sm th {
+          padding: 0.3rem;
+        }
+
+        .table-bordered {
+          border: 1px solid #191919;
+        }
+
+        .table-bordered td,
+        .table-bordered th {
+          border: 1px solid #191919;
+        }
+
+        .table-bordered thead td,
+        .table-bordered thead th {
+          border-bottom-width: 1px;
+        }
+
+        @media all {
+          /*.content { display: block; page-break-inside: avoid; }*/
+        }
+
+        .content {
+          /*margin-top: 18cm;*/
+        }
+
+        .table-responsive.table-bordered {
+          border: 0;
+        }
+
+        .double_underline {
+            text-decoration:underline;
+            border-bottom: 1px solid #000;
+            text-align: center;
+        }
+    </style>
+  </head>
+  <body style="font-size:12px;">
+    <div class="clearfix">
+     <div style="width:40%;text-align:left;float:left;"  class="">
+            {% set var = "uploads/" ~ menu.findParametre.logo.path ~"/"~ menu.findParametre.logo.alt %}
+        <img src="{{ var |replace({'/': "\\"}) }}" width="150px" />
+        <p>
+            01 B.P 5889 ABIDJAN 01<br>
+            TEL: +225 21 27 53 50 FAX.: +225 21 27 53 29<br>
+            EMAIL: <a href="mailto:info@kuyopipeline.com">info@kuyopipeline.com</a>
+        </p>
+      </div>
+   
+       <div style="width:50%;text-align:left;float:right;">
+          <h1 style="font-weight:700;font-size:25px">QUITTANCE DE LOYER <span style="font-size:14px;color:#FF2E2E"></span></h1>
+          ABIDJAN LE {{ 'now' | date('d/m/Y') }}<br>
+          <div style="text-align:left;border: 1px solid #000;padding:8px;float:left"  class="">
+            <p style="margin-bottom:2px;margin-top:3px;"><b>Fournisseur: </b> ddd</p>
+            <p style="margin-bottom:2px;margin-top:3px"><b>Contact(s): </b>ddd</p>
+            <p style="margin-bottom:2px;margin-top:3px"><b>Adresse: </b>dddd</p>
+            <p style="margin-bottom:2px;margin-top:3px"><b>Proforma: </b>ddd</p>
+          </div>
+
+        </div>
+    </div>
+     <div class="clearfix">
+     <div style="width:60%;text-align:left;float:left;margin-top:20px"  class="">
+        <p  style="margin-bottom:2px;margin-top:3px;">SERVICE DEMANDEUR: <b>ffff</b></p>
+        <p style="margin-bottom:2px;margin-top:3px;">REF.: <b>ddd</b></p>
+        <p style="margin-bottom:2px;margin-top:3px;">IMPUTATION: ddd </p>
+        <p style="margin-bottom:2px;margin-top:3px;">PROJET: <b>dddd</b> </p>
+      </div>
+       <div style="width:30%;text-align:center;float:right;">
+          <h3 style="margin-top:0"><u>ADRESSE DE LIVRAISON</u></h3>
+            <div style="text-align:center;border: 1px solid #000;padding:8px;border-radius:10px"  class="">
+              KUYO PIPELINE<br>
+              BUREAU ET ATELIER<br>
+              VRIDI-FACE GESTOCI<br>
+              01 BP 15889 ABIDJAN 01
+          </div>
+        </div>
+    </div>
+    <table class="table table-bordered" style="margin-top:10px;font-size:10px">
+      <thead>
+        <tr>
+          <th style="vertical-align:middle;width:8%">N° DE REF ARTICLE</th>
+          <th style="vertical-align:middle">DESIGNATION MATERIEL / SERVICE</th>
+          <th style="vertical-align:middle;width:9%">QUANTITE</th>
+          <th style="vertical-align:middle;width:7%">UNITE</th>
+          <th style="vertical-align:middle;width:11%">PRIX UNITAIRE</th>
+          <th style="vertical-align:middle;text-align:right;padding-right:5px">TOTAL</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% set total = 0 %}
+         {% for ligne in 1..5 %}
+         {# {% set total_ligne = (ligne.cout * ligne.quantite) %} #}
+          <tr>
+            <td style="vertical-align:middle;text-align:center;padding:8px 5px">ddd</td>
+            <td style="vertical-align:middle;">ddd</td>
+            <td style="vertical-align:middle;text-align:center;" >dd</td>
+            <td style="vertical-align:middle;text-align:center">ddd</td>
+            <td style="vertical-align:middle;text-align:right">dd</td>
+            <td style="vertical-align:middle;text-align:right">ddd</td>
+            {# {% set total = total + total_ligne %} #}
+          </tr>
+         {% endfor %}
+        {# {% set mnt_remise = (total * (commande.remise / 100)) | round(0) %}  #}
+        <tr>
+            <td>&nbsp;</td>
+            <td style="padding:8px 5px">
+              <b><u>Remise</u></b> (10 %)
+            </td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+           <td style="vertical-align:middle;text-align:right">{{ 44 | format_number }}</td>
+        </tr>
+       
+        
+         {# {% set total = total - mnt_remise %}
+        {% set montant_tva = (total * (commande.tva / 100)) %}
+        {% set total_ttc = montant_tva + total  %}
+        {% set mnt_accompte = (total_ttc * (commande.accompte / 100)) | round(0) %} #}
+        <tr>
+            <td>&nbsp;</td>
+            <td style="padding:8px 5px">
+              <b><u>Conditions de règlement</u></b> : Accompte (4 %) soit 88;
+              Solde 444555
+            </td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+           <td style="vertical-align:middle;text-align:right"></td>
+        </tr>
+         <tr>
+            <td>&nbsp;</td>
+            <td style="padding:8px 5px" colspan="4">
+              
+             5555
+            </td>
+           <td style="vertical-align:middle;text-align:right">&nbsp;</td>
+        </tr>
+        
+        </tbody>
+        <tfoot>
+         
+          <tr>
+            <td style="text-align:right;border: 1px solid #000;padding:10px 5px">&nbsp;</td>
+            <td colspan="4" style="text-align:right;border: 1px solid #000;padding:10px 5px">MONTANT TOTAL HORS TAXES</td>
+            <td style="text-align:right;border: 1px solid #000;padding:10px 5px">tt</td>
+          </tr>
+          <tr>
+            <td style="text-align:right;border: 1px solid #000;padding:10px 5px">&nbsp;</td>
+            <td colspan="4" style="text-align:right;border: 1px solid #000;padding:10px 5px">TVA 18%</td>
+            <td style="text-align:right;border: 1px solid #000;padding:10px 5px">gg</td>
+          </tr>
+          <tr>
+            <td style="text-align:right;border: 1px solid #000;padding:10px 5px">&nbsp;</td>
+            <td colspan="4" style="text-align:right;border: 1px solid #000;padding:10px 5px">MONTANT TOTAL TTC</td>
+            <td style="text-align:right;border: 1px solid #000;padding:10px 5px">ggg</td>
+          </tr>
+          <tr>
+            <td colspan="6" style="border: 1px solid #000;padding:10px 5px">
+              Arrêté le présent Bon de commande à la somme de <b>45555</b> F.CFA
+            </td>
+          </tr>
+        </tfoot>
+    </table>
+    <div class="mention" style="font-weight:bold;font-size:11px">
+      <div class="clearfix">
+        <div style="width:70%;float:left;">
+          <u>NOS CONDITIONS DE REGLEMENT</u><br>
+        45555
+        </div>
+        <div style="width:20%;float:right;text-align:right">
+          <div style="">
+            <u>DIRECTION GENERALE</u><br>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    
+    <htmlpagefooter name="pageFooter">
+      
+    </htmlpagefooter>
+  </body>
+</html>
