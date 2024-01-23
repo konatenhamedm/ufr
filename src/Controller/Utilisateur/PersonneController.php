@@ -29,6 +29,7 @@ class PersonneController extends AbstractController
         ->add('nom', TextColumn::class, ['label' => 'Nom'])
         ->add('prenom', TextColumn::class, ['label' => 'Prénoms'])
         ->add('contact', TextColumn::class, ['label' => 'Contact(s)'])
+        ->add('email', TextColumn::class, ['label' => 'Email'])
         ->add('fonction', TextColumn::class, ['label' => 'Fonction', 'field' => 'fonction.libelle'])
         ->createAdapter(ORMAdapter::class, [
             'entity' => Employe::class,

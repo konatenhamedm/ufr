@@ -93,7 +93,7 @@ class DashboardController extends AbstractController
                     'href' => $this->generateUrl('app_parametre_type_frais_index')
                 ],
                 [
-                    'label' => 'Nature de paiement',
+                    'label' => 'Nature des paiements',
                     'id' => 'param_nature_paiement',
                     'href' => $this->generateUrl('app_parametre_nature_paiement_index')
                 ],
