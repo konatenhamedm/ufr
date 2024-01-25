@@ -22,6 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Controller\FileTrait;
+use App\Service\Omines\Column\NumberFormatColumn;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 
@@ -33,15 +34,16 @@ class InscriptionController extends AbstractController
     public function index(Request $request, DataTableFactory $dataTableFactory, UserInterface $user): Response
     {
         $table = $dataTableFactory->create()
-            ->add('datePreinscription', DateTimeColumn::class, [
-                'label' => 'Date inscription',
-                'format' => 'd-m-Y'
-            ])
-            ->add('nom', TextColumn::class, ['label' => 'Nom', 'field' => 'etudiant.nom'])
-            ->add('prenom', TextColumn::class, ['label' => 'Prénoms', 'field' => 'etudiant.prenom'])
-            ->add('niveau', TextColumn::class, ['label' => 'Niveau', 'field' => 'niveau.libelle'])
-            ->add('filiere', TextColumn::class, ['label' => 'Filière', 'field' => 'filiere.libelle'])
-            ->add('datePaiement', DateTimeColumn::class, ['label' => 'Date paiement', 'format' => 'd-m-Y', 'field' => 'info.datePaiement'])
+            ->add('codePreinscription', TextColumn::class, ['label' => 'Code Préinscription', 'field' => 'p.getCode'])
+            // ->add('datePreinscription', DateTimeColumn::class, [
+            //     'label' => 'Date inscription',
+            //     'format' => 'd-m-Y'
+            // ])
+            ->add('nom', TextColumn::class, ['label' => 'Nom et prénoms', 'field' => 'etudiant.getNomComplet'])
+            ->add('sigleNiveauFiliere', TextColumn::class, ['label' => 'Sigle niveau filière', 'field' => 'niveau.getFullLibelleSigle'])
+            ->add('datePaiement', DateTimeColumn::class, ['label' => 'Date paiement', 'format' => 'd-m-Y H:i:s', 'field' => 'info.datePaiement'])
+            ->add('montantPaiement', NumberFormatColumn::class, ['label' => 'Montant', 'field' => 'info.montant'])
+            ->add('caissiere', TextColumn::class, ['label' => 'Caissiere', 'field' => 'etudiant.getNomComplet'])
             ->createAdapter(ORMAdapter::class, [
                 'entity' => Preinscription::class,
                 'query' => function (QueryBuilder $qb) use ($user) {

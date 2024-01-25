@@ -203,6 +203,7 @@ class NiveauEtudiantController extends AbstractController
     public function index(Request $request, DataTableFactory $dataTableFactory): Response
     {
         $table = $dataTableFactory->create()
+            ->add('codePreinscription', TextColumn::class, ['field' => 'e.getCode', 'label' => 'Code Preinscription'])
             ->add('nom', TextColumn::class, ['field' => 'etudiant.getNomComplet', 'label' => 'Nom et Prénoms'])
             ->add('dateNaissance', DateTimeColumn::class, ['label' => 'Date de naissance', 'format' => 'd-m-Y', 'field' => 'etudiant.dateNaissance'])
             ->add('filiere', TextColumn::class, ['label' => 'Filiere', 'field' => 'filiere.libelle'])

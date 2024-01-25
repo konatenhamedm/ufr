@@ -81,6 +81,11 @@ class Niveau
         return sprintf('[%s] %s', $this->getFiliere()->getLibelle(), $this->getLibelle());
     }
 
+    public function getFullLibelleSigle()
+    {
+        return sprintf('%s %s', $this->getFiliere()->getCode(), $this->getLibelle());
+    }
+
     public function getLibelle(): ?string
     {
         return $this->libelle;

@@ -1,7 +1,7 @@
 {% block page_content %}
     {% form_theme form 'widget/fields-block.html.twig' %}
     <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Paiemnt de la préinscription</h5>
+        <h5 class="modal-title" id="exampleModalLabel">Paiement de la préinscription</h5>
         <div class="btn btn-icon btn-sm  ms-2" data-bs-dismiss="modal" aria-label="Close">
             <span class="svg-icon svg-icon-2x text-white">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -18,25 +18,25 @@
         <div class="alert alert-dismissible bg-light-primary border border-info border-1 border-dashed p-5 mb-5">
         <div class="row p-0 m-0 mb-4">
 
-
             <div class="col">
-                Nom et prenom: <b>{{ etudiant.getNomComplet }}</b>
+                Code pré-inscription: <b> {{ preinscription.code }} </b>
             </div>
             <div class="col">
-                Date naissance: <b>{{ etudiant.dateNaissance |date("m/d/Y") }}</b>
+                Nom et prenom: <b>{{ etudiant.getNomComplet }}</b>
             </div>
 
             </div>
             <div class="row p-0 m-0">
                 <div class="col">
-                    filiere: <b>{{ preinscription.niveau.filiere.libelle }}</b>
-                </div>
-                <div class="col">
                     Montant pré-inscription: <b> {{ preinscription.niveau.filiere.montantPreinscription }} Frcfa</b>
                 </div>
                 <div class="col">
-                    Code pré-inscription: <b> {{ preinscription.code }} </b>
+                    Date naissance: <b>{{ etudiant.dateNaissance |date("m/d/Y") }}</b>
                 </div>
+                <div class="col">
+                    Filiere: <b>{{ preinscription.niveau.filiere.libelle }}</b>
+                </div>
+                
             </div>
     </div>
        {% if(etat != 'paiement_confirmation') %}

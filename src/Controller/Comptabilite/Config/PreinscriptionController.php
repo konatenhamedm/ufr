@@ -22,13 +22,13 @@ class PreinscriptionController extends AbstractController
         $module = $request->query->get('module');
         $modules = [
             [
-                'label' => 'Attente de paiement',
+                'label' => 'En attente de paiement',
                 'icon' => 'bi bi-list',
                 'module' => 'general',
                 'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_index')
             ],
             [
-                'label' => 'Validés',
+                'label' => 'Payés',
                 'icon' => 'bi bi-list',
                 'module' => 'gestion',
                 'href' => $this->generateUrl('app_parametre_preinscription_ls', ['module' => 'valider'])
@@ -52,7 +52,8 @@ class PreinscriptionController extends AbstractController
 
         return $this->render('parametre/dashboard/index.html.twig', [
             'modules' => $modules,
-            'breadcrumb' => $breadcrumb
+            'breadcrumb' => $breadcrumb,
+            'title' => 'Paiements de préinscriptions'
         ]);
     }
 
