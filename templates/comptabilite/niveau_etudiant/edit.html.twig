@@ -19,7 +19,7 @@
         <div class="row p-0 m-0 mb-4">
 
             <div class="col">
-                Code pré-inscription: <b> {{ preinscription.code }} </b>
+                Code pré-inscription: <b>{% if(preinscription.code) %}  {{ preinscription.code }} {% else %} NEANT {% endif %}</b>
             </div>
             <div class="col">
                 Nom et prenom: <b>{{ etudiant.getNomComplet }}</b>

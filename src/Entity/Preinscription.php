@@ -25,7 +25,7 @@ class Preinscription
         'inscription' => 'Inscription Validées'
     ];
 
-    
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -51,6 +51,11 @@ class Preinscription
     #[ORM\JoinColumn(nullable: false)]
     #[Gedmo\Blameable(on: 'create')]
     private ?Utilisateur $utilisateur = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Gedmo\Blameable(on: 'update')]
+    private ?Utilisateur $caisse = null;
 
     #[Assert\NotBlank(message: 'Veuillez renseigner un motif de refus', groups: ['rejet-preinscription'])]
     private ?string $motif;
@@ -129,6 +134,18 @@ class Preinscription
         return $this;
     }
 
+    public function getCaisse(): ?Utilisateur
+    {
+        return $this->caisse;
+    }
+
+    public function setCaisse(?Utilisateur $caisse): static
+    {
+        $this->caisse = $caisse;
+
+        return $this;
+    }
+
     /**
      * Get the value of motif
      */
@@ -203,7 +220,4 @@ class Preinscription
 
         return $this;
     }
-
-
-
 }

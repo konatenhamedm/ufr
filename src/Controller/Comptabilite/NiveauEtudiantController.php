@@ -452,8 +452,7 @@ class NiveauEtudiantController extends AbstractController
     {
         // dd($niveauEtudiant->getEtudiant()->getNom());
 
-
-
+        //dd('ffff');
         $form = $this->createForm(PreinscriptionPaiementType::class, $preinscription, [
             'method' => 'POST',
             'etat' => $preinscription->getEtat(),
