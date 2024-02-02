@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Liste des</title>
+    <style>
+      {% block page_css %}
+        @page {
+
+          margin-footer: 0.5cm;
+
+          /header: html_headerContent;/
+          footer: html_pageFooter;
+          margin-top: 0.5cm;
+          margin-header: 0cm;
+          margin-left: 1cm;
+           margin-right: 1cm;
+          /*background: ...
+  background-image: ...
+  background-position ...
+  background-repeat ...
+  background-color ...
+  background-gradient: ...*/
+        }
+        .clearfix:after,
+        {% endblock %} .clearfix:before {
+          content: " ";
+          display: table;
+        }
+
+        .clearfix:after {
+          clear: both;
+        }
+
+        .mention {
+  position: absolute;
+  bottom: 100px;
+}
+
+        /*@page :first {
+   header: html_headerContent;
+}*/
+
+        .table {
+          width: 100%;
+          max-width: 100%;
+          border-collapse: collapse;
+
+        }
+        .table {
+          page-break-before: auto;
+        }
+
+        body {
+          font-family: Trebuchet,Arial,Helvetica;
+        }
+
+        .table td,
+        .table th {
+          padding: 2px;
+          vertical-align: top;
+          border-top: 1px solid #191919;
+        }
+
+        .table thead th {
+          vertical-align: bottom;
+          border-bottom: 2px solid #191919;
+        }
+
+        .table tbody + tbody {
+          border-top: 1px solid #191919;
+        }
+
+        .table .table {
+          background-color: #fff;
+        }
+
+        .table-sm td,
+        .table-sm th {
+          padding: 0.3rem;
+        }
+
+        .table-bordered {
+          border: 1px solid #191919;
+        }
+
+        .table-bordered td,
+        .table-bordered th {
+          border: 1px solid #191919;
+        }
+
+        .table-bordered thead td,
+        .table-bordered thead th {
+          border-bottom-width: 1px;
+        }
+
+        @media all {
+          /.content { display: block; page-break-inside: avoid; }/
+        }
+
+        .content {
+          /margin-top: 18cm;/
+        }
+
+        .table-responsive.table-bordered {
+          border: 0;
+        }
+
+        .double_underline {
+            text-decoration:underline;
+            border-bottom: 1px solid #000;
+            text-align: center;
+        }
+    </style>
+  </head>
+  <body style="font-size:12px;">
+      <div class="clearfix">
+     <div style="width:50%;text-align:left;float:left;"  class="">
+            {# {% set var = "uploads/" ~ menu.findParametre.logo.path "/" menu.findParametre.logo.alt %}
+        <img src="{{ var |replace({'/': "\\"}) }}" width="200px" height="50px"/> #}
+        <p>
+            {{ "BPV 43 Abidjan"}}<br>
+            TEL: +(225) 01 15 44 44 <br>
+            EMAIL: <a href="mailto:{{ "ufrseg-sf2@gmail.com"}}">{{ "ufrseg-sf2@gmail.com"}}</a>
+        </p>
+      </div>
+   
+       <div style="width:50%;text-align:left;float:right;">
+           <h3 style="font-weight:700;font-size:20px">Etat des recouvrements {{ ''}} <span style="font-size:10px;color:#FF2E2E"> <br>
+         <span style="font-weight:700;font-size:20px;margin-left:45px">à la date {{"now"|date("m/d/Y")}}</span>
+           </span></h3> 
+           
+
+        </div>
+    </div>
+
+
+       <table class="table table-bordered" style="margin-top:10px;font-size:10px">
+      <thead>
+        <tr>
+          <th style="vertical-align:middle;width:5%">N°</th>
+          <th style="vertical-align:middle;">NOM ET PRÉNOMS</th>
+          {# <th style="vertical-align:middle;">STATUT</th> #}
+          <th style="vertical-align:middle;">COUT DE LA FORMATION</th>
+          <th style="vertical-align:middle;">MONATNT PAYÉ</th>
+          <th style="vertical-align:middle;">MONATNT IMPAYÉ</th>
+          <th style="vertical-align:middle;">{{"Reste à payer" | upper }}</th>
+          {# <th style="vertical-align:middle;">TAUX DE PAIEMNET</th> #}
+       
+        </tr>
+      </thead>
+      <tbody>
+       {% set total=0 %}
+         {% for key,ligne in data %}
+         
+          <tr>
+            <td style="vertical-align:middle;text-align:center;">{{key+1}}</td>
+            <td style="vertical-align:middle;text-align:center;" >{{ ligne.nom ~ ' ' ~ ligne.prenom }}</td>
+            {# <td style="vertical-align:middle;text-align:center;" >{% if ligne.etat == "valide" %} {{ 'Payer' }} {% else %} {{ 'Impayer' }} {% endif %}</td> #}
+            <td style="vertical-align:middle;text-align:center;">{{ligne.montant_preinscription |number_format(0, '.', '.') }}</td>
+            <td style="vertical-align:middle;text-align:center;" ><span style="font-size:15px;color:#FF2E2E">{% if ligne.etat == "valide" %} {{ligne.montant_preinscription  |number_format(0, '.', '.') }} {% else %} {{ '0'|number_format(0, '.', '.') }} {% endif %}</span ></td>
+            <td style="vertical-align:middle;text-align:center;" >{% if ligne.etat in ["paiement_confirmation","attente_paiement"] %} {{ligne.montant_preinscription  |number_format(0, '.', '.') }} {% else %} {{ '0'|number_format(0, '.', '.') }} {% endif %}</td>
+            <td style="vertical-align:middle;text-align:center;" >{% if ligne.etat in ["paiement_confirmation","attente_paiement"]  %} {{ligne.montant_preinscription  |number_format(0, '.', '.') }} {% else %} {{ '0'|number_format(0, '.', '.') }} {% endif %}</td>
+          
+           {% set total = total + ligne.montant_preinscription %}
+            {# <td style="vertical-align:middle;text-align:center;" >{{ menu.existeContrat(ligne.id) ?  menu.existeContrat(ligne.id).locataire.NPrenoms  : 'Appartement libre'  }}</td>
+            <td style="vertical-align:middle;text-align:center;" >{{ menu.existeContrat(ligne.id) ?  (menu.existeContrat(ligne.id).DateEntree)|date("m/d/Y")  : 'Appartement libre' }}</td>
+             #}
+            {# {{ dump(ligne.getInfo )}} #}
+           {#  {{ dump(ligne.getInfo ? ligne.getInfo.locataire.NPrenoms :'fff' )}} #}
+          </tr>
+         {% endfor %}
+
+         <tr>
+           <td style="vertical-align:middle;text-align:center;font-family:"Gill Sans Extrabold", sans-serif;" colspan="3">
+              <h3 class="text-center">Total</h3>
+           </td>
+
+           <td style="vertical-align:middle;text-align:center;font-family:"Gill Sans Extrabold", sans-serif;" >
+         <h3 class="text-center">{{ total |number_format(0, '.', '.') }}</h3>
+           </td>
+            
+           <td style="vertical-align:middle;text-align:center;font-family:"Gill Sans Extrabold", sans-serif;" > 
+           <h3 class="text-center">{{ total_payer |number_format(0, '.', '.')  }}</h3>
+           </td>
+           <td style="vertical-align:middle;text-align:center;font-family:"Gill Sans Extrabold", sans-serif;" > 
+          <h3 class="text-center">{{ total_impaye |number_format(0, '.', '.')  }}</h3>
+           </td>
+           <td style="vertical-align:middle;text-align:center;font-family:"Gill Sans Extrabold", sans-serif;" > 
+           <h3 class="text-center">{{ total_impaye |number_format(0, '.', '.')  }}</h3>
+           </td>
+         </tr>
+        
+    </table>
+     
+   
+      
+    </div>
+
+
+   
+  
+        
+    
+    <br> 
+  <div  style="border-bottom:3px solid #000">
+  </div>
+  
+    
+
+    
+    
+    
+    <htmlpagefooter name="pageFooter">
+      
+    </htmlpagefooter>
+  </body>
+</html>

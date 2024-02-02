@@ -32,22 +32,21 @@ class UtilisateurController extends AbstractController
     public function index(Request $request, DataTableFactory $dataTableFactory): Response
     {
         $table = $dataTableFactory->create()
-        ->add('username', TextColumn::class, ['label' => 'Pseudo'])
-        //->add('email', TextColumn::class, ['label' => 'Email', 'field' => 'e.adresseMail'])
-        ->add('nom', TextColumn::class, ['label' => 'Nom', 'field' => 'e.nom'])
-        ->add('prenom', TextColumn::class, ['label' => 'Prénoms', 'field' => 'e.prenom'])
-        ->add('fonction', TextColumn::class, ['label' => 'Fonction', 'field' => 'f.libelle'])
-        ->createAdapter(ORMAdapter::class, [
-            'entity' => Utilisateur::class,
-            'query' => function(QueryBuilder $qb){
-                $qb->select('u, e, f')
-                    ->from(Utilisateur::class, 'u')
-                    ->join('u.personne', 'e')
-                    ->join('e.fonction', 'f')
-                ;
-            }
-        ])
-        ->setName('dt_app_utilisateur_utilisateur');
+            ->add('username', TextColumn::class, ['label' => 'Pseudo'])
+            //->add('email', TextColumn::class, ['label' => 'Email', 'field' => 'e.adresseMail'])
+            ->add('nom', TextColumn::class, ['label' => 'Nom', 'field' => 'e.nom'])
+            ->add('prenom', TextColumn::class, ['label' => 'Prénoms', 'field' => 'e.prenom'])
+            ->add('fonction', TextColumn::class, ['label' => 'Fonction', 'field' => 'f.libelle'])
+            ->createAdapter(ORMAdapter::class, [
+                'entity' => Utilisateur::class,
+                'query' => function (QueryBuilder $qb) {
+                    $qb->select('u, e, f')
+                        ->from(Utilisateur::class, 'u')
+                        ->join('u.personne', 'e')
+                        ->join('e.fonction', 'f');
+                }
+            ])
+            ->setName('dt_app_utilisateur_utilisateur');
 
         $renders = [
             'edit' =>  new ActionRender(function () {
@@ -58,7 +57,7 @@ class UtilisateurController extends AbstractController
             }),
         ];
 
-        
+
         $hasActions = false;
 
         foreach ($renders as $_ => $cb) {
@@ -70,39 +69,27 @@ class UtilisateurController extends AbstractController
 
         if ($hasActions) {
             $table->add('id', TextColumn::class, [
-                'label' => 'Actions'
-                , 'orderable' => false
-                ,'globalSearchable' => false
-                ,'className' => 'grid_row_actions'
-                , 'render' => function ($value, Utilisateur $context) use ($renders) {
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Utilisateur $context) use ($renders) {
                     $options = [
                         'default_class' => 'btn btn-xs btn-clean btn-icon mr-2 ',
                         'target' => '#exampleModalSizeLg2',
-                            
+
                         'actions' => [
                             'edit' => [
-                            'url' => $this->generateUrl('app_utilisateur_utilisateur_edit', ['id' => $value])
-                            , 'ajax' => true
-                            , 'icon' => '%icon% bi bi-pen'
-                            , 'attrs' => ['class' => 'btn-default']
-                            , 'render' => $renders['edit']
-                        ],
-                        'delete' => [
-                            'target' => '#exampleModalSizeNormal',
-                            'url' => $this->generateUrl('app_utilisateur_utilisateur_delete', ['id' => $value])
-                            , 'ajax' => true
-                            , 'icon' => '%icon% bi bi-trash'
-                            , 'attrs' => ['class' => 'btn-main']
-                            ,  'render' => $renders['delete']
+                                'url' => $this->generateUrl('app_utilisateur_utilisateur_edit', ['id' => $value]), 'ajax' => true, 'icon' => '%icon% bi bi-pen', 'attrs' => ['class' => 'btn-default'], 'render' => $renders['edit']
+                            ],
+                            'delete' => [
+                                'target' => '#exampleModalSizeNormal',
+                                'url' => $this->generateUrl('app_utilisateur_utilisateur_delete', ['id' => $value]), 'ajax' => true, 'icon' => '%icon% bi bi-trash', 'attrs' => ['class' => 'btn-main'],  'render' => $renders['delete']
+                            ]
                         ]
-                    ] 
-                            
+
                     ];
                     return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
                 }
             ]);
         }
-       
+
 
         $table->handleRequest($request);
 
@@ -122,7 +109,7 @@ class UtilisateurController extends AbstractController
         $utilisateur = new Utilisateur();
         $form = $this->createForm(UtilisateurType::class, $utilisateur, [
             'method' => 'POST',
-            'validation_groups' =>['Default', 'Registration'],
+            'validation_groups' => ['Default', 'Registration'],
             'action' => $this->generateUrl('app_utilisateur_utilisateur_new')
         ]);
         $form->handleRequest($request);
@@ -136,39 +123,37 @@ class UtilisateurController extends AbstractController
             $response = [];
             $redirect = $this->generateUrl('app_utilisateur_utilisateur_index');
 
-           
+            $username = $form->get('personne')->getData();
+
+
 
 
             if ($form->isValid()) {
                 $utilisateur->setPassword($userPasswordHasher->hashPassword($utilisateur, $form->get('plainPassword')->getData()));
+                $utilisateur->setUsername($username->getNom());
                 $em->persist($utilisateur);
                 $em->flush();
                 $data = true;
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-                
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = Response::HTTP_INTERNAL_SERVER_ERROR;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-                
             }
 
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
-            
         }
 
         return $this->render('utilisateur/utilisateur/new.html.twig', [
@@ -187,13 +172,13 @@ class UtilisateurController extends AbstractController
 
     #[Route('/{id}/edit', name: 'app_utilisateur_utilisateur_edit', methods: ['GET', 'POST', 'PATCH'])]
     public function edit(
-        Request $request, 
-        Utilisateur $utilisateur, 
-        UserPasswordHasherInterface $userPasswordHasher, 
-        EntityManagerInterface $em, 
-        FormError $formError): Response
-    {
-        
+        Request $request,
+        Utilisateur $utilisateur,
+        UserPasswordHasherInterface $userPasswordHasher,
+        EntityManagerInterface $em,
+        FormError $formError
+    ): Response {
+
         $form = $this->createForm(UtilisateurType::class, $utilisateur, [
             'method' => 'PATCH',
             'passwordRequired' => false,
@@ -201,7 +186,7 @@ class UtilisateurController extends AbstractController
                 'id' =>  $utilisateur->getId()
             ])
         ])->remove('personne');
-        
+
 
         $data = null;
         $statutCode = Response::HTTP_OK;
@@ -215,7 +200,7 @@ class UtilisateurController extends AbstractController
             $response = [];
             $redirect = $this->generateUrl('app_utilisateur_utilisateur_index');
 
-           
+
             if ($form->isValid()) {
                 if ($form->get('plainPassword')->getData()) {
                     $utilisateur->setPassword($userPasswordHasher->hashPassword($utilisateur, $form->get('plainPassword')->getData()));
@@ -226,21 +211,18 @@ class UtilisateurController extends AbstractController
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-                
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = Response::HTTP_INTERNAL_SERVER_ERROR;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-                
             }
 
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
@@ -260,14 +242,14 @@ class UtilisateurController extends AbstractController
         $form = $this->createFormBuilder()
             ->setAction(
                 $this->generateUrl(
-                'app_utilisateur_utilisateur_delete'
-                ,   [
+                    'app_utilisateur_utilisateur_delete',
+                    [
                         'id' => $utilisateur->getId()
                     ]
                 )
             )
             ->setMethod('DELETE')
-        ->getForm();
+            ->getForm();
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $data = true;
@@ -301,11 +283,11 @@ class UtilisateurController extends AbstractController
     }
 
 
-     
-    #[Route("/{id}/edit-password", name: "app_utilisateur_utilisateur_edit_password", methods:["GET","POST"])]
+
+    #[Route("/{id}/edit-password", name: "app_utilisateur_utilisateur_edit_password", methods: ["GET", "POST"])]
     public function editPassword(Request $request, Utilisateur $utilisateur, FormError $formError, EntityManagerInterface $em, UserPasswordHasherInterface $userPasswordHasher): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_USER_EDIT',$utilisateur);
+        $this->denyAccessUnlessGranted('ROLE_USER_EDIT', $utilisateur);
         $redirect = $request->query->get('r');
         $form = $this->createForm(EditUtilisateurType::class, $utilisateur, [
             'method' => 'POST',
@@ -313,7 +295,7 @@ class UtilisateurController extends AbstractController
             'validation_groups' => ['Default'],
             'action' => $this->generateUrl('app_utilisateur_utilisateur_edit_password', ['id' =>  $utilisateur->getId(), 'r' => $redirect])
         ]);
-       
+
         $form->handleRequest($request);
 
         $isAjax = $request->isXmlHttpRequest();
@@ -322,13 +304,13 @@ class UtilisateurController extends AbstractController
         if ($form->isSubmitted()) {
 
             $response = [];
-            
+
             $isValidPassword = $userPasswordHasher->isPasswordValid($utilisateur, $form->get('oldPassword')->getData());
 
             if ($form->get('newPassword')->getData() && $isValidPassword) {
                 $utilisateur->setPassword($userPasswordHasher->hashPassword($utilisateur, $form->get('newPassword')->getData()));
             }
-            
+
             if ($form->isValid()) {
                 if (!$isValidPassword) {
                     $message = 'L\'ancien mot de passe est incorrect';
@@ -340,22 +322,18 @@ class UtilisateurController extends AbstractController
                     $statut = 1;
                     $this->addFlash('success', $message);
                 }
-                
-
-                
             } else {
-                
+
                 $message = $formError->all($form);
                 $statut = 0;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-                
             }
 
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data', 'reloadPage'));
+                return $this->json(compact('statut', 'message', 'redirect', 'data', 'reloadPage'));
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect);
@@ -368,5 +346,4 @@ class UtilisateurController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-
 }

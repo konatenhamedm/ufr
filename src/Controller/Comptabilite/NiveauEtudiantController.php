@@ -75,6 +75,7 @@ class NiveauEtudiantController extends AbstractController
                 ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date de demande', 'format' => 'd-m-Y'])
                 ->add('filiere', TextColumn::class, ['label' => 'Filiere', 'field' => 'filiere.libelle'])
                 /*   ->add('niveau', TextColumn::class, ['label' => 'Niveau', 'field' => 'niveau.libelle']) */
+                /* ->add('caissiere', TextColumn::class, ['field' => 'c.getNomComplet', 'label' => 'Caissière ']) */
                 ->add('montant', NumberFormatColumn::class, ['label' => 'Mnt. Préinscr.', 'field' => 'filiere.montantPreinscription'])
                 ->createAdapter(ORMAdapter::class, [
                     'entity' => Preinscription::class,
@@ -83,6 +84,7 @@ class NiveauEtudiantController extends AbstractController
                             ->from(Preinscription::class, 'e')
                             ->join('e.etudiant', 'etudiant')
                             /*   ->join('e.filiere', 'filiere') */
+                            /*  ->leftJoin('e.caissiere', 'c') */
                             ->join('e.niveau', 'niveau')
                             ->join('niveau.filiere', 'filiere')
 
@@ -208,15 +210,17 @@ class NiveauEtudiantController extends AbstractController
             ->add('dateNaissance', DateTimeColumn::class, ['label' => 'Date de naissance', 'format' => 'd-m-Y', 'field' => 'etudiant.dateNaissance'])
             ->add('filiere', TextColumn::class, ['label' => 'Filiere', 'field' => 'filiere.libelle'])
             ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date pré-inscription', 'format' => 'd-m-Y',])
+            /*   ->add('caissiere', TextColumn::class, ['field' => 'c.getNomComplet', 'label' => 'Caissière ']) */
             //->add('montantPreinscription', NumberFormatColumn::class, ['label' => 'Mnt. Préinscr.'])
             ->createAdapter(ORMAdapter::class, [
                 'entity' => Preinscription::class,
                 'query' => function (QueryBuilder $qb) {
-                    $qb->select('e, filiere, etudiant,niveau')
+                    $qb->select('e, filiere, etudiant,niveau,c')
                         ->from(Preinscription::class, 'e')
                         ->join('e.etudiant', 'etudiant')
                         ->join('e.niveau', 'niveau')
                         ->join('niveau.filiere', 'filiere')
+                        ->leftJoin('e.caissiere', 'c')
                         ->andWhere('e.etat = :statut')
                         ->setParameter('statut', 'attente_paiement');
                 }
@@ -519,7 +523,7 @@ class NiveauEtudiantController extends AbstractController
 
                 /* $entityManager->persist($niveauEtudiant);
                 $entityManager->flush();*/
-
+                $preinscription->setCaissiere($this->getUser());
                 $data = true;
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;

@@ -52,11 +52,6 @@ class Preinscription
     #[Gedmo\Blameable(on: 'create')]
     private ?Utilisateur $utilisateur = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Gedmo\Blameable(on: 'update')]
-    private ?Utilisateur $caisse = null;
-
     #[Assert\NotBlank(message: 'Veuillez renseigner un motif de refus', groups: ['rejet-preinscription'])]
     private ?string $motif;
 
@@ -68,6 +63,11 @@ class Preinscription
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $code = null;
+
+    #[ORM\ManyToOne]
+    private ?Utilisateur $caissiere = null;
+
+
 
     public function getId(): ?int
     {
@@ -134,17 +134,7 @@ class Preinscription
         return $this;
     }
 
-    public function getCaisse(): ?Utilisateur
-    {
-        return $this->caisse;
-    }
 
-    public function setCaisse(?Utilisateur $caisse): static
-    {
-        $this->caisse = $caisse;
-
-        return $this;
-    }
 
     /**
      * Get the value of motif
@@ -217,6 +207,18 @@ class Preinscription
     public function setCode(?string $code): static
     {
         $this->code = $code;
+
+        return $this;
+    }
+
+    public function getCaissiere(): ?Utilisateur
+    {
+        return $this->caissiere;
+    }
+
+    public function setCaissiere(?Utilisateur $caissiere): static
+    {
+        $this->caissiere = $caissiere;
 
         return $this;
     }

@@ -32,8 +32,8 @@ use Symfony\Component\Workflow\WorkflowInterface;
 class PreinscriptionController extends AbstractController
 {
 
-private $em ;
-    public function __construct(private WorkflowInterface $preinscriptionStateMachine,EntityManagerInterface $em)
+    private $em;
+    public function __construct(private WorkflowInterface $preinscriptionStateMachine, EntityManagerInterface $em)
     {
         /*$etats = [
             'attente_validation' => 'En attente de'
@@ -47,12 +47,12 @@ private $em ;
     public function index(Request $request, UserInterface $user, DataTableFactory $dataTableFactory): Response
     {
         $isEtudiant = $this->isGranted('ROLE_ETUDIANT');
-        
+
         $table = $dataTableFactory->create()
-        ->add('filiere', TextColumn::class, ['field' => 'filiere.libelle', 'label' => 'Filière'])
-        ->add('niveau', TextColumn::class, ['field' => 'niveau.libelle', 'label' => 'Niveau'])
-        ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date de la demande', 'format' => 'd-m-Y'])
-        ->add('etat', MapColumn::class, ['label' => 'Etat', 'map' => Preinscription::ETATS]);
+            ->add('filiere', TextColumn::class, ['field' => 'filiere.libelle', 'label' => 'Filière'])
+            ->add('niveau', TextColumn::class, ['field' => 'niveau.libelle', 'label' => 'Niveau'])
+            ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date de la demande', 'format' => 'd-m-Y'])
+            ->add('etat', MapColumn::class, ['label' => 'Etat', 'map' => Preinscription::ETATS]);
 
         if (!$isEtudiant) {
             $table->add('nom', TextColumn::class, ['field' => 'etudiant.nom', 'visible' => false])
@@ -69,15 +69,14 @@ private $em ;
                     ->from(Preinscription::class, 'p')
                     ->join('p.niveau', 'niveau')
                     ->join('niveau.filiere', 'filiere')
-                    ->join('p.etudiant', 'etudiant')
-                   ;
+                    ->join('p.etudiant', 'etudiant');
                 if ($this->isGranted('ROLE_ETUDIANT')) {
                     $qb->andWhere('p.etudiant = :etudiant')
-                    ->setParameter('etudiant', $user->getPersonne());
+                        ->setParameter('etudiant', $user->getPersonne());
                 }
             }
         ])
-        ->setName('dt_app_comptabilite_preinscription_user');
+            ->setName('dt_app_comptabilite_preinscription_user');
 
         $renders = [
             'edit' =>  new ActionRender(function () {
@@ -100,17 +99,13 @@ private $em ;
 
         if ($hasActions) {
             $table->add('id', TextColumn::class, [
-                'label' => 'Actions'
-                , 'orderable' => false
-                ,'globalSearchable' => false
-                ,'className' => 'grid_row_actions'
-                , 'render' => function ($value, Preinscription $context) use ($renders) {
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Preinscription $context) use ($renders) {
                     $options = [
                         'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
                         'target' => '#modal-lg',
 
                         'actions' => [
-                           /* 'edit' => [
+                            /* 'edit' => [
                                 'url' => $this->generateUrl('app_comptabilite_preinscription_edit', ['id' => $value]),
                                 'ajax' => true,
                                 'stacked' => false,
@@ -126,8 +121,7 @@ private $em ;
                             'icon' => '%icon% bi bi-trash',
                             'attrs' => ['class' => 'btn-danger'],
                             'render' => $renders['delete']
-                        ]*/
-                    ]
+                        ]*/]
 
                     ];
                     return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
@@ -155,12 +149,15 @@ private $em ;
     {
 
         $isEtudiant = $this->isGranted('ROLE_ETUDIANT');
-        
+
         $table = $dataTableFactory->create()
-        ->add('code', TextColumn::class, [ 'label' => 'Code'])
-        ->add('filiere', TextColumn::class, ['field' => 'filiere.libelle', 'label' => 'Filière'])
-        ->add('niveau', TextColumn::class, ['field' => 'niveau.libelle', 'label' => 'Niveau'])
-        ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date de la demande', 'format' => 'd-m-Y']);
+            ->add('code', TextColumn::class, ['label' => 'Code'])
+            ->add('filiere', TextColumn::class, ['field' => 'filiere.libelle', 'label' => 'Filière'])
+            ->add('niveau', TextColumn::class, ['field' => 'niveau.libelle', 'label' => 'Niveau'])
+            ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date de la demande', 'format' => 'd-m-Y'])
+
+            ->add('caissiere', TextColumn::class, ['field' => 'c.getNomComplet', 'label' => 'Caissière ']);
+
 
         if (!$isEtudiant) {
             $table->add('nom', TextColumn::class, ['field' => 'etudiant.nom', 'visible' => false])
@@ -178,40 +175,41 @@ private $em ;
         $table->createAdapter(ORMAdapter::class, [
             'entity' => Preinscription::class,
             'query' => function (QueryBuilder $qb) use ($user, $etat) {
-                $qb->select(['p', 'niveau', 'filiere', 'etudiant', 'info'])
+                $qb->select(['p', 'niveau', 'c', 'filiere', 'etudiant', 'info'])
                     ->from(Preinscription::class, 'p')
                     ->join('p.niveau', 'niveau')
                     ->join('niveau.filiere', 'filiere')
                     ->join('p.etudiant', 'etudiant')
                     ->leftJoin('p.infoPreinscription', 'info')
+                    ->leftJoin('p.caissiere', 'c')
                     ->andWhere('p.etat = :etat')
                     ->setParameter('etat', $etat);
                 if ($this->isGranted('ROLE_ETUDIANT')) {
                     $qb->andWhere('p.etudiant = :etudiant')
-                    ->setParameter('etudiant', $user->getPersonne());
+                        ->setParameter('etudiant', $user->getPersonne());
                 }
             }
         ])
-        ->setName('dt_app_comptabilite_preinscription_'.$etat);
+            ->setName('dt_app_comptabilite_preinscription_' . $etat);
 
         $renders = [
-            'edit' =>  new ActionRender(function () use ($etat){
+            'edit' =>  new ActionRender(function () use ($etat) {
                 if ($etat == 'paiement_confirmation') {
                     return true;
-                }else {
+                } else {
                     return false;
                 }
-            }),   'imprime' =>  new ActionRender(function () use ($etat){
+            }),   'imprime' =>  new ActionRender(function () use ($etat) {
                 if ($etat == 'valide') {
                     return true;
-                }else {
+                } else {
                     return false;
                 }
             }),
             'delete' => new ActionRender(function () use ($etat) {
                 if ($etat == 'paiement_confirmation') {
                     return true;
-                }else {
+                } else {
                     return false;
                 }
             }),
@@ -229,11 +227,7 @@ private $em ;
 
         if ($hasActions) {
             $table->add('id', TextColumn::class, [
-                'label' => 'Actions'
-                , 'orderable' => false
-                ,'globalSearchable' => false
-                ,'className' => 'grid_row_actions'
-                , 'render' => function ($value, Preinscription $context) use ($renders) {
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Preinscription $context) use ($renders) {
                     $options = [
                         'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
                         'target' => '#modal-lg',
@@ -245,7 +239,7 @@ private $em ;
                                 'stacked' => false,
                                 'icon' => '%icon% fa fa-print',
                                 'attrs' => ['class' => 'btn-main', 'title' => 'Imprime'],
-                                'render' => new ActionRender(fn() => $context->getEtat() == 'valide')
+                                'render' => new ActionRender(fn () => $context->getEtat() == 'valide')
                                 //'render' => $renders['imprime']
                             ],
                             'edit' => [
@@ -254,7 +248,7 @@ private $em ;
                                 'stacked' => false,
                                 'icon' => '%icon% bi bi-check',
                                 'attrs' => ['class' => 'btn-main'],
-                                'render' => new ActionRender(fn() => $context->getEtat() == 'paiement_confirmation')
+                                'render' => new ActionRender(fn () => $context->getEtat() == 'paiement_confirmation')
                             ],
                             'paiement' => [
                                 'url' => $this->generateUrl('app_comptabilite_paiement_etudiant_edit', ['id' => $value]),
@@ -262,7 +256,7 @@ private $em ;
                                 'stacked' => false,
                                 'icon' => '%icon% bi bi-cash',
                                 'attrs' => ['class' => 'btn-warning', 'title' => 'Paiements'],
-                                'render' => new ActionRender(fn() => $context->getEtat() == 'paiement_confirmation')
+                                'render' => new ActionRender(fn () => $context->getEtat() == 'paiement_confirmation')
                             ],
                         ]
 
@@ -320,28 +314,23 @@ private $em ;
                 $message       = sprintf('Votre demande pour le niveau [%s] a été enregistrée. Elle sera traitée par nos services pour la suite de votre parcours', $preinscription->getNiveau()->getLibelle());
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-
             }
 
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data', 'showAlert'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data', 'showAlert'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
-
         }
 
         return $this->render('comptabilite/preinscription/new.html.twig', [
@@ -363,14 +352,14 @@ private $em ;
         } else {
             $nb = $nb + 1;
         }
-        return ($code.'-'.date("y") .'-'. str_pad($nb, 3, '0', STR_PAD_LEFT));
+        return ($code . '-' . date("y") . '-' . str_pad($nb, 3, '0', STR_PAD_LEFT));
     }
 
     #[Route('/demande/new', name: 'app_comptabilite_preinscription_demande_new', methods: ['GET', 'POST'])]
-    public function demanddNew(Request $request,NiveauRepository $niveauRepository, UserInterface $user, EntityManagerInterface $entityManager, FormError $formError,PreinscriptionRepository $preinscriptionRepository): Response
+    public function demanddNew(Request $request, NiveauRepository $niveauRepository, UserInterface $user, EntityManagerInterface $entityManager, FormError $formError, PreinscriptionRepository $preinscriptionRepository): Response
     {
         $preinscription = new Preinscription();
-//dd();
+        //dd();
         $form = $this->createForm(PreinscriptionEudiantConnecteType::class, $preinscription, [
             'method' => 'POST',
             'action' => $this->generateUrl('app_comptabilite_preinscription_demande_new')
@@ -403,8 +392,6 @@ private $em ;
                 $message       = sprintf('Votre demande pour le niveau [%s] a été enregistrée. Elle sera traitée par nos services pour la suite de votre parcours', $preinscription->getNiveau()->getLibelle());
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
@@ -412,25 +399,22 @@ private $em ;
                 if (!$isAjax) {
                     $this->addFlash('warning', $message);
                 }
-
             }
 
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data', 'showAlert'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data', 'showAlert'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
-
         }
 
         return $this->render('comptabilite/preinscription/demande_new.html.twig', [
             'preinscription' => $preinscription,
             'form' => $form->createView(),
-            'info'=>$preinscriptionRepository->getLastRecord()[0]
+            'info' => $preinscriptionRepository->getLastRecord()[0]
         ]);
     }
 
@@ -464,7 +448,7 @@ private $em ;
 
         $form->handleRequest($request);
 
-       if ($form->isSubmitted()) {
+        if ($form->isSubmitted()) {
             $response = [];
             $redirect = $this->generateUrl('app_comptabilite_preinscription_index');
 
@@ -481,26 +465,22 @@ private $em ;
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-
             }
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
         }
 
         return $this->render('comptabilite/preinscription/paiement.html.twig', [
@@ -516,7 +496,7 @@ private $em ;
         $form = $this->createForm(PreinscriptionType::class, $preinscription, [
             'method' => 'POST',
             'action' => $this->generateUrl('app_comptabilite_preinscription_edit', [
-                    'id' =>  $preinscription->getId()
+                'id' =>  $preinscription->getId()
             ])
         ]);
 
@@ -528,7 +508,7 @@ private $em ;
 
         $form->handleRequest($request);
 
-       if ($form->isSubmitted()) {
+        if ($form->isSubmitted()) {
             $response = [];
             $redirect = $this->generateUrl('app_comptabilite_preinscription_index');
 
@@ -544,26 +524,22 @@ private $em ;
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-
             }
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
         }
 
         return $this->render('comptabilite/preinscription/edit.html.twig', [
@@ -596,7 +572,7 @@ private $em ;
 
         $form->handleRequest($request);
 
-       if ($form->isSubmitted()) {
+        if ($form->isSubmitted()) {
             $response = [];
             $redirect = $this->generateUrl('app_comptabilite_preinscription_index');
 
@@ -614,26 +590,22 @@ private $em ;
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-
             }
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
         }
 
         return $this->render('comptabilite/preinscription/edit.html.twig', [
@@ -648,14 +620,14 @@ private $em ;
         $form = $this->createFormBuilder()
             ->setAction(
                 $this->generateUrl(
-                'app_comptabilite_preinscription_delete'
-                ,   [
+                    'app_comptabilite_preinscription_delete',
+                    [
                         'id' => $preinscription->getId()
                     ]
                 )
             )
             ->setMethod('DELETE')
-        ->getForm();
+            ->getForm();
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $data = true;
