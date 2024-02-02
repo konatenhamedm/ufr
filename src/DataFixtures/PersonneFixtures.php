@@ -5,8 +5,7 @@ namespace App\DataFixtures;
 use App\Entity\Personne;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
-use Doctrine\Persistence\ObjectManager;
-;
+use Doctrine\Persistence\ObjectManager;;
 
 class PersonneFixtures extends Fixture implements DependentFixtureInterface
 {
@@ -19,7 +18,7 @@ class PersonneFixtures extends Fixture implements DependentFixtureInterface
         $personne->setCivilite($this->getReference(CiviliteFixtures::DEFAULT_CIVILITE_REFERENCE));
         $personne->setFonction($this->getReference(FonctionFixtures::DEFAULT_FONCTION_REFERENCE));
         $personne->setGenre($this->getReference(GenreFixtures::DEFAULT_GENRE_REFERENCE));
-        $personne->setEmail('');
+        $personne->setEmail('admin@gmail.com');
         $personne->setContact('');
         $personne->setDateNaissance(new \DateTime());
         $personne->setLieuNaissance('Abidjan');
@@ -29,7 +28,6 @@ class PersonneFixtures extends Fixture implements DependentFixtureInterface
         $manager->flush();
 
         $this->addReference(self::DEFAULT_PERSONNE_REFERENCE, $personne);
-
     }
 
 

@@ -6,9 +6,7 @@ use App\Entity\Utilisateur;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-
-;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;;
 
 class UtilisateurFixtures extends Fixture implements DependentFixtureInterface
 {
@@ -27,6 +25,7 @@ class UtilisateurFixtures extends Fixture implements DependentFixtureInterface
         $utilisateur = new Utilisateur();
         $utilisateur->addGroupe($this->getReference(GroupeFixtures::DEFAULT_GROUP_REFERENCE));
         $utilisateur->setUsername('admin_ufr');
+        $utilisateur->setEmail('admin@gmail.com');
         $utilisateur->setPassword($this->hasher->hashPassword($utilisateur, 'admin_ufr'));
         $utilisateur->setPersonne($this->getReference(PersonneFixtures::DEFAULT_PERSONNE_REFERENCE));
         // $product = new Product();
