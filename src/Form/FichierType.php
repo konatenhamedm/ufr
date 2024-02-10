@@ -17,54 +17,44 @@ class FichierType extends AbstractType
 {
 
     const DEFAULT_MIME_TYPES = [
-        'text/plain'
-        , 'application/octet-stream'
-        , 'application/pdf'
-        , 'image/jpg'
-        , 'image/jpeg'
-        , 'image/png'
-        , 'application/vnd.ms-excel'
-        , 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        , 'application/msword'
-        , 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'text/plain', 'application/octet-stream', 'application/pdf', 'image/jpg', 'image/jpeg', 'image/png', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
     /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+
+
         if (isset($options['doc_options']['mime_types'])) {
             $mimeTypes = $options['doc_options']['mime_types'];
             unset($options['doc_options']['mime_types']);
         } else {
-             $mimeTypes = $options['mime_types'] ?: self::DEFAULT_MIME_TYPES;
+            $mimeTypes = $options['mime_types'] ?: self::DEFAULT_MIME_TYPES;
         }
-       
+
         $attr = array_merge(['accept' => implode(',', $mimeTypes), 'class' => 'input-file'], $options['attrs']);
         $attr = array_merge($attr, $options['doc_options']['attrs'] ?? []);
 
         if (isset($options['doc_options']['attrs'])) {
-             unset($options['doc_options']['attrs']);
+            unset($options['doc_options']['attrs']);
         }
 
 
-        
-        
+
+
         $builder
-        //->add('alt', UrlType::class, ['attr' => ['class' => 'input-alt', 'placeholder' => 'URL'], 'required' => false])*/
-        ->add('file', FileType::class, [
-            'label' => false
-            //,'data_class' => Fichier::class
-            , 'required' => $options['required']
-            , 'attr' => $attr
+            //->add('alt', UrlType::class, ['attr' => ['class' => 'input-alt', 'placeholder' => 'URL'], 'required' => false])*/
+            ->add('file', FileType::class, [
+                'label' => false
+                //,'data_class' => Fichier::class
+                , 'required' => $options['required'], 'attr' => $attr, 'constraints' => [
 
-            , 'constraints' => [
-
-                new File(
-                    ['mimeTypes' => $mimeTypes]
-                ),
-            ],
-        ]);
+                    new File(
+                        ['mimeTypes' => $mimeTypes]
+                    ),
+                ],
+            ]);
 
         if ($options['doc_options']) {
 
@@ -75,7 +65,7 @@ class FichierType extends AbstractType
                 $form      = $event->getForm();
                 $nonMapped = ['uploadDir'];
 
-                
+
 
                 if (!empty($data['file'])) {
                     foreach ($options['doc_options'] as $option => $value) {
@@ -96,29 +86,29 @@ class FichierType extends AbstractType
                     $form->add('path', TextType::class);
                     $form->add('filePrefix', TextType::class);
 
-                   
-                        //$data['alt'] = null;
-                        
+
+                    //$data['alt'] = null;
+
                     $parts = explode('/public/uploads/', $options['doc_options']['uploadDir']);
                     $path = $parts[1] ?? '';
 
-                    
+
+
                     $data['path'] = $path ?? null;
                     if (!empty($options['doc_options']['file_prefix'])) {
                         $data['filePrefix'] = $options['doc_options']['file_prefix'];
-                    } else {
-                        $data['filePrefix'] = '';
                     }
-                    
-                   $event->setData($data);
 
+
+
+
+
+                    $event->setData($data);
                 }
-
-                
-
             });
         }
-    }/**
+    }
+    /**
      * {@inheritdoc}
      */
     public function configureOptions(OptionsResolver $resolver)
@@ -129,12 +119,13 @@ class FichierType extends AbstractType
             'attrs' => [],
             'mime_types' => self::DEFAULT_MIME_TYPES,
             'required' => false,
-            'validation_groups' => ['Default', 'FileRequired']
+            //'validation_groups' => ['Default', 'FileRequired']
         ]);
 
         $resolver->setRequired('doc_options');
         $resolver->setRequired('mime_types');
         $resolver->setRequired('attrs');
         $resolver->setRequired('required');
+        $resolver->setRequired(['validation_groups']);
     }
 }

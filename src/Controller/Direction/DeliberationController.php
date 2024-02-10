@@ -11,6 +11,7 @@ use App\Entity\LigneDeliberation;
 use App\Entity\Mention;
 use App\Form\DeliberationType;
 use App\Repository\DeliberationRepository;
+use App\Repository\FraisRepository;
 use App\Service\ActionRender;
 use App\Service\FormError;
 use App\Service\Omines\Column\NumberFormatColumn;
@@ -35,14 +36,14 @@ class DeliberationController extends AbstractController
     public function index(Request $request, UserInterface $user, DataTableFactory $dataTableFactory): Response
     {
         $table = $dataTableFactory->create()
-        ->add('code', TextColumn::class, ['label' => 'Code'])
-        ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
-        ->add('niveau', TextColumn::class, ['label' => 'Niveau', 'field' => 'niveau.libelle'])
-       
-        ->createAdapter(ORMAdapter::class, [
-            'entity' => Examen::class,
-        ])
-        ->setName('dt_app_direction_examen_deliberation');
+            ->add('code', TextColumn::class, ['label' => 'Code'])
+            ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
+            ->add('niveau', TextColumn::class, ['label' => 'Niveau', 'field' => 'niveau.libelle'])
+
+            ->createAdapter(ORMAdapter::class, [
+                'entity' => Examen::class,
+            ])
+            ->setName('dt_app_direction_examen_deliberation');
 
         $renders = [
             'edit' =>  new ActionRender(function () {
@@ -65,11 +66,7 @@ class DeliberationController extends AbstractController
 
         if ($hasActions) {
             $table->add('id', TextColumn::class, [
-                'label' => 'Actions'
-                , 'orderable' => false
-                ,'globalSearchable' => false
-                ,'className' => 'grid_row_actions'
-                , 'render' => function ($value, Examen $context) use ($renders) {
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Examen $context) use ($renders) {
                     $options = [
                         'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
                         'target' => '#modal-lg',
@@ -105,43 +102,18 @@ class DeliberationController extends AbstractController
     }
 
 
-
-    #[Route('/historique', name: 'app_direction_deliberation_historique', methods: ['GET', 'POST'])]
-    public function historique(Request $request, UserInterface $user, DataTableFactory $dataTableFactory): Response
+    #[Route('/timeline', name: 'app_direction_deliberation_time_index', methods: ['GET', 'POST'])]
+    public function indexTimeLigne(Request $request, UserInterface $user, DataTableFactory $dataTableFactory): Response
     {
         $table = $dataTableFactory->create()
-        //->add('date', TextColumn::class, ['label' => 'Code'])
-        ->add('candidat', TextColumn::class, ['label' => 'Candidat', 'render' => function ($value, Deliberation $deliberation) {
-            return $deliberation->getPreinscription()->getNomComplet();
-        }])
-        ->add('examen', TextColumn::class, ['label' => 'Examen', 'field' => 'ex.libelle'])
-        ->add('niveau', TextColumn::class, ['label' => 'Niveau', 'field' => 'n.libelle'])
-        ->add('total', NumberFormatColumn::class, ['label' => 'Total'])
-        ->add('moyenne', NumberFormatColumn::class, ['label' => 'Moyenne'])
-        ->add('mention', TextColumn::class, ['label' => 'Mention', 'field' => 'm.libelle'])
-        ->add('etat', TextColumn::class, ['label' => 'Decision', 'raw' => false,  'render' => function ($value, Deliberation $context) {
-            if ($value == 'valide') {
-                return sprintf('<span class="badge badge-success">Admis(e)</span>');
-            } 
-            return sprintf('<span class="badge badge-success">Ajourné(e)</span>');
-        }])
-       
-        ->createAdapter(ORMAdapter::class, [
-            'entity' => Deliberation::class,
-            'query' => function (QueryBuilder $qb) use ($user) {
-                $qb->select(['d', 'ex', 'n', 'm', 'dp', 'p'])
-                    ->from(Deliberation::class, 'd')
-                    ->join('d.infoPreinscription', 'dp')
-                    ->join('dp.preinscription', 'p')
-                    ->join('d.examen', 'ex')
-                    ->join('ex.niveau', 'n')
-                    ->join('d.mention', 'm');
-                if ($this->isGranted('ROLE_ETUDIANT')) {
-                    $qb->andWhere('p.etudiant = :etudiant')->setParameter('etudiant', $user->getPersonne());
-                }
-            }
-        ])
-        ->setName('dt_app_direction_examen_deliberation_histo');
+            ->add('code', TextColumn::class, ['label' => 'Code'])
+            ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
+            ->add('niveau', TextColumn::class, ['label' => 'Niveau', 'field' => 'niveau.libelle'])
+
+            ->createAdapter(ORMAdapter::class, [
+                'entity' => Examen::class,
+            ])
+            ->setName('dt_app_direction_examen_deliberation_time');
 
         $renders = [
             'edit' =>  new ActionRender(function () {
@@ -164,29 +136,17 @@ class DeliberationController extends AbstractController
 
         if ($hasActions) {
             $table->add('id', TextColumn::class, [
-                'label' => 'Actions'
-                , 'orderable' => false
-                ,'globalSearchable' => false
-                ,'className' => 'grid_row_actions'
-                , 'render' => function ($value, Deliberation $context) use ($renders) {
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Examen $context) use ($renders) {
                     $options = [
                         'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
                         'target' => '#modal-lg',
 
                         'actions' => [
-                            /*'edit' => [
-                                'url' => $this->generateUrl('app_direction_deliberation_edit', ['id' => $value]),
+                            'deliberation' => [
+                                'url' => $this->generateUrl('app_direction_deliberation_new', ['id' => $value]),
                                 'ajax' => false,
                                 'stacked' => false,
                                 'icon' => '%icon% bi bi-pen',
-                                'attrs' => ['class' => 'btn-main'],
-                                'render' => $renders['edit']
-                            ],*/
-                            'show' => [
-                                'url' => $this->generateUrl('app_direction_deliberation_show', ['id' => $value]),
-                                'ajax' => false,
-                                'stacked' => false,
-                                'icon' => '%icon% bi bi-file',
                                 'attrs' => ['class' => 'btn-main'],
                                 'render' => $renders['edit']
                             ],
@@ -206,15 +166,122 @@ class DeliberationController extends AbstractController
         }
 
 
-        return $this->render('direction/deliberation/index.html.twig', [
+        return $this->render('direction/deliberation/index_timeline.html.twig', [
+            'datatable' => $table
+        ]);
+    }
+
+
+
+    #[Route('/historique/{id}', name: 'app_direction_deliberation_historique', methods: ['GET', 'POST'])]
+    public function historique(Request $request, UserInterface $user, $id, DataTableFactory $dataTableFactory): Response
+    {
+        $table = $dataTableFactory->create()
+            //->add('date', TextColumn::class, ['label' => 'Code'])
+            ->add('candidat', TextColumn::class, ['label' => 'Candidat', 'render' => function ($value, Deliberation $deliberation) {
+                return $deliberation->getPreinscription()->getNomComplet();
+            }])
+            ->add('examen', TextColumn::class, ['label' => 'Examen', 'field' => 'ex.libelle'])
+            ->add('niveau', TextColumn::class, ['label' => 'Niveau', 'field' => 'n.libelle'])
+            ->add('total', NumberFormatColumn::class, ['label' => 'Total'])
+            ->add('moyenne', NumberFormatColumn::class, ['label' => 'Moyenne'])
+            ->add('mention', TextColumn::class, ['label' => 'Mention', 'field' => 'm.libelle'])
+            ->add('etat', TextColumn::class, ['label' => 'Decision', 'raw' => false,  'render' => function ($value, Deliberation $context) {
+                if ($value == 'valide') {
+                    return sprintf('<span class="badge badge-success">Admis(e)</span>');
+                }
+                return sprintf('<span class="badge badge-success">Ajourné(e)</span>');
+            }])
+
+            ->createAdapter(ORMAdapter::class, [
+                'entity' => Deliberation::class,
+                'query' => function (QueryBuilder $qb) use ($user, $id) {
+                    $qb->select(['d', 'ex', 'n', 'm', 'dp', 'p'])
+                        ->from(Deliberation::class, 'd')
+                        ->join('d.infoPreinscription', 'dp')
+                        ->join('dp.preinscription', 'p')
+                        ->join('d.examen', 'ex')
+                        ->join('ex.niveau', 'n')
+                        ->join('d.mention', 'm')
+                        ->andWhere('ex.id = :id')
+                        ->setParameter('id', $id);
+                    /*  ->orderBy('d.date', 'DESC') */
+                    if ($this->isGranted('ROLE_ETUDIANT')) {
+                        $qb->andWhere('p.etudiant = :etudiant')->setParameter('etudiant', $user->getPersonne());
+                    }
+                }
+            ])
+            ->setName('dt_app_direction_examen_deliberation_historique' . $id);
+
+        $renders = [
+            'edit' =>  new ActionRender(function () {
+                return true;
+            }),
+            'delete' => new ActionRender(function () {
+                return true;
+            }),
+        ];
+
+
+        $hasActions = false;
+
+        foreach ($renders as $_ => $cb) {
+            if ($cb->execute()) {
+                $hasActions = true;
+                break;
+            }
+        }
+
+        if ($hasActions) {
+            $table->add('id', TextColumn::class, [
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Deliberation $context) use ($renders) {
+                    $options = [
+                        'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
+                        'target' => '#modal-lg',
+
+                        'actions' => [
+                            /*'edit' => [
+                                'url' => $this->generateUrl('app_direction_deliberation_edit', ['id' => $value]),
+                                'ajax' => false,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-pen',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['edit']
+                            ],*/
+                            'show' => [
+                                'url' => $this->generateUrl('app_direction_deliberation_show', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-eye',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['edit']
+                            ],
+                        ]
+
+                    ];
+                    return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
+                }
+            ]);
+        }
+
+
+        $table->handleRequest($request);
+
+        if ($table->isCallback()) {
+            return $table->getResponse();
+        }
+
+
+        return $this->render('direction/deliberation/index_historique.html.twig', [
             'datatable' => $table,
-            'title' => 'Historique des délibérations'
+            'title' => 'Historique des délibérations',
+            'id' => $id
         ]);
     }
 
 
     #[Route('/{id}/new', name: 'app_direction_deliberation_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, Examen $examen, EntityManagerInterface $entityManager, FormError $formError): Response
+    public function new(Request $request, Examen $examen, EntityManagerInterface $entityManager, FormError $formError, FraisRepository $fraisRepository): Response
     {
         $deliberation = new Deliberation();
         $deliberation->setExamen($examen);
@@ -222,7 +289,7 @@ class DeliberationController extends AbstractController
         $etudiant = $request->query->get('etudiant');
 
 
-        
+
         foreach ($examen->getMatiereExamens() as $matiereExamen) {
             $ligne = new LigneDeliberation();
             $ligne->setMatiereExamen($matiereExamen);
@@ -251,7 +318,7 @@ class DeliberationController extends AbstractController
             $response = [];
             $redirect = $this->generateUrl('app_direction_deliberation_index');
 
-
+            //dd($form->get('infoPreinscription'));
 
 
             if ($form->isValid()) {
@@ -264,26 +331,43 @@ class DeliberationController extends AbstractController
 
                 if ($etat == 'valide') {
                     $niveau = $examen->getNiveau();
-                    $preinscription->setEtat('attente_inscription');
+                    $preinscription->setEtatDeliberation('deliberer');
+
+                    $somme = 0;
+
+                    /*      $allFrais = $fraisRepository->findBy(array('niveau' => $niveau));
+                    foreach ($allFrais as $key => $value) {
+                       
+                    }
+ */
                     $inscription = new Inscription();
                     $inscription->setEtudiant($preinscription->getEtudiant());
                     $inscription->setNiveau($examen->getNiveau());
+                    //$inscription->setMontant($preinscription->getCode());
+                    $inscription->setEtat('attente_echeancier');
+                    $inscription->setCode($preinscription->getCode());
+                    $inscription->setCodeUtilisateur($this->getUser()->getEmail());
                     foreach ($niveau->getFrais() as $frais) {
                         $fraisInscription = new FraisInscription();
                         $fraisInscription->setTypeFrais($frais->getTypeFrais());
                         $fraisInscription->setMontant($frais->getMontant());
                         $inscription->addFraisInscription($fraisInscription);
+                        $somme += $frais->getMontant();
                     }
+                    $inscription->setMontant($somme);
+
+
                     $entityManager->persist($inscription);
                 } elseif ($etat == 'rejet') {
                     $preinscription->setEtat('ajourne_inscription');
+                    $preinscription->setEtatDeliberation('deliberer');
                 }
 
                 foreach ($mentions as $mention) {
                     if ($moyenne >= $mention->getMoyenneMin() && $mention->getMoyenneMax() >= $moyenne) {
                         $deliberation->setMention($mention);
                         break;
-                    }   
+                    }
                 }
 
 
@@ -296,31 +380,152 @@ class DeliberationController extends AbstractController
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-
             }
 
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data', 'fullRedirect'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data', 'fullRedirect'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
-
         }
 
         return $this->render('direction/deliberation/new.html.twig', [
+            'deliberation' => $deliberation,
+            'examen' => $examen,
+            'mentions' => json_encode($results),
+            'form' => $form->createView(),
+        ]);
+    }
+    #[Route('/{id}/new/historique', name: 'app_direction_deliberation_historique_new', methods: ['GET', 'POST'])]
+    public function newHistorique(Request $request, Examen $examen, EntityManagerInterface $entityManager, FormError $formError, FraisRepository $fraisRepository): Response
+    {
+        $deliberation = new Deliberation();
+        $deliberation->setExamen($examen);
+        $mentions = $entityManager->getRepository(Mention::class)->findAll();
+        $etudiant = $request->query->get('etudiant');
+
+
+
+        foreach ($examen->getMatiereExamens() as $matiereExamen) {
+            $ligne = new LigneDeliberation();
+            $ligne->setMatiereExamen($matiereExamen);
+            $ligne->setCoefficient($matiereExamen->getCoefficient());
+            $deliberation->addLigneDeliberation($ligne);
+        }
+
+        $results = [];
+        foreach ($mentions as $mention) {
+            $results["{$mention->getMoyenneMin()}-{$mention->getMoyenneMax()}"] = $mention->getLibelle();
+        }
+        $form = $this->createForm(DeliberationType::class, $deliberation, [
+            'method' => 'POST',
+            'examen' => $examen,
+            'action' => $this->generateUrl('app_direction_deliberation_historique_new', ['id' => $examen->getId()])
+        ]);
+        $form->handleRequest($request);
+
+        $data = null;
+        $statutCode = Response::HTTP_OK;
+        $fullRedirect = false;
+
+        $isAjax = $request->isXmlHttpRequest();
+
+        if ($form->isSubmitted()) {
+            $response = [];
+            $redirect = $this->generateUrl('app_direction_deliberation_historique', ['id' => $examen->getId()]);
+
+            //dd($form->get('infoPreinscription'));
+
+
+            if ($form->isValid()) {
+                $deliberation->updateTotal();
+                $moyenne = $deliberation->getMoyenne();
+
+                $preinscription = $deliberation->getPreinscription();
+
+                $etat = $deliberation->getEtat();
+
+                if ($etat == 'valide') {
+                    $niveau = $examen->getNiveau();
+                    $preinscription->setEtatDeliberation('deliberer');
+
+                    $somme = 0;
+
+                    /*      $allFrais = $fraisRepository->findBy(array('niveau' => $niveau));
+                    foreach ($allFrais as $key => $value) {
+                       
+                    }
+ */
+                    $inscription = new Inscription();
+                    $inscription->setEtudiant($preinscription->getEtudiant());
+                    $inscription->setNiveau($examen->getNiveau());
+                    //$inscription->setMontant($preinscription->getCode());
+                    $inscription->setEtat('attente_echeancier');
+                    $inscription->setCode($preinscription->getCode());
+                    $inscription->setCodeUtilisateur($this->getUser()->getEmail());
+                    foreach ($niveau->getFrais() as $frais) {
+                        $fraisInscription = new FraisInscription();
+                        $fraisInscription->setTypeFrais($frais->getTypeFrais());
+                        $fraisInscription->setMontant($frais->getMontant());
+                        $inscription->addFraisInscription($fraisInscription);
+                        $somme += $frais->getMontant();
+                    }
+                    $inscription->setMontant($somme);
+
+
+                    $entityManager->persist($inscription);
+                } elseif ($etat == 'rejet') {
+                    $preinscription->setEtat('ajourne_inscription');
+                    $preinscription->setEtatDeliberation('deliberer');
+                }
+
+                foreach ($mentions as $mention) {
+                    if ($moyenne >= $mention->getMoyenneMin() && $mention->getMoyenneMax() >= $moyenne) {
+                        $deliberation->setMention($mention);
+                        break;
+                    }
+                }
+
+
+                $entityManager->persist($deliberation);
+                $entityManager->flush();
+
+                $fullRedirect = true;
+
+                $data = true;
+                $message       = 'Opération effectuée avec succès';
+                $statut = 1;
+                $this->addFlash('success', $message);
+            } else {
+                $message = $formError->all($form);
+                $statut = 0;
+                $statutCode = 500;
+                if (!$isAjax) {
+                    $this->addFlash('warning', $message);
+                }
+            }
+
+
+            if ($isAjax) {
+                return $this->json(compact('statut', 'message', 'redirect', 'data', 'fullRedirect'), $statutCode);
+            } else {
+                if ($statut == 1) {
+                    return $this->redirect($redirect, Response::HTTP_OK);
+                }
+            }
+        }
+
+        return $this->render('direction/deliberation/historique_new.html.twig', [
             'deliberation' => $deliberation,
             'examen' => $examen,
             'mentions' => json_encode($results),
@@ -331,7 +536,7 @@ class DeliberationController extends AbstractController
     #[Route('/{id}/show', name: 'app_direction_deliberation_show', methods: ['GET'])]
     public function show(Deliberation $deliberation): Response
     {
-       
+
         return $this->render('direction/deliberation/show.html.twig', [
             'deliberation' => $deliberation,
             'examen' => $deliberation->getExamen()
@@ -353,7 +558,7 @@ class DeliberationController extends AbstractController
             'method' => 'PATCH',
             'examen' => $examen,
             'action' => $this->generateUrl('app_direction_deliberation_edit', [
-                    'id' =>  $deliberation->getId()
+                'id' =>  $deliberation->getId()
             ])
         ]);
 
@@ -369,7 +574,7 @@ class DeliberationController extends AbstractController
 
         $form->handleRequest($request);
 
-       if ($form->isSubmitted()) {
+        if ($form->isSubmitted()) {
             $response = [];
             $redirect = $this->generateUrl('app_direction_deliberation_historique');
 
@@ -385,7 +590,7 @@ class DeliberationController extends AbstractController
                     if ($moyenne >= $mention->getMoyenneMin() && $mention->getMoyenneMax() >= $moyenne) {
                         $deliberation->setMention($mention);
                         break;
-                    }   
+                    }
                 }
 
 
@@ -396,26 +601,22 @@ class DeliberationController extends AbstractController
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-
             }
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
         }
 
         return $this->render('direction/deliberation/edit.html.twig', [
@@ -432,14 +633,14 @@ class DeliberationController extends AbstractController
         $form = $this->createFormBuilder()
             ->setAction(
                 $this->generateUrl(
-                'app_direction_deliberation_delete'
-                ,   [
+                    'app_direction_deliberation_delete',
+                    [
                         'id' => $deliberation->getId()
                     ]
                 )
             )
             ->setMethod('DELETE')
-        ->getForm();
+            ->getForm();
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $data = true;

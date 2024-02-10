@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Liste des maisons</title>
+    <style>
+      {% block page_css %}
+        @page {
+
+          margin-footer: 0.5cm;
+
+          /*header: html_headerContent;*/
+          footer: html_pageFooter;
+          margin-top: 0.5cm;
+          margin-header: 0cm;
+          margin-left: 1cm;
+           margin-right: 1cm;
+          /*background: ...
+  background-image: ...
+  background-position ...
+  background-repeat ...
+  background-color ...
+  background-gradient: ...*/
+        }
+        .clearfix:after,
+        {% endblock %} .clearfix:before {
+          content: " ";
+          display: table;
+        }
+
+        .clearfix:after {
+          clear: both;
+        }
+
+        .mention {
+  position: absolute;
+  bottom: 100px;
+}
+
+.ok{
+  width: 30%;
+    border: 1px solid black;
+    text-align: center;
+}
+.deuxieme{
+  width: 38%;
+}
+.montant{
+    font-weight: bolder;
+}
+
+.Info_client h4{
+   magin-left:15px !important;
+}
+
+        /*@page :first {
+   header: html_headerContent;
+}*/
+
+        .table {
+          width: 100%;
+          max-width: 100%;
+          border-collapse: collapse;
+
+        }
+        .table {
+          page-break-before: auto;
+        }
+
+        body {
+          font-family: Trebuchet,Arial,Helvetica;
+        }
+
+        .table td,
+        .table th {
+          padding: 2px;
+          vertical-align: top;
+          border-top: 1px solid #191919;
+        }
+
+        .table thead th {
+          vertical-align: bottom;
+          border-bottom: 2px solid #191919;
+        }
+
+        .table tbody + tbody {
+          border-top: 1px solid #191919;
+        }
+
+        .table .table {
+          background-color: #fff;
+        }
+
+        .table-sm td,
+        .table-sm th {
+          padding: 0.3rem;
+        }
+
+        .table-bordered {
+          border: 1px solid #191919;
+        }
+
+        .table-bordered td,
+        .table-bordered th {
+          border: 1px solid #191919;
+        }
+
+        .table-bordered thead td,
+        .table-bordered thead th {
+          border-bottom-width: 1px;
+        }
+
+        @media all {
+          /*.content { display: block; page-break-inside: avoid; }*/
+        }
+
+        .content {
+          /*margin-top: 18cm;*/
+        }
+
+        .table-responsive.table-bordered {
+          border: 0;
+        }
+
+        .double_underline {
+            text-decoration:underline;
+            border-bottom: 1px solid #000;
+            text-align: center;
+        }
+    </style>
+  </head>
+<body style="font-size:12px;">
+ <div class="Info_client">
+            <br>
+            <div>
+              {% set var = "uploads/" ~ 'media_etudiant' ~"/"~ 'lg.jpeg' %}
+        <img src="{{ var |replace({'/': "\\"}) }}" width="100px" height="60px"/>
+               {#  <img height="60px" width="100px" src="K:\PROJET\GOMBOS\new_ufrseg\public\assets\lg.jpeg"> #}
+            
+     <h4 style="font-weight: bolder;"><strong>UFR-SEG</strong></h4></div>
+        </div>
+
+
+
+
+<table style="width:100%">
+  <tr>
+    <td >N :</td>
+    <td span="2" class="deuxieme">{{ "data.code" }}</td>
+    <td span="3"   class="ok" >
+        <h6>Le comptable</h6>
+    </td>
+  </tr>
+
+  <tr>
+    <td>Nom :</td>
+    <td>{{ "data.etudiant.getNomComplet" }}</td>
+    <td rowspan="5" class="ok"></td>
+
+  </tr>
+  <tr>
+    <td>Filière :</td>
+    <td>{{ "data.niveau.filiere.code" }}</td>
+  
+  </tr>
+  <tr>
+    <td>Année academique :</td>
+    <td>2023 - 2024</td>
+
+  </tr>
+    <tr>
+    <td>Date paiement :</td>
+    <td> 
+     </td>
+
+  </tr>
+    <tr>
+    <td>Montant payé :</td>
+    <td class="montant"><strong>
+      </strong></td>
+
+  </tr>
+
+</table>
+ <hr>
+<div>
+ <h5 style="text-align: center;">Cel:(225) 01 15 44 44 - BPV 43 Abidjan -Email: ufrseg-sf2@gmail.com</h5>
+</div>
+
+
+    
+    <htmlpagefooter name="pageFooter">
+      
+    </htmlpagefooter>
+</body>
+</html>
+
+
+

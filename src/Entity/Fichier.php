@@ -18,7 +18,6 @@ use Symfony\Component\Serializer\Annotation\Groups as Group;
 #[ORM\HasLifecycleCallbacks]
 class Fichier
 {
-
     const DEFAULT_MIME_TYPES = [
         'text/plain', 'application/octet-stream', 'application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
@@ -96,9 +95,8 @@ class Fichier
     }
 
     // On modifie le setter de File, pour prendre en compte l'upload d'un fichier lorsqu'il en existe déjà un autre
-
     /**
-     * @param UploadedFile|null $file
+     * @param UploadedFile $file
      */
     public function setFile(UploadedFile $file = null)
     {

@@ -26,7 +26,7 @@ trait FileTrait
      * @param $template
      * @param $vars
      */
-    private function renderPdf($template, $vars, $options = [], $showResponse = true, $entreprise, $imgFiligrame)
+    private function renderPdf($template, $vars, $options = [], $showResponse = true)
     {
 
         $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
@@ -83,9 +83,11 @@ trait FileTrait
         $mpdf->showWatermarkImage = $options['showWaterkImage'] ?? false;
 
 
-        $mpdf->watermark($entreprise, 45, 90, 0.1);
-
-        $mpdf->watermarkImg($imgFiligrame, 0.1);
+        $mpdf->watermark($options['entreprise'], 45, 90, 0.1);
+        if ($options['watermarkImg'] != "") {
+            $mpdf->watermarkImg($options['watermarkImg'], 0.1);
+        }
+        //  $mpdf->watermarkImg($imgFiligrame, 0.1);
         // $mpdf->Image("", 10, 10, 30, 0, 'PNG', '', '', true, 150, '', false, false, 0, true, false, false);
 
 

@@ -23,14 +23,14 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface, 
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 180,nullable: true)]
+    #[ORM\Column(length: 180, nullable: true)]
     private ?string $username = null;
 
 
     #[ORM\Column]
     private array $roles = [];
 
-    #[ORM\Column(type: 'string',nullable: true)]
+    #[ORM\Column(type: 'string', nullable: true)]
     private ?string $resetToken;
 
     /**
@@ -56,10 +56,14 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface, 
     #[Assert\NotBlank(message: ' renseigner le mail')]
     private ?string $email = null;
 
+    #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: InfoInscription::class)]
+    private Collection $infoInscriptions;
+
     public function __construct()
     {
         $this->utilisateurGroupes = new ArrayCollection();
         $this->groupes = new ArrayCollection();
+        $this->infoInscriptions = new ArrayCollection();
     }
 
     public function getId(): ?int

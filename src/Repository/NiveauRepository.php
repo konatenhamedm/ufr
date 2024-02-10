@@ -49,7 +49,6 @@ class NiveauRepository extends ServiceEntityRepository
             ->innerJoin('rl.niveau', 'n')
             ->innerJoin('rl.utilisateur', 'u')
             ->andWhere('u.id =:id')
-
             ->setParameter('id', $this->user->getId())
             ->getQuery()
             ->getResult();

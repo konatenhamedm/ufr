@@ -12,18 +12,50 @@
             <div class="col-md-5 ">
                 {{ form_row(colonne.fichier) }}
             </div>
+             {#    {% if colonne.children.fichier.vars.data %}
+                
+            <div class="col-md-1 ">
+                <a class="btn btn-dark" target="_blank" href="{{ asset('uploads/media_etudiant/' ~ colonne.children.fichier.vars.data) }}" download> <i class="fe fe-upload"></i>
+                    <i class="fe fe-folder"></i></a>
+                
+            </div>
+        {% endif %}  #}
             <div class="col-md-1 del-col_universitaire" data-parent=".row-colonne_universitaire"></div>
+            
         </div>
     </div>
 
 {% endmacro  %}
 
 
+{% macro prototype_ligne_colonne_information(form) %}
+    <div class="list-colonne_document"  data-prototype="{{ _self.colonne(form.documents.vars.prototype)|e }}"></div>
+    <button type="button" data-protoname="__name__" class="btn btn-default add_line_document btn-xs" id="add_ligne_document"  data-protoclass=".list-colonne_document" data-container=".column-container">
+        <i class="fa fa-plus"></i> Ajouter un document
+    </button>
+    <div class="column-container proto-container" data-childclass="">
+        {% for item in form.documents %}
+            {{ _self.colonne(item|e) }}
+        {% endfor %}
+    </div>
+{% endmacro %}
 {% macro prototype_ligne_colonne(form) %}
     <div class="list-colonne_universitaire"  data-prototype="{{ _self.colonne(form.documents.vars.prototype)|e }}"></div>
     <button type="button" data-protoname="__name__" class="btn btn-default add_line_universitaire btn-xs" id="add_ligne_universitaire"  data-protoclass=".list-colonne_universitaire" data-container=".column-container">
         <i class="fa fa-plus"></i> Ajouter un document
     </button>
+    <div class="column-container proto-container" data-childclass="">
+        {% for item in form.documents %}
+            {{ _self.colonne(item|e) }}
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{% macro prototype_ligne_colonne_document(form) %}
+    <div class="list-colonne_universitaire"  data-prototype="{{ _self.colonne(form.documents.vars.prototype)|e }}"></div>
+    {# <button type="button" data-protoname="__name__" class="btn btn-default add_line_universitaire btn-xs" id="add_ligne_universitaire"  data-protoclass=".list-colonne_universitaire" data-container=".column-container">
+        <i class="fa fa-plus"></i> Ajouter un document
+    </button> #}
     <div class="column-container proto-container" data-childclass="">
         {% for item in form.documents %}
             {{ _self.colonne(item|e) }}

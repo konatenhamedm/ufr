@@ -1,0 +1,280 @@
+{% block page_content %}
+    {% form_theme form 'widget/fields-block.html.twig' %}
+    <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Edition de l'échéancier</h5>
+        <div class="btn btn-icon btn-sm  ms-2" data-bs-dismiss="modal" aria-label="Close">
+            <span class="svg-icon svg-icon-2x text-white">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor"></rect>
+					<rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor"></rect>
+				</svg>
+            </span>
+        </div>
+    </div>
+    {% from '_macros/inscription.html.twig' import prototype_ligne_echeancier %}
+    {{ form_start(form, {'attr': {'role':'form', 'class': 'form'}}) }}
+    <div class="modal-body">
+        {{ include('_includes/ajax/response.html.twig') }}
+       {#  <div class="row">
+            <div class="col-md-3">{{ form_row(form.code) }}</div>
+            <div class="col-md-9">{{ form_row(form.niveau) }}</div>
+        </div>
+         <div class="row">
+            <div class="col-md-3">{{ form_row(form.dateExamen) }}</div>
+            <div class="col-md-9">{{ form_row(form.libelle) }}</div>
+        </div> #}
+
+         <div class="alert alert-dismissible bg-light-primary border border-info border-1 border-dashed p-5 mb-5">
+        <div class="row p-0 m-0 mb-4">
+
+
+            <div class="col">
+                Niveau: <b>{{ inscription.niveau.libelle }}</b>
+            </div>
+            <div class="col">
+                Date inscription: <b>{{ inscription.dateInscription |date("m/d/Y") }}</b>
+            </div>
+
+        </div>
+            <div class="row p-0 m-0">
+
+
+
+                <div class="col">
+                    Code: <b>{{ inscription.code }}</b>
+                </div>
+                <div class="col">
+                    Etat: <b>{% if inscription.etat == "echeance_soumis"%} Attente validation de l'échéancier {% else%} {{ inscription.etat }} {% endif %} </b>
+                </div>
+            </div>
+    </div>
+        {{ prototype_ligne_echeancier(form,inscription.etat) }}
+        <div class="row">
+        
+            <div class="col-md-12">
+            <table class="table table-bordered table-custom">
+       {#  <thead class="thead-dark">
+            <tr>
+                <th width="50%" class="p-2">Frais</th>
+                <th width="40%" class="p-2">Montant</th>
+                <th width="" class="p-2"></th>
+            </tr>
+        </thead> #}
+        <tbody  class="row-">
+{% set somme = 0 %}
+        {% for item in frais %}
+                    <tr class="row-colonne even pointer table-light">
+        <td class="p-2">
+            {{ item.typeFrais.libelle }}
+            {# <div style="display:none">{{ form_widget(frais.typeFrais) }}</div> #}
+        </td>
+        <td class="p-2 text-end">{{ item.montant|number_format(0, '.', '.')}}</td>
+       {#  <td class="p-2"></td> #}
+    </tr>
+    {% set somme = somme + item.montant %}
+        {% endfor %}
+     
+        </tbody>
+        <tfoot>
+            <tr>
+                <th class="text-end p-2" style="color: red;font-weight:bolder">TOTAL SAISI</th>
+                <th class="total-saisi text-end p-2 fw-bolder total" style="color: red;font-weight:bolder">{{ 0 }} </td>
+            </tr>
+            <tr>
+                <th class="text-end p-2">TOTAL</th>
+                <th class="total text-end p-2 fw-bolder total">{{ somme|number_format(0, '.', '.') }} </td>
+            </tr>
+        </tfoot>
+    </table>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        {# {{ include('_includes/ajax/loader.html.twig') }} #}
+        {{ form_widget(form.annuler) }}
+      {{ form_widget(form.save) }}
+       {% if workflow_can(inscription, 'valider') %}
+            {{ form_widget(form.passer) }}
+        {% endif %}
+         {% if workflow_can(inscription, 'rejet') %}
+           {#  {{ form_widget(form.rejeter) }} #}
+             <a title="Rejeter l'échéancier" href="{{ path('app_inscription_inscription_rejeter',{'id':inscription.id }) }}" class="btn btn-danger btn-sm test" data-bs-stacked-toggle="modal" data-bs-stacked-modal="#exampleModalSizeLg1">Rejeter le document</a>
+             
+        {% endif %}
+    </div>
+   {{ form_widget(form._token) }}
+    {{ form_end(form, {render_rest: false}) }}
+{% endblock %}
+{% block java %}
+    <script>
+ $("#exampleModalSizeLg1").find('.modal-header').css("background","red");
+            var elements = Array.from(document.querySelectorAll("[data-bs-stacked-modal]"));
+
+            if (elements && elements.length > 0) {
+                elements.forEach((element) => {
+                    if (element.getAttribute("data-kt-initialized") === "1" ) {
+                        return;
+                    }
+
+                    const url = element.getAttribute('href');
+                    element.setAttribute("data-kt-initialized", "1");
+
+
+                    element.addEventListener("click", function(e) {
+                        e.preventDefault();
+
+                        const modalEl = document.querySelector(this.getAttribute("data-bs-stacked-modal"));
+
+                        if (modalEl) {
+                            const modal = new bootstrap.Modal(modalEl);
+                            modal.show(element);
+                        }
+                    });
+                });
+            }
+
+
+
+ total = 0;
+
+                $('.montant-input').each(function () {
+                    $ligne = $(this);
+
+                    total = total + parseInt($ligne.val().replaceAll(' ', ''));
+                    //total = +$ligne.val().replaceAll(' ', '');
+                });
+
+               
+                $('.total-saisi').text(setValue(total));
+
+
+        $(function () {
+            
+            init_select2('select');
+             $('.no-auto').each(function () {
+                const $this = $(this);
+                const $id = $('#' + $this.attr('id'));
+                init_date_picker($id,  'down', (start, e) => {
+                    //$this.val(start.format('DD/MM/YYYY'));
+                }, null, null, false);
+
+                $id.on('apply.daterangepicker', function (ev, picker) {
+                    $(this).val(picker.startDate.format('DD/MM/YYYY'));
+                });
+            });
+
+
+
+           
+            const $container = $('.row-container');
+
+            var index = $container.find('.row-colonne').length;
+
+            const $addLink = $('.add-ligne');
+
+        
+            $addLink.click(function (e) {
+
+                addLine($container);
+
+                
+
+  $('.montant-input').on('update-value',  (e, val, element)  => {
+                const $this = $(this);
+    
+                    total = 0;
+
+                $('.montant-input').each(function () {
+                    $ligne = $(this);
+
+                    total = total + parseInt($ligne.val().replaceAll(' ', ''));
+                    //total = +$ligne.val().replaceAll(' ', '');
+                });
+
+               
+                $('.total-saisi').text(setValue(total));
+                
+            });
+           
+
+
+                e.preventDefault(); // évite qu'un # apparaisse dans l'URL
+            });
+        // On ajoute un premier champ automatiquement s'il n'en existe pas déjà un (cas d'une nouvelle annonce par exemple).
+        /*if (index == 0) {
+                addimputation($container);
+                } else {*/
+            if (index > 0) {
+                $container.children('.row-colonne').each(function () {
+                    const $this = $(this);
+                    addDeleteLink($this);
+                    $this.find("select").each(function () {
+                        const $this = $(this);
+                        init_select2($this, null, '#modal-lg');
+                    });
+                });
+            }
+
+        // La fonction qui ajoute un formulaire Categorie
+            function addLine($container) {
+            // Dans le contenu de l'attribut « data-prototype », on remplace :
+            // - le texte "__name__label__" qu'il contient par le label du champ
+            // - le texte "__name__" qu'il contient par le numéro du champ
+                var $prototype = $($(".proto-container").attr('data-prototype').replace(/__name__label__/g, 'Ligne ' + (
+                index + 1)).replace(/__name__/g, index));
+                // On ajoute au prototype un lien pour pouvoir supprimer la prestation
+                addDeleteLink($prototype);
+                // On ajoute le prototype modifié à la fin de la balise <div>
+                $container.append($prototype);
+
+                $prototype.find("select").each(function () {
+                const $this = $(this);
+                    init_select2($this, null, '#modal-lg');
+                });
+
+                $prototype.find('.field-matiere').css('display', 'block');
+
+            
+                index++;
+
+                  $('.no-auto').each(function () {
+           const $this = $(this);
+           const $id = $('#' + $this.attr('id'));
+           init_date_picker($id,  'down', (start, e) => {
+               //$this.val(start.format('DD/MM/YYYY'));
+           }, null, null, null);
+
+           $id.on('apply.daterangepicker', function (ev, picker) {
+               $(this).val(picker.startDate.format('DD/MM/YYYY'));
+           });
+       });
+
+            }
+
+            function addDeleteLink($prototype) {
+                // Création du lien
+                let $deleteLink = $('<a href="#" class="btn btn-danger btn-xs"><span class="bi bi-trash"></span></a>');
+                // Ajout du lien
+                if ($prototype.find('.del-col').find('.btn-danger').length == 0) {
+                    $prototype.find(".del-col").append($deleteLink);
+                } else {
+                    $deleteLink = $prototype.find('.del-col').find('.btn-danger');
+                }
+                
+                // Ajout du listener sur le clic du lien
+                $deleteLink.click(function (e) {
+                    const $parent = $(this).closest('.row-colonne');
+                    $parent.remove();
+
+                    if (index > 0) {
+                        index -= 1;
+                    }
+
+                    e.preventDefault(); // évite qu'un # apparaisse dans l'URL
+                });
+            }
+
+        });
+       
+    </script>
+{% endblock %}

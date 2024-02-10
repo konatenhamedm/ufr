@@ -61,6 +61,11 @@ services:
         tags:
             - { name: knp_menu.menu_builder, method: createMainMenu, alias: direction }
 
+    App\Menu\ScolariteMenuBuilder:
+        arguments: ["@knp_menu.factory"]
+        tags:
+            - { name: knp_menu.menu_builder, method: createMainMenu, alias: scolarite }
+
     App\Menu\InscriptionMenuBuilder:
         arguments: [ "@knp_menu.factory" ]
         tags:

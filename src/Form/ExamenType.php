@@ -31,7 +31,7 @@ class ExamenType extends AbstractType
                 'required' => false,
                 'placeholder' => '----',
                 'label_attr' => ['class' => 'label-required'],
-                'choice_label' => 'libelle',
+                'choice_label' => 'getFullLibelleSigle',
                 'label' => 'Niveau',
                 'attr' => ['class' => 'has-select2']
             ])
@@ -45,11 +45,10 @@ class ExamenType extends AbstractType
                     'allow_add'     => true,
                     'allow_delete'  => true,
                     'by_reference'  => false,
-                    
+
                     'entry_options' => ['label' => false],
                 ]
-            )
-        ;
+            );
     }
 
     public function configureOptions(OptionsResolver $resolver): void

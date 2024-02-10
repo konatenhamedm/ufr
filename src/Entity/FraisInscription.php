@@ -25,12 +25,16 @@ class FraisInscription
     #[ORM\Column(type: Types::DECIMAL, precision: 6, scale: '0')]
     private ?string $montant = null;
 
-    #[ORM\ManyToOne(inversedBy: 'fraisInscriptions')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Inscription $inscription = null;
 
     #[ORM\OneToMany(mappedBy: 'fraisInscription', targetEntity: Versement::class)]
     private Collection $versements;
+
+
+
+
+    #[ORM\ManyToOne(inversedBy: 'fraisInscriptions')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Inscription $inscription = null;
 
     public function __construct()
     {
@@ -66,7 +70,7 @@ class FraisInscription
         return $this;
     }
 
-    public function getInscription(): ?Inscription
+    /*     public function getInscription(): ?Inscription
     {
         return $this->inscription;
     }
@@ -77,7 +81,7 @@ class FraisInscription
 
         return $this;
     }
-
+ */
     /**
      * @return Collection<int, Versement>
      */
@@ -128,5 +132,17 @@ class FraisInscription
     public function getLibelle()
     {
         return $this->getTypeFrais()->getLibelle();
+    }
+
+    public function getInscription(): ?Inscription
+    {
+        return $this->inscription;
+    }
+
+    public function setInscription(?Inscription $inscription): static
+    {
+        $this->inscription = $inscription;
+
+        return $this;
     }
 }

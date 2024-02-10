@@ -19,14 +19,15 @@ class Document
     #[ORM\JoinColumn(nullable: true)]
     private ?Fichier $fichier = null;
 
-    #[ORM\Column(length: 100,nullable: true)]
+    #[ORM\Column(length: 100, nullable: true)]
     private ?string $description = null;
 
     #[ORM\ManyToOne(inversedBy: 'documents')]
-    #[ORM\JoinColumn(nullable: false)]
+    /* #[ORM\JoinColumn(nullable: false)] */
     private ?Personne $personne = null;
 
-    public function __construct(){
+    public function __construct()
+    {
         $this->description = "document";
     }
 
@@ -43,7 +44,7 @@ class Document
         return $this->fichier;
     }
 
-    public function setFichier(?Fichier $fichier): static
+    public function setFichier(?Fichier $fichier): self
     {
         $this->fichier = $fichier;
 
@@ -74,7 +75,7 @@ class Document
         return $this;
     }
 
-    public function getTypeDocument(): ?TypeDocument
+    /* public function getTypeDocument(): ?TypeDocument
     {
         return $this->typeDocument;
     }
@@ -84,7 +85,7 @@ class Document
         $this->typeDocument = $typeDocument;
 
         return $this;
-    }
+    } */
 
     public function getLibelle(): ?string
     {

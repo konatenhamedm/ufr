@@ -1,6 +1,9 @@
 {% extends 'base-layout.html.twig' %}
 
 {% block title %}Liste des utilisateurs{% endblock %}
+ {# {% from '_macros/macro_document.html.twig' import prototype_ligne_colonne_document %} #}
+  {% from '_macros/macro_document.html.twig' import prototype_ligne_colonne_information %}
+
    {% from '_macros/macro_cursus_universitaire.html.twig' import prototype_ligne_colonne %}
    {% from '_macros/macro_cursus_professionnel.html.twig' import prototype_ligne_colonne_professionnel %}
    {% from '_macros/macro_cursus_stage.html.twig' import prototype_ligne_colonne_stage %}
@@ -29,9 +32,12 @@
                     <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_2">VOS CONTACTS</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_3">INFORMATIONS PERSONNELS</a>
+                    <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_3">INFORMATIONS PERSONNELLES</a>
                 </li> <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_4">VOTRES PARCOURS</a>
+                    <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_4">VOTRE PARCOURS</a>
+                </li>
+                </li> <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_5">MES DOCUMENTS</a>
                 </li>
             </ul>
 
@@ -87,25 +93,37 @@
                     <div class="row mb-4">
                         <h6>Votre cursus universitaire</h6>
                     </div>
-                   <br>
+                   
 
                         {{ prototype_ligne_colonne(form) }}
 
-
+<br>
                     <div class="row mb-4">
                         <h6>Votre cursus professionnel</h6>
                     </div>
-                    <br>
-
                     {{ prototype_ligne_colonne_professionnel(form) }}
-
+<br>
                     <div class="row mb-4">
                         <h6>Vos stages éffectués</h6>
                     </div>
-                    <br>
+                  
 
                     {{ prototype_ligne_colonne_stage(form) }}
                     <br>
+
+                </div>
+                
+                <div class="tab-pane fade" id="kt_tab_pane_5" role="tabpanel">
+                     <div class="row mb-4">
+                        <h6>Mes documents</h6>
+                     </div>
+                    <br>
+
+                     {{ prototype_ligne_colonne_information(form) }}
+                    <br>
+                   
+
+    
 
                 </div>
 
@@ -114,9 +132,12 @@
 
             <div class="row">
                 <div class="col-md-8"><button type="button" class="btn btn-default btn-sm" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-main  btn-sm  btn-ajax">
-                        <span class="spinner-border d-none  spinner-ajax spinner-border-sm" role="status" aria-hidden="true"></span>
-                        Valider</button></div>
+                     {{ form_widget(form.save) }}
+                        {% if etudiant.etat =="pas_complet" %}
+                        
+                        {{ form_widget(form.valider) }}
+                        {% endif %}
+                        </div>
                 <div class="col-md-4">
 
                 </div>
@@ -136,7 +157,24 @@
 <script src="{{ asset('assets/parcours/universitaitre.js') }}"></script>
 <script src="{{ asset('assets/parcours/professionnel.js') }}"></script>
 <script src="{{ asset('assets/parcours/stage.js') }}"></script>
+<script src="{{ asset('assets/parcours/document.js') }}"></script>
     <script>
+     const etat = "{{etudiant.etat}}";
+
+     if(etat == "pas_complet"){
+         Swal.fire({
+        text: `Bienvenu (e) dans votre espace étudiant. Veuillez renseigner vos informations personnelles et les soumettre à validation`,
+        icon: "warning",
+        buttonsStyling: false,
+        confirmButtonText: "ok",
+        customClass: {
+            confirmButton: "btn btn-success"
+        }
+    });
+
+     }
+
+
         $('.no-auto').each(function () {
             const $this = $(this);
             const $id = $('#' + $this.attr('id'));

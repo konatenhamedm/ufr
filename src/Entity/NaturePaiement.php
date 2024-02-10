@@ -34,9 +34,13 @@ class NaturePaiement
     #[ORM\OneToMany(mappedBy: 'modePaiement', targetEntity: InfoPreinscription::class)]
     private Collection $infoPreinscriptions;
 
+    #[ORM\OneToMany(mappedBy: 'modePaiement', targetEntity: InfoInscription::class)]
+    private Collection $infoInscriptions;
+
     public function __construct()
     {
         $this->infoPreinscriptions = new ArrayCollection();
+        $this->infoInscriptions = new ArrayCollection();
     }
     public function getId(): ?int
     {
@@ -103,6 +107,36 @@ class NaturePaiement
             // set the owning side to null (unless already changed)
             if ($infoPreinscription->getModePaiement() === $this) {
                 $infoPreinscription->setModePaiement(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, InfoInscription>
+     */
+    public function getInfoInscriptions(): Collection
+    {
+        return $this->infoInscriptions;
+    }
+
+    public function addInfoInscription(InfoInscription $infoInscription): static
+    {
+        if (!$this->infoInscriptions->contains($infoInscription)) {
+            $this->infoInscriptions->add($infoInscription);
+            $infoInscription->setModePaiement($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInfoInscription(InfoInscription $infoInscription): static
+    {
+        if ($this->infoInscriptions->removeElement($infoInscription)) {
+            // set the owning side to null (unless already changed)
+            if ($infoInscription->getModePaiement() === $this) {
+                $infoInscription->setModePaiement(null);
             }
         }
 

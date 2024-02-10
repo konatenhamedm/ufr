@@ -36,6 +36,7 @@ class DirectionMenuBuilder
         }
 
         if (isset($menu[self::MODULE_NAME])) {
+            $menu->addChild('examen.index', ['route' => 'app_direction_examen_index', 'label' => 'EXAMENS'])->setExtra('icon', 'bi bi-gear');
             $menu->addChild('deliberation.index', ['route' => 'app_direction_deliberation_index', 'label' => 'GESTION DE EXAMENS'])->setExtra('icon', 'bi bi-gear');
         }
 

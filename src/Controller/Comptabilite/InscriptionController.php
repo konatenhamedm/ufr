@@ -40,7 +40,7 @@ class InscriptionController extends AbstractController
     #[Route('/', name: 'app_comptabilite_inscription_index',  methods: ['GET', 'POST'], options: ['expose' => true])]
     public function index(Request $request, DataTableFactory $dataTableFactory, UserInterface $user): Response
     {
-
+        //dd('juj')
         $niveau = $request->query->get('niveau');
         $caissiere = $request->query->get('caissiere');
         $dateDebut = $request->query->get('dateDebut');
@@ -125,7 +125,7 @@ class InscriptionController extends AbstractController
                     $qb->select(['p', 'niveau', 'filiere', 'etudiant', 'info,ca'])
                         ->from(Preinscription::class, 'p')
                         ->join('p.niveau', 'niveau')
-                        ->join('p.caissiere', 'ca')
+                        ->leftJoin('p.caissiere', 'ca')
                         ->join('niveau.filiere', 'filiere')
                         ->join('p.etudiant', 'etudiant')
                         ->leftJoin('p.infoPreinscription', 'info')
@@ -290,8 +290,10 @@ class InscriptionController extends AbstractController
             'fontDir' => [
                 $this->getParameter('font_dir') . '/arial',
                 $this->getParameter('font_dir') . '/trebuchet',
-            ]
-        ], true, "", $imgFiligrame);
+            ],
+            'watermarkImg' => $imgFiligrame,
+            'entreprise' => ''
+        ], true);
         //return $this->renderForm("stock/sortie/imprime.html.twig");
 
     }
@@ -336,7 +338,6 @@ class InscriptionController extends AbstractController
         $imgFiligrame = "uploads/" . 'media_etudiant' . "/" . 'lg.jpeg';
         return $this->renderPdf("site/liste.html.twig", [
             'data' => $preinscriptions,
-            'niveau' => $_SESSION['token'],
             'total_payer' => $totalPayer,
             'total_impaye' => $totalImpaye
             //'data_info'=>$infoPreinscriptionRepository->findOneByPreinscription($preinscription)
@@ -350,8 +351,10 @@ class InscriptionController extends AbstractController
             'fontDir' => [
                 $this->getParameter('font_dir') . '/arial',
                 $this->getParameter('font_dir') . '/trebuchet',
-            ]
-        ], true, "", $imgFiligrame);
+            ],
+            'watermarkImg' => $imgFiligrame,
+            'entreprise' => ''
+        ], true);
         //return $this->renderForm("stock/sortie/imprime.html.twig");
 
     }

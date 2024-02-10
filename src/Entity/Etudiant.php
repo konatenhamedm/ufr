@@ -83,6 +83,9 @@ class Etudiant extends Personne
     #[ORM\ManyToOne(inversedBy: 'etudiants')]
     private ?Pays $pays = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $etat = null;
+
 
     public function __construct()
     {
@@ -121,7 +124,7 @@ class Etudiant extends Personne
         return $this;
     }
 
-   
+
     public function getFiliere(): ?Filiere
     {
         return $this->filiere;
@@ -172,7 +175,7 @@ class Etudiant extends Personne
         return $this->inscriptions;
     }
 
-    public function addInscription(Inscription $inscription): static
+    /*    public function addInscription(Inscription $inscription): static
     {
         if (!$this->inscriptions->contains($inscription)) {
             $this->inscriptions->add($inscription);
@@ -192,7 +195,7 @@ class Etudiant extends Personne
         }
 
         return $this;
-    }
+    } */
 
     public function getVille(): ?string
     {
@@ -424,5 +427,15 @@ class Etudiant extends Personne
         return $this;
     }
 
+    public function getEtat(): ?string
+    {
+        return $this->etat;
+    }
 
+    public function setEtat(string $etat): static
+    {
+        $this->etat = $etat;
+
+        return $this;
+    }
 }

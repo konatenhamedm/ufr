@@ -30,6 +30,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Workflow\Registry;
 
 #[Route('/comptabilite/niveau/etudiant')]
@@ -54,15 +55,17 @@ class NiveauEtudiantController extends AbstractController
         $this->utilisateur = $security->getUser();
     }
 
-    #[Route('/{etat}', name: 'app_comptabilite_niveau_etudiant_preinscription_index', methods: ['GET', 'POST'])]
-    public function indexPreinscription(Request $request, DataTableFactory $dataTableFactory, $etat, UtilisateurGroupeRepository $utilisateurGroupeRepository): Response
+    #[Route('/{etat}/{id}', name: 'app_comptabilite_niveau_etudiant_preinscription_suivi_formation_index', methods: ['GET', 'POST'])]
+    public function indexFormation(Request $request, DataTableFactory $dataTableFactory, $etat, $id, UtilisateurGroupeRepository $utilisateurGroupeRepository): Response
     {
-        //dd('dddd');
+        // dd($etat);
         $titre = '';
         if ($etat == "attente_paiement") {
             $titre = "Liste des préinscriptions en attente de finalisation";
         } elseif ($etat == "valider") {
             $titre = "Liste des préinscriptions payées";
+        } elseif ($etat == "attente_validation") {
+            $titre = "Liste des préinscriptions en attente de validation";
         } else {
             $titre = "Liste des préinscriptions en attente de confirmation";
         }
@@ -71,15 +74,17 @@ class NiveauEtudiantController extends AbstractController
             $table = $dataTableFactory->create()
                 //->add('nom', TextColumn::class, ['field' => 'etudiant.getNomComplet', 'label' => 'Nom et Prénoms'])
                 ->add('code', TextColumn::class, ['label' => 'Code'])
-                ->add('nom', TextColumn::class, ['label' => 'Nom et Prénoms', 'field' => 'etudiant.getNomComplet'])
-                ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date de demande', 'format' => 'd-m-Y'])
+                ->add('etudiant', TextColumn::class, ['label' => 'Nom et Prénoms', 'render' => function ($value, Preinscription $preinscription) {
+                    return   $preinscription->getEtudiant()->getNomComplet();
+                }])
+                ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date de demande', 'format' => 'd-m-Y', 'searchable' => false])
                 ->add('filiere', TextColumn::class, ['label' => 'Filiere', 'field' => 'filiere.libelle'])
                 /*   ->add('niveau', TextColumn::class, ['label' => 'Niveau', 'field' => 'niveau.libelle']) */
                 /* ->add('caissiere', TextColumn::class, ['field' => 'c.getNomComplet', 'label' => 'Caissière ']) */
                 ->add('montant', NumberFormatColumn::class, ['label' => 'Mnt. Préinscr.', 'field' => 'filiere.montantPreinscription'])
                 ->createAdapter(ORMAdapter::class, [
                     'entity' => Preinscription::class,
-                    'query' => function (QueryBuilder $qb) use ($etat, $utilisateurGroupeRepository) {
+                    'query' => function (QueryBuilder $qb) use ($etat, $utilisateurGroupeRepository, $id) {
                         $qb->select('e, filiere, etudiant,niveau')
                             ->from(Preinscription::class, 'e')
                             ->join('e.etudiant', 'etudiant')
@@ -88,27 +93,35 @@ class NiveauEtudiantController extends AbstractController
                             ->join('e.niveau', 'niveau')
                             ->join('niveau.filiere', 'filiere')
 
+                            ->andWhere('e.id = :id')
                             ->andWhere('e.etat = :statut')
+                            ->setParameter('id', $id)
                             ->setParameter('statut', $etat);
 
                         if ($utilisateurGroupeRepository->findOneBy(array('utilisateur' => $this->utilisateur))->getGroupe()->getLibelle() == "Etudiants") {
                             $qb->andWhere('etudiant.id = :etudiant')
                                 ->setParameter('etudiant', $this->user->getId());
+                        } else {
+                            $qb
+                                ->andWhere('etudiant.etat = :etat')
+                                ->setParameter('etat', 'complete');
                         }
                     }
                 ])
-                ->setName('dt_app_comptabilite_niveau_etudiant_preinscription' . $etat);
+                ->setName('dt_app_comptabilite_niveau_etudiant_preinscription_suivi_formation_' . $etat);
         } else {
             $table = $dataTableFactory->create()
                 ->add('code', TextColumn::class, ['label' => 'Code'])
-                ->add('nom', TextColumn::class, ['label' => 'Nom et Prénoms', 'field' => 'etudiant.getNomComplet'])
-                ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date de demande', 'format' => 'd-m-Y'])
+                ->add('etudiant', TextColumn::class, ['label' => 'Nom et Prénoms', 'render' => function ($value, Preinscription $preinscription) {
+                    return   $preinscription->getEtudiant()->getNomComplet();
+                }])
+                ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date de demande', 'format' => 'd-m-Y', 'searchable' => false])
                 ->add('filiere', TextColumn::class, ['label' => 'Filiere', 'field' => 'filiere.libelle'])
                 /*   ->add('niveau', TextColumn::class, ['label' => 'Niveau', 'field' => 'niveau.libelle']) */
                 ->add('montant', NumberFormatColumn::class, ['label' => 'Mnt. Préinscr.', 'field' => 'filiere.montantPreinscription'])
                 ->createAdapter(ORMAdapter::class, [
                     'entity' => Preinscription::class,
-                    'query' => function (QueryBuilder $qb) use ($etat, $utilisateurGroupeRepository) {
+                    'query' => function (QueryBuilder $qb) use ($etat, $utilisateurGroupeRepository, $id) {
                         $qb->select('e, filiere, etudiant,niveau')
                             ->from(Preinscription::class, 'e')
                             ->join('e.etudiant', 'etudiant')
@@ -116,16 +129,22 @@ class NiveauEtudiantController extends AbstractController
                             ->join('e.niveau', 'niveau')
                             ->join('niveau.filiere', 'filiere')
 
+                            ->andWhere('e.id = :id')
                             ->andWhere('e.etat = :statut')
+                            ->setParameter('id', $id)
                             ->setParameter('statut', $etat);
 
                         if ($utilisateurGroupeRepository->findOneBy(array('utilisateur' => $this->utilisateur))->getGroupe()->getLibelle() == "Etudiants") {
                             $qb->andWhere('etudiant.id = :etudiant')
                                 ->setParameter('etudiant', $this->user->getId());
+                        } else {
+                            $qb
+                                ->andWhere('etudiant.etat = :etat')
+                                ->setParameter('etat', 'complete');
                         }
                     }
                 ])
-                ->setName('dt_app_comptabilite_niveau_etudiant_preinscription' . $etat);
+                ->setName('dt_app_comptabilite_niveau_etudiant_preinscription_suivi_formation' . $etat . $id);
         }
 
 
@@ -133,6 +152,13 @@ class NiveauEtudiantController extends AbstractController
         $renders = [
             'edit' =>  new ActionRender(function () use ($etat) {
                 if ($etat == 'valider_non_paye') {
+                    return true;
+                } else {
+                    return false;
+                }
+            }),
+            'verification' =>  new ActionRender(function () use ($etat) {
+                if ($etat == 'attente_validation') {
                     return true;
                 } else {
                     return false;
@@ -155,12 +181,201 @@ class NiveauEtudiantController extends AbstractController
 
         if ($hasActions) {
             $table->add('id', TextColumn::class, [
-                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, NiveauEtudiant $context) use ($renders) {
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Preinscription $context) use ($renders) {
                     $options = [
                         'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
                         'target' => '#modal-lg',
 
                         'actions' => [
+                            'verification' => [
+                                'target' => '#modal-xl',
+                                'url' => $this->generateUrl('verification_validation_dossier', ['id' => $context->getEtudiant()->getId(), 'preinscription' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-pen',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['verification']
+                            ],
+                            'edit' => [
+                                'url' => $this->generateUrl('app_comptabilite_niveau_etudiant_payer', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-pen',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['edit']
+                            ],
+                            'delete' => [
+                                'target' => '#modal-small',
+                                'url' => $this->generateUrl('app_comptabilite_niveau_etudiant_delete', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-trash',
+                                'attrs' => ['class' => 'btn-danger'],
+                                'render' => $renders['delete']
+                            ]
+                        ]
+
+                    ];
+                    return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
+                }
+            ]);
+        }
+
+
+        $table->handleRequest($request);
+
+        if ($table->isCallback()) {
+            return $table->getResponse();
+        }
+
+
+        return $this->render('etudiant/preinscription/index_suivi_formation.html.twig', [
+            'datatable' => $table,
+            'etat' => $etat,
+            'id' => $id,
+            'titre' => $titre,
+        ]);
+    }
+
+
+
+    #[Route('/{etat}', name: 'app_comptabilite_niveau_etudiant_preinscription_index', methods: ['GET', 'POST'])]
+    public function indexPreinscription(Request $request, DataTableFactory $dataTableFactory, $etat, UtilisateurGroupeRepository $utilisateurGroupeRepository): Response
+    {
+        // dd($etat);
+        $titre = '';
+        if ($etat == "attente_paiement") {
+            $titre = "Liste des préinscriptions en attente de finalisation";
+        } elseif ($etat == "valider") {
+            $titre = "Liste des préinscriptions payées";
+        } elseif ($etat == "attente_validation") {
+            $titre = "Liste des préinscriptions en attente de validation";
+        } else {
+            $titre = "Liste des préinscriptions en attente de confirmation";
+        }
+
+        if ($etat == "valider_non_paye" || $etat == "valider_paye") {
+            $table = $dataTableFactory->create()
+                //->add('nom', TextColumn::class, ['field' => 'etudiant.getNomComplet', 'label' => 'Nom et Prénoms'])
+                ->add('code', TextColumn::class, ['label' => 'Code'])
+                ->add('etudiant', TextColumn::class, ['label' => 'Nom et Prénoms', 'render' => function ($value, Preinscription $preinscription) {
+                    return   $preinscription->getEtudiant()->getNomComplet();
+                }])
+                ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date de demande', 'format' => 'd-m-Y', 'searchable' => false])
+                ->add('filiere', TextColumn::class, ['label' => 'Filiere', 'field' => 'filiere.libelle'])
+                /*   ->add('niveau', TextColumn::class, ['label' => 'Niveau', 'field' => 'niveau.libelle']) */
+                /* ->add('caissiere', TextColumn::class, ['field' => 'c.getNomComplet', 'label' => 'Caissière ']) */
+                ->add('montant', NumberFormatColumn::class, ['label' => 'Mnt. Préinscr.', 'field' => 'filiere.montantPreinscription'])
+                ->createAdapter(ORMAdapter::class, [
+                    'entity' => Preinscription::class,
+                    'query' => function (QueryBuilder $qb) use ($etat, $utilisateurGroupeRepository) {
+                        $qb->select('e, filiere, etudiant,niveau')
+                            ->from(Preinscription::class, 'e')
+                            ->join('e.etudiant', 'etudiant')
+                            /*   ->join('e.filiere', 'filiere') */
+                            /*  ->leftJoin('e.caissiere', 'c') */
+                            ->join('e.niveau', 'niveau')
+                            ->join('niveau.filiere', 'filiere')
+
+                            ->andWhere('e.etat = :statut')
+                            ->setParameter('statut', $etat);
+
+                        if ($utilisateurGroupeRepository->findOneBy(array('utilisateur' => $this->utilisateur))->getGroupe()->getLibelle() == "Etudiants") {
+                            $qb->andWhere('etudiant.id = :etudiant')
+                                ->setParameter('etudiant', $this->user->getId());
+                        } else {
+                            $qb
+                                ->andWhere('etudiant.etat = :etat')
+                                ->setParameter('etat', 'complete');
+                        }
+                    }
+                ])
+                ->setName('dt_app_comptabilite_niveau_etudiant_preinscription' . $etat);
+        } else {
+            $table = $dataTableFactory->create()
+                ->add('code', TextColumn::class, ['label' => 'Code'])
+                ->add('etudiant', TextColumn::class, ['label' => 'Nom et Prénoms', 'render' => function ($value, Preinscription $preinscription) {
+                    return   $preinscription->getEtudiant()->getNomComplet();
+                }])
+                ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date de demande', 'format' => 'd-m-Y', 'searchable' => false])
+                ->add('filiere', TextColumn::class, ['label' => 'Filiere', 'field' => 'filiere.libelle'])
+                /*   ->add('niveau', TextColumn::class, ['label' => 'Niveau', 'field' => 'niveau.libelle']) */
+                ->add('montant', NumberFormatColumn::class, ['label' => 'Mnt. Préinscr.', 'field' => 'filiere.montantPreinscription'])
+                ->createAdapter(ORMAdapter::class, [
+                    'entity' => Preinscription::class,
+                    'query' => function (QueryBuilder $qb) use ($etat, $utilisateurGroupeRepository) {
+                        $qb->select('e, filiere, etudiant,niveau')
+                            ->from(Preinscription::class, 'e')
+                            ->join('e.etudiant', 'etudiant')
+                            /*   ->join('e.filiere', 'filiere') */
+                            ->join('e.niveau', 'niveau')
+                            ->join('niveau.filiere', 'filiere')
+
+                            ->andWhere('e.etat = :statut')
+                            ->setParameter('statut', $etat);
+
+                        if ($utilisateurGroupeRepository->findOneBy(array('utilisateur' => $this->utilisateur))->getGroupe()->getLibelle() == "Etudiants") {
+                            $qb->andWhere('etudiant.id = :etudiant')
+                                ->setParameter('etudiant', $this->user->getId());
+                        } else {
+                            $qb
+                                ->andWhere('etudiant.etat = :etat')
+                                ->setParameter('etat', 'complete');
+                        }
+                    }
+                ])
+                ->setName('dt_app_comptabilite_niveau_etudiant_preinscription' . $etat);
+        }
+
+
+
+        $renders = [
+            'edit' =>  new ActionRender(function () use ($etat) {
+                if ($etat == 'valider_non_paye') {
+                    return true;
+                } else {
+                    return false;
+                }
+            }),
+            'verification' =>  new ActionRender(function () use ($etat) {
+                if ($etat == 'attente_validation') {
+                    return true;
+                } else {
+                    return false;
+                }
+            }),
+            'delete' => new ActionRender(function () {
+                return false;
+            }),
+        ];
+
+
+        $hasActions = false;
+
+        foreach ($renders as $_ => $cb) {
+            if ($cb->execute()) {
+                $hasActions = true;
+                break;
+            }
+        }
+
+        if ($hasActions) {
+            $table->add('id', TextColumn::class, [
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Preinscription $context) use ($renders) {
+                    $options = [
+                        'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
+                        'target' => '#modal-lg',
+
+                        'actions' => [
+                            'verification' => [
+                                'target' => '#modal-xl',
+                                'url' => $this->generateUrl('verification_validation_dossier', ['id' => $context->getEtudiant()->getId(), 'preinscription' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-pen',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['verification']
+                            ],
                             'edit' => [
                                 'url' => $this->generateUrl('app_comptabilite_niveau_etudiant_payer', ['id' => $value]),
                                 'ajax' => true,
@@ -202,19 +417,24 @@ class NiveauEtudiantController extends AbstractController
     }
 
     #[Route('/', name: 'app_comptabilite_niveau_etudiant_index', methods: ['GET', 'POST'])]
-    public function index(Request $request, DataTableFactory $dataTableFactory): Response
+    public function index(Request $request, DataTableFactory $dataTableFactory, UserInterface $user): Response
     {
+        $ver = $this->isGranted('ROLE_ETUDIANT');
         $table = $dataTableFactory->create()
-            ->add('codePreinscription', TextColumn::class, ['field' => 'e.getCode', 'label' => 'Code Preinscription'])
-            ->add('nom', TextColumn::class, ['field' => 'etudiant.getNomComplet', 'label' => 'Nom et Prénoms'])
-            ->add('dateNaissance', DateTimeColumn::class, ['label' => 'Date de naissance', 'format' => 'd-m-Y', 'field' => 'etudiant.dateNaissance'])
+            ->add('code', TextColumn::class, ['label' => 'Code Preinscription'])
+            ->add('etudiant', TextColumn::class, ['label' => 'Nom et Prénoms', 'render' => function ($value, Preinscription $preinscription) {
+                return   $preinscription->getEtudiant()->getNomComplet();
+            }])
+            /* ->add('etudiant', TextColumn::class, ['field' => 'etudiant.nom', 'label' => 'Nom'])
+            ->add('prenoms', TextColumn::class, ['field' => 'etudiant.prenom', 'label' => 'Prénoms']) */
+            ->add('etudiant.dateNaissance', DateTimeColumn::class, ['label' => 'Date de naissance', 'format' => 'd-m-Y', "searchable" => false, 'field' => 'etudiant.dateNaissance'])
             ->add('filiere', TextColumn::class, ['label' => 'Filiere', 'field' => 'filiere.libelle'])
-            ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date pré-inscription', 'format' => 'd-m-Y',])
+            ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date pré-inscription', 'format' => 'd/m/Y', "searchable" => false,])
             /*   ->add('caissiere', TextColumn::class, ['field' => 'c.getNomComplet', 'label' => 'Caissière ']) */
             //->add('montantPreinscription', NumberFormatColumn::class, ['label' => 'Mnt. Préinscr.'])
             ->createAdapter(ORMAdapter::class, [
                 'entity' => Preinscription::class,
-                'query' => function (QueryBuilder $qb) {
+                'query' => function (QueryBuilder $qb) use ($user, $ver) {
                     $qb->select('e, filiere, etudiant,niveau,c')
                         ->from(Preinscription::class, 'e')
                         ->join('e.etudiant', 'etudiant')
@@ -223,16 +443,22 @@ class NiveauEtudiantController extends AbstractController
                         ->leftJoin('e.caissiere', 'c')
                         ->andWhere('e.etat = :statut')
                         ->setParameter('statut', 'attente_paiement');
+
+                    if ($this->isGranted('ROLE_ETUDIANT')) {
+                        $qb->andWhere('e.etudiant = :etudiant')
+                            ->setParameter('etudiant', $user->getPersonne());
+                    }
                 }
             ])
             ->setName('dt_app_comptabilite_niveau_etudiant');
-
+        // dd($this->isGranted('ROLE_ETUDIANT'));
         $renders = [
-            'edit' =>  new ActionRender(function () {
-                return true;
-            }),
+            'edit' => new ActionRender(fn () => $ver == false),
             'delete' => new ActionRender(function () {
                 return false;
+            }),
+            'show' => new ActionRender(function () {
+                return true;
             }),
         ];
 
@@ -261,6 +487,14 @@ class NiveauEtudiantController extends AbstractController
                                 'icon' => '%icon% bi bi-cash',
                                 'attrs' => ['class' => 'btn-warning'],
                                 'render' => $renders['edit']
+                            ],
+                            'show' => [
+                                'url' => $this->generateUrl('app_comptabilite_preinscription_show', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-eye',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['show']
                             ],
                             'delete' => [
                                 'target' => '#modal-small',
@@ -291,6 +525,118 @@ class NiveauEtudiantController extends AbstractController
             'datatable' => $table
         ]);
     }
+    #[Route('/suivi/formation/{id}/paiement', name: 'app_comptabilite_niveau_etudiant_formation_index', methods: ['GET', 'POST'])]
+    public function indexFormationSuivi(Request $request, DataTableFactory $dataTableFactory, UserInterface $user, $id): Response
+    {
+        $ver = $this->isGranted('ROLE_ETUDIANT');
+        $table = $dataTableFactory->create()
+            ->add('code', TextColumn::class, ['label' => 'Code Preinscription'])
+            ->add('etudiant', TextColumn::class, ['label' => 'Nom et Prénoms', 'render' => function ($value, Preinscription $preinscription) {
+                return   $preinscription->getEtudiant()->getNomComplet();
+            }])
+            /* ->add('etudiant', TextColumn::class, ['field' => 'etudiant.nom', 'label' => 'Nom'])
+            ->add('prenoms', TextColumn::class, ['field' => 'etudiant.prenom', 'label' => 'Prénoms']) */
+            ->add('etudiant.dateNaissance', DateTimeColumn::class, ['label' => 'Date de naissance', 'format' => 'd-m-Y', "searchable" => false, 'field' => 'etudiant.dateNaissance'])
+            ->add('filiere', TextColumn::class, ['label' => 'Filiere', 'field' => 'filiere.libelle'])
+            ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date pré-inscription', 'format' => 'd/m/Y', "searchable" => false,])
+            /*   ->add('caissiere', TextColumn::class, ['field' => 'c.getNomComplet', 'label' => 'Caissière ']) */
+            //->add('montantPreinscription', NumberFormatColumn::class, ['label' => 'Mnt. Préinscr.'])
+            ->createAdapter(ORMAdapter::class, [
+                'entity' => Preinscription::class,
+                'query' => function (QueryBuilder $qb) use ($user, $id) {
+                    $qb->select('e, filiere, etudiant,niveau,c')
+                        ->from(Preinscription::class, 'e')
+                        ->join('e.etudiant', 'etudiant')
+                        ->join('e.niveau', 'niveau')
+                        ->join('niveau.filiere', 'filiere')
+                        ->leftJoin('e.caissiere', 'c')
+                        ->andWhere('e.id = :id')
+                        ->andWhere('e.etat = :statut')
+                        ->setParameter('id', $id)
+                        ->setParameter('statut', 'attente_paiement');
+
+                    if ($this->isGranted('ROLE_ETUDIANT')) {
+                        $qb->andWhere('e.etudiant = :etudiant')
+                            ->setParameter('etudiant', $user->getPersonne());
+                    }
+                }
+            ])
+            ->setName('dt_app_comptabilite_niveau_etudiant_formation' . $id);
+        // dd($this->isGranted('ROLE_ETUDIANT'));
+        $renders = [
+            'edit' => new ActionRender(fn () => $ver == false),
+            'delete' => new ActionRender(function () {
+                return false;
+            }),
+            'show' => new ActionRender(function () {
+                return true;
+            }),
+        ];
+
+
+        $hasActions = false;
+
+        foreach ($renders as $_ => $cb) {
+            if ($cb->execute()) {
+                $hasActions = true;
+                break;
+            }
+        }
+
+        if ($hasActions) {
+            $table->add('id', TextColumn::class, [
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Preinscription $context) use ($renders) {
+                    $options = [
+                        'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
+                        'target' => '#modal-lg',
+
+                        'actions' => [
+                            'edit' => [
+                                'url' => $this->generateUrl('app_comptabilite_paiement_etudiant_edit', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-cash',
+                                'attrs' => ['class' => 'btn-warning'],
+                                'render' => $renders['edit']
+                            ],
+                            'show' => [
+                                'url' => $this->generateUrl('app_comptabilite_preinscription_show', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-eye',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['show']
+                            ],
+                            'delete' => [
+                                'target' => '#modal-small',
+                                'url' => $this->generateUrl('app_comptabilite_niveau_etudiant_delete', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-trash',
+                                'attrs' => ['class' => 'btn-danger'],
+                                'render' => $renders['delete']
+                            ]
+                        ]
+
+                    ];
+                    return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
+                }
+            ]);
+        }
+
+
+        $table->handleRequest($request);
+
+        if ($table->isCallback()) {
+            return $table->getResponse();
+        }
+
+
+        return $this->render('comptabilite/niveau_etudiant/index.html.twig', [
+            'datatable' => $table,
+            'id' => $id
+        ]);
+    }
 
     #[Route('/{etat}', name: 'app_comptabilite_niveau_etudiant_valider_index', methods: ['GET', 'POST'])]
     public function indexValider(Request $request, $etat, DataTableFactory $dataTableFactory, Security $security): Response
@@ -299,8 +645,10 @@ class NiveauEtudiantController extends AbstractController
 
         $table = $dataTableFactory->create()
             ->add('code', TextColumn::class, ['label' => 'Code'])
-            ->add('nom', TextColumn::class, ['field' => 'etudiant.getNomComplet', 'label' => 'Nom et Prénoms'])
-            ->add('dateNaissance', DateTimeColumn::class, ['label' => 'Date de naissance', 'format' => 'd-m-Y', 'field' => 'etudiant.dateNaissance'])
+            ->add('etudiant', NumberFormatColumn::class, ['label' => 'Nom et Prénoms', 'render' => function ($value, NiveauEtudiant $preinscription) {
+                return   $preinscription->getEtudiant()->getNomComplet();
+            }])
+            ->add('dateNaissance', DateTimeColumn::class, ['label' => 'Date de naissance', 'format' => 'd-m-Y', 'field' => 'etudiant.dateNaissance', 'searchable' => false])
             ->add('filiere', TextColumn::class, ['label' => 'Filiere', 'field' => 'filiere.libelle'])
             ->add('date', DateTimeColumn::class, ['label' => 'Date de demande', 'format' => 'd-m-Y',])
             ->add('dateValidation', DateTimeColumn::class, ['label' => 'Date de validation', 'format' => 'd-m-Y',])

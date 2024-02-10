@@ -141,6 +141,119 @@ class PreinscriptionController extends AbstractController
             'datatable' => $table
         ]);
     }
+    #[Route('/formation', name: 'app_comptabilite_preinscription_formation_index', methods: ['GET', 'POST'])]
+    public function indexFormation(Request $request, UserInterface $user, DataTableFactory $dataTableFactory): Response
+    {
+        $isEtudiant = $this->isGranted('ROLE_ETUDIANT');
+
+        $table = $dataTableFactory->create()
+            ->add('filiere', TextColumn::class, ['field' => 'filiere.libelle', 'label' => 'Filière'])
+            ->add('niveau', TextColumn::class, ['field' => 'niveau.libelle', 'label' => 'Niveau'])
+            ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date de la demande', 'format' => 'd-m-Y'])
+            ->add('etat', MapColumn::class, ['label' => 'Etat', 'map' => Preinscription::ETATS]);
+
+        if (!$isEtudiant) {
+            $table->add('nom', TextColumn::class, ['field' => 'etudiant.nom', 'visible' => false])
+                ->add('prenom', TextColumn::class, ['field' => 'etudiant.prenom', 'visible' => false])
+                ->add('nom_prenom', TextColumn::class, ['label' => 'Demandeur', 'render' => function ($value, Preinscription $preinscription) {
+                    return $preinscription->getEtudiant()->getNomComplet();
+                }]);
+        }
+
+        $table->createAdapter(ORMAdapter::class, [
+            'entity' => Preinscription::class,
+            'query' => function (QueryBuilder $qb) use ($user) {
+                $qb->select(['p', 'niveau', 'filiere', 'etudiant'])
+                    ->from(Preinscription::class, 'p')
+                    ->join('p.niveau', 'niveau')
+                    ->join('niveau.filiere', 'filiere')
+                    ->join('p.etudiant', 'etudiant');
+                if ($this->isGranted('ROLE_ETUDIANT')) {
+                    $qb->andWhere('p.etudiant = :etudiant')
+                        ->setParameter('etudiant', $user->getPersonne());
+                }
+            }
+        ])
+            ->setName('dt_app_comptabilite_preinscription_formation_');
+
+        $renders = [
+            'show' =>  new ActionRender(function () {
+                return true;
+            }),
+            'suivi' =>  new ActionRender(function () {
+                return true;
+            }),
+            'edit' =>  new ActionRender(function () {
+                return true;
+            }),
+            'delete' => new ActionRender(function () {
+                return true;
+            }),
+        ];
+
+
+        $hasActions = false;
+
+        foreach ($renders as $_ => $cb) {
+            if ($cb->execute()) {
+                $hasActions = true;
+                break;
+            }
+        }
+
+        if ($hasActions) {
+            $table->add('id', TextColumn::class, [
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Preinscription $context) use ($renders) {
+                    $options = [
+                        'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
+                        'target' => '#modal-lg',
+
+                        'actions' => [
+                            'suivi' => [
+                                'url' => $this->generateUrl('app_home_timeline_etudiant_formation_preinscription_index', ['id' => $value]),
+                                'ajax' => false,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-folder',
+                                'attrs' => ['class' => 'btn-primary'],
+                                'render' => $renders['suivi']
+                            ],
+                            'show' => [
+                                'url' => $this->generateUrl('app_comptabilite_preinscription_show', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-eye',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['show']
+                            ],
+                            /* 'delete' => [
+                            'target' => '#modal-small',
+                            'url' => $this->generateUrl('app_comptabilite_preinscription_delete', ['id' => $value]),
+                            'ajax' => true,
+                            'stacked' => false,
+                            'icon' => '%icon% bi bi-trash',
+                            'attrs' => ['class' => 'btn-danger'],
+                            'render' => $renders['delete']
+                        ]*/
+                        ]
+
+                    ];
+                    return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
+                }
+            ]);
+        }
+
+
+        $table->handleRequest($request);
+
+        if ($table->isCallback()) {
+            return $table->getResponse();
+        }
+
+
+        return $this->render('comptabilite/preinscription/index_formation.html.twig', [
+            'datatable' => $table
+        ]);
+    }
 
 
 
@@ -180,7 +293,6 @@ class PreinscriptionController extends AbstractController
                     ->join('p.niveau', 'niveau')
                     ->join('niveau.filiere', 'filiere')
                     ->join('p.etudiant', 'etudiant')
-                    ->leftJoin('p.infoPreinscription', 'info')
                     ->leftJoin('p.caissiere', 'c')
                     ->andWhere('p.etat = :etat')
                     ->setParameter('etat', $etat);
@@ -383,13 +495,15 @@ class PreinscriptionController extends AbstractController
                 $preinscription->setEtudiant($this->getUser()->getPersonne());
                 $preinscription->setUtilisateur($this->getUser());
                 $preinscription->setCode($this->numero($niveauRepository->find($form->get('niveau')->getData()->getId())->getCode()));
-                $preinscription->setEtat('attente_paiement');
+                $preinscription->setEtat('attente_validation');
+                $preinscription->setEtatDeliberation('pas_deliberer');
                 $entityManager->persist($preinscription);
                 $entityManager->flush();
 
                 $data = true;
                 $showAlert = true;
                 $message       = sprintf('Votre demande pour le niveau [%s] a été enregistrée. Elle sera traitée par nos services pour la suite de votre parcours', $preinscription->getNiveau()->getLibelle());
+
                 $statut = 1;
                 $this->addFlash('success', $message);
             } else {

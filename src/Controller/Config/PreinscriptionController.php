@@ -22,22 +22,22 @@ class PreinscriptionController extends AbstractController
         $module = $request->query->get('module');
         $modules = [
             [
-                'label' => 'En attente de finalisation ',
+                'label' => 'En attente de traitement ',
                 'icon' => 'bi bi-list',
                 'module' => 'general',
-                'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_preinscription_index', ['etat' => 'attente_paiement'])
+                'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_preinscription_index', ['etat' => 'attente_validation'])
             ],
             [
-                'label' => 'Finalisées',
+                'label' => 'En attente de paiement',
                 'icon' => 'bi bi-list',
                 'module' => 'gestion',
-                'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_preinscription_index', ['etat' => 'valide'])
+                'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_index')
             ],
             [
-                'label' => 'En attente confirmation',
+                'label' => 'En attente de complement',
                 'icon' => 'bi bi-list',
                 'module' => 'gestion',
-                'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_preinscription_index', ['etat' => 'paiement_confirmation'])
+                'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_preinscription_index', ['etat' => 'attente_informations'])
             ],
         ];
 
@@ -61,6 +61,52 @@ class PreinscriptionController extends AbstractController
             'breadcrumb' => $breadcrumb
         ]);
     }
+    #[Route(path: '/suivi/{id}', name: 'app_config_preinscription_suivi_formation_index', methods: ['GET', 'POST'])]
+    #[RoleMethod(title: 'Gestion des Paramètres', as: 'index')]
+    public function indexSuivi(Request $request, Breadcrumb $breadcrumb, $id): Response
+    {
+        $module = $request->query->get('module');
+        $modules = [
+            [
+                'label' => 'En attente de traitement ',
+                'icon' => 'bi bi-list',
+                'module' => 'general',
+                'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_preinscription_suivi_formation_index', ['etat' => 'attente_validation', 'id' => $id])
+            ],
+            [
+                'label' => 'En attente de paiement',
+                'icon' => 'bi bi-list',
+                'module' => 'gestion',
+                'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_index', ['id' => $id])
+            ],
+            [
+                'label' => 'En attente de complement',
+                'icon' => 'bi bi-list',
+                'module' => 'gestion',
+                'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_preinscription_suivi_formation_index', ['etat' => 'attente_informations', 'id' => $id])
+            ],
+        ];
+
+        $breadcrumb->addItem([
+            [
+                'route' => 'app_default',
+                'label' => 'Tableau de bord'
+            ],
+            [
+                'label' => 'Paramètres'
+            ]
+        ]);
+
+
+        if ($module) {
+            $modules = array_filter($modules, fn ($_module) => $_module['module'] == $module);
+        }
+
+        return $this->render('config/preinscription/index_suivi_formation.html.twig', [
+            'modules' => $modules,
+            'breadcrumb' => $breadcrumb
+        ]);
+    }
 
 
     #[Route(path: '/{module}', name: 'app_config_preinscription_ls', methods: ['GET', 'POST'])]
@@ -69,10 +115,7 @@ class PreinscriptionController extends AbstractController
         /**
          * @todo: A déplacer dans un service
          */
-        $configs = [
-
-        ]
-        ;
+        $configs = [];
 
 
         return $this->render('config/preinscription/liste.html.twig', ['links' => $configs[$module] ?? []]);

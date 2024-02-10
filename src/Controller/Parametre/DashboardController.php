@@ -80,9 +80,9 @@ class DashboardController extends AbstractController
                     'id' => 'param_genre',
                     'href' => $this->generateUrl('app_parametre_genre_index')
                 ],
-            ], 
+            ],
             'gestion' => [
-                [  
+                [
                     'label' => 'UFR',
                     'id' => 'param_ufr',
                     'href' => $this->generateUrl('app_parametre_unite_formation_index')
@@ -112,7 +112,7 @@ class DashboardController extends AbstractController
                     'id' => 'param_type_matiere',
                     'href' => $this->generateUrl('app_parametre_type_matiere_index')
                 ],
-                
+
                 [
                     'label' => 'Mentions',
                     'id' => 'param_mention',
@@ -122,16 +122,15 @@ class DashboardController extends AbstractController
                     'label' => 'Matières',
                     'id' => 'param_matiere',
                     'href' => $this->generateUrl('app_parametre_matiere_index')
-                ],
+                ]/* ,
                 [
                     'label' => 'Examens',
                     'id' => 'param_examen',
                     'href' => $this->generateUrl('app_direction_examen_index')
-                ],
+                ], */
 
-            ], 
-        ]
-        ;
+            ],
+        ];
 
 
         return $this->render('parametre/dashboard/liste.html.twig', ['links' => $parametres[$module] ?? []]);

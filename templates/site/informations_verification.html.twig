@@ -1,0 +1,193 @@
+{% block page_content %}
+   {% from '_macros/macro_document.html.twig' import prototype_ligne_colonne_document %}
+   {% from '_macros/macro_cursus_universitaire.html.twig' import prototype_ligne_colonne %}
+   {% from '_macros/macro_cursus_professionnel.html.twig' import prototype_ligne_colonne_professionnel %}
+   {% from '_macros/macro_cursus_stage.html.twig' import prototype_ligne_colonne_stage %}
+    {% form_theme form 'widget/fields-block.html.twig' %}
+    <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Informations etudiant</h5>
+        <div class="btn btn-icon btn-sm  ms-2" data-bs-dismiss="modal" aria-label="Close">
+            <span class="svg-icon svg-icon-2x text-white">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor"></rect>
+					<rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor"></rect>
+				</svg>
+            </span>
+        </div>
+    </div>
+    {{ form_start(form, {'attr': {'role':'form', 'class': 'form'}}) }}
+    <div class="modal-body">
+        {{ include('_includes/ajax/response.html.twig') }}
+           <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#kt_tab_pane_1">ETAT CIVIL</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_2">MES CONTACTS</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_3">INFORMATIONS PERSONNELLES</a>
+                </li> <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_4">MON PARCOURS</a>
+                </li>
+                </li> <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_5">MES DOCUMENTS</a>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="kt_tab_pane_1" role="tabpanel">
+                    <div class="row">
+                        <div class="form-group col-md-12 mb-2">{{ form_row(form.nom) }}</div>
+                        <div class="form-group  col-md-12 mb-2">{{ form_row(form.prenom) }}</div>
+                        <div class="form-group  col-md-12 mb-2">{{ form_row(form.dateNaissance) }}</div>
+                        <div class="form-group  col-md-12 mb-2">{{ form_row(form.lieuNaissance) }}</div>
+                        <div class="form-group  col-md-12 mb-2">{{ form_row(form.genre) }}</div>
+                        <div class="form-group  col-md-12 mb-2">{{ form_row(form.civilite) }}</div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="kt_tab_pane_2" role="tabpanel">
+                    <div class="col-md-12">{{ form_row(form.adresse) }}</div>
+                    <div class="col-md-12">{{ form_row(form.ville) }}</div>
+                    <div class="col-md-12">{{ form_row(form.pays) }}</div>
+                    <div class="col-md-12">{{ form_row(form.boite) }}</div>
+                    <div class="col-md-12">{{ form_row(form.contact) }}</div>
+
+                </div>
+                <div class="tab-pane fade" id="kt_tab_pane_3" role="tabpanel">
+                    <div class="row mb-7">
+                        <h4>COMMENT ALLEZ VOUS FINANCER VOS ÉTUDES ?</h4>
+                    </div>
+                    <div class="row mb-4 ">
+                        <div class="form-group col-md-4 mb-7">{{ form_row(form.employeur) }}</div>
+                        <div class="form-group  col-md-4 mb-7">{{ form_row(form.bailleur) }}</div>
+                        <div class="form-group  col-md-4 mb-1">{{ form_row(form.vousMeme) }}</div>
+                        <div class="form-group  col-md-4 ">{{ form_row(form.parent) }}</div>
+                        <div class="form-group  col-md-4 ">Autres  précisez ici :</div>
+                        <div class="form-group  col-md-4 mb-2">{{ form_row(form.autre,{'attr':{'placeholder':'Saisissez vos informations'}}) }}</div>
+
+                    </div>
+                    <div class="row mb-7">
+                        <h4>COMMENT AVEZ VOUS APPRIS L'EXISTENCE DE LA FILIERE DE VOTRE CHOIX A L'UFR SEG ?</h4>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-4 mb-7">{{ form_row(form.radio) }}</div>
+                        <div class="form-group  col-md-4 mb-7">{{ form_row(form.ministere) }}</div>
+                        <div class="form-group  col-md-4 mb-7">{{ form_row(form.professeur) }}</div>
+                        <div class="form-group  col-md-4 mb-7">{{ form_row(form.presse) }}</div>
+                        <div class="form-group  col-md-4 mb-7">{{ form_row(form.mailing) }}</div>
+                        <div class="form-group  col-md-4 mb-7">{{ form_row(form.amiCollegue) }}</div>
+                        <div class="form-group  col-md-4 mb-2">{{ form_row(form.affiche) }}</div>
+                        <div class="form-group  col-md-4 mb-2">{{ form_row(form.siteWeb) }}</div>
+                        <div class="form-group  col-md-1 mb-2">Autre :</div>
+                        <div class="form-group  col-md-3 mb-2">{{ form_row(form.autreExistence,{'attr':{'placeholder':'Saisissez vos informations'}}) }}</div>
+                    </div>
+                </div> 
+                <div class="tab-pane fade" id="kt_tab_pane_4" role="tabpanel">
+                    <div class="row mb-4">
+                        <h6>Votre cursus universitaire</h6>
+                    </div>
+                   
+
+                        {{ prototype_ligne_colonne(form) }}
+
+<br>
+                    <div class="row mb-4">
+                        <h6>Votre cursus professionnel</h6>
+                    </div>
+                    {{ prototype_ligne_colonne_professionnel(form) }}
+<br>
+                    <div class="row mb-4">
+                        <h6>Vos stages éffectués</h6>
+                    </div>
+                  
+
+                    {{ prototype_ligne_colonne_stage(form) }}
+                    <br>
+
+                </div>
+
+                <div class="tab-pane fade" id="kt_tab_pane_5" role="tabpanel">
+                     <div class="row mb-4">
+                <h6>Mes documents</h6>
+            </div>
+            <br>
+
+            {{ prototype_ligne_colonne_document(form) }}
+            <br>
+                   
+
+    
+
+                </div>
+
+
+
+
+    </div>
+    <div class="modal-footer">
+        {# {{ include('_includes/ajax/loader.html.twig') }} #}
+        <button type="button" class="btn btn-default btn-sm" data-bs-dismiss="modal">Annuler</button>
+        
+             <a title="Traiter la demande" href="{{ path('app_demande_rejeter',{'id':preinscription }) }}" class="btn btn-main btn-sm test" data-bs-stacked-toggle="modal" data-bs-stacked-modal="#modal-xl2">Traiter la demande</a>
+             
+        
+        {# <button type="submit" class="btn btn-main btn-ajax btn-sm"><span class="spinner-border d-none  spinner-ajax spinner-border-sm" role="status" aria-hidden="true"></span> Valider</button> #}
+    </div>
+      {{ form_widget(form._token) }}
+            {{ form_end(form, {render_rest: false}) }}
+{% endblock %}
+
+{% block javascripts_inline %}
+<script src="{{ asset('assets/parcours/universitaitre.js') }}"></script>
+<script src="{{ asset('assets/parcours/professionnel.js') }}"></script>
+<script src="{{ asset('assets/parcours/stage.js') }}"></script>
+    <script>
+  $(function () {
+$(function () {
+            init_select2('select');
+        }); 
+           
+
+           $('.no-auto').each(function () {
+            const $this = $(this);
+            const $id = $('#' + $this.attr('id'));
+            init_date_picker($id,  'down', (start, e) => {
+                //$this.val(start.format('DD/MM/YYYY'));
+            }, null, null, false);
+
+            $id.on('apply.daterangepicker', function (ev, picker) {
+                $(this).val(picker.startDate.format('DD/MM/YYYY'));
+            });
+        });
+           $("#modal-xl2").find('.modal-header').css("background","red");
+            var elements = Array.from(document.querySelectorAll("[data-bs-stacked-modal]"));
+
+            if (elements && elements.length > 0) {
+                elements.forEach((element) => {
+                    if (element.getAttribute("data-kt-initialized") === "1" ) {
+                        return;
+                    }
+
+                    const url = element.getAttribute('href');
+                    element.setAttribute("data-kt-initialized", "1");
+
+
+                    element.addEventListener("click", function(e) {
+                        e.preventDefault();
+
+                        const modalEl = document.querySelector(this.getAttribute("data-bs-stacked-modal"));
+
+                        if (modalEl) {
+                            const modal = new bootstrap.Modal(modalEl);
+                            modal.show(element);
+                        }
+                    });
+                });
+            }
+
+
+        });
+    </script>
+{% endblock %}

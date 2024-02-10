@@ -344,8 +344,10 @@ class VersementController extends AbstractController
             'fontDir' => [
                 $this->getParameter('font_dir') . '/arial',
                 $this->getParameter('font_dir') . '/trebuchet',
-            ]
-        ], true, "", "");
+            ],
+            'watermarkImg' => "",
+            'entreprise' => ''
+        ], true);
     }
 
 

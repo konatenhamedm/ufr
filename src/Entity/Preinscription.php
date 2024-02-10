@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PreinscriptionRepository::class)]
 #[Table(name: 'compta_preinscription')]
-#[UniqueEntity(fields: ['niveau', 'etudiant'], message: 'Vous avez déjà une demande de préinscription')]
+/* #[UniqueEntity(fields: ['niveau', 'etudiant'], message: 'Vous avez déjà une demande de préinscription')] */
 class Preinscription
 {
     const ETATS = [
@@ -66,6 +66,15 @@ class Preinscription
 
     #[ORM\ManyToOne]
     private ?Utilisateur $caissiere = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $etatDeliberation = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateValidation = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $commentaire = null;
 
 
 
@@ -219,6 +228,42 @@ class Preinscription
     public function setCaissiere(?Utilisateur $caissiere): static
     {
         $this->caissiere = $caissiere;
+
+        return $this;
+    }
+
+    public function getEtatDeliberation(): ?string
+    {
+        return $this->etatDeliberation;
+    }
+
+    public function setEtatDeliberation(?string $etatDeliberation): static
+    {
+        $this->etatDeliberation = $etatDeliberation;
+
+        return $this;
+    }
+
+    public function getDateValidation(): ?\DateTimeInterface
+    {
+        return $this->dateValidation;
+    }
+
+    public function setDateValidation(?\DateTimeInterface $dateValidation): static
+    {
+        $this->dateValidation = $dateValidation;
+
+        return $this;
+    }
+
+    public function getCommentaire(): ?string
+    {
+        return $this->commentaire;
+    }
+
+    public function setCommentaire(?string $commentaire): static
+    {
+        $this->commentaire = $commentaire;
 
         return $this;
     }

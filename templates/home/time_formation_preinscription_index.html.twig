@@ -1,0 +1,218 @@
+{% extends 'base-layout.html.twig' %}
+
+{% block title %}Suivi{% endblock %}
+{% block header %}Workflow de suivi de dossier : {{ inscription.code ~'|'~ inscription.niveau.filiere.libelle }} {% endblock %}
+{% block breadcrumb %}{% endblock %}
+
+{% block inline_stylesheets %}
+<style>
+   {#  .sw-theme-dots>ul.step-anchor>li.done>a:after {
+        background: green;
+    }
+    .sw-theme-dots>ul.step-anchor>li.active>a:after {
+        background: orangered;
+    }
+    .sw-theme-dots>ul.step-anchor>li>a:after {
+        background: grey;
+    } #}
+.stepper.stepper-pills .stepper-item.current .stepper-icon{
+    background-color: green !important;
+}
+
+
+</style>
+{% endblock %}
+{% block body %}
+<div class="card shadow-sm">
+    <div class="card-header card-header-sm">
+        {# <h3 class="card-title"> Liste des civilités</h3> #}
+        <div class="card-toolbar">
+            {# <a href="{{ path('app_parametre_civilite_new') }}" class="btn btn-main btn-sm"  
+                data-bs-toggle="modal" data-bs-target="#exampleModalSizeLg2">
+                <i class="bi bi-plus-square text-light"></i>
+                Nouveau
+            </a> #}
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-12">
+               <!--begin::Stepper-->
+<div class="stepper stepper-pills stepper-column d-flex flex-column flex-lg-row" id="kt_stepper_example_vertical">
+    <!--begin::Aside-->
+    <div class="d-flex flex-row-auto w-100" style="width: 243px !important;">
+    <!--begin::Nav-->
+    <div class="stepper-nav flex-cente " id="parametre-tabs">
+        <!--begin::Step 1-->
+        {% for key,module in modules %}
+            <div class="stepper-item me-5    {% if module.etat == true %} current {% endif %}
+              " data-kt-stepper-element="nav" data-kt-stepper-action="step">
+            <!--begin::Wrapper-->
+              <a data-bs-toggle="tab" href="#{{ key }}" data-key="{{ key }}" data-href="{{ module.href }}" class="nav-link">
+                <div class="stepper-wrapper d-flex align-items-center">
+                <!--begin::Icon-->
+                <div class="stepper-icon w-40px h-40px">
+                    <i class="stepper-check fas fa-check"></i>
+                    <span class="stepper-number">{{ key+1}}</span>
+                </div>
+                <!--end::Icon-->
+
+                <!--begin::Label-->
+                <div class="stepper-label">
+                    <h3 class="stepper-title">
+                        {{ module.label }}
+                    </h3>
+
+                    {# <div class="stepper-desc">
+                        Description
+                    </div> #}
+                </div>
+                <!--end::Label-->
+            </div>
+              </a>
+            <!--end::Wrapper-->
+
+            <!--begin::Line-->
+            <div class="stepper-line h-40px"></div>
+            <!--end::Line-->
+        </div>
+        {% endfor %}
+        <!--end::Step 1-->
+
+     
+    </div>
+    <!--end::Nav-->
+    </div>
+
+    <!--begin::Content-->
+    <div class="flex-row-fluid">
+        <!--begin::Form-->
+        {# w-lg-500px #}
+        <form class="form  mx-auto" novalidate="novalidate">
+            <!--begin::Group-->
+            <div class="mb-5">
+
+             <div class="tab-content" id="myTabContent" >
+                {# {% for key, module in modules | filter(module => is_config_granted(module.module | default(''))) %} #}
+                {# {% for key, item in 1..4 %}
+                {% set id = module.name | default('module' ~ key) %}
+                <div class="tab-pane fade  flex-column  {% if key == 0 %}show active current{% endif %}" id="{{ key }}" role="tabpanel" aria-labelledby="{{ key }}"></div>
+                {% endfor %} #}
+
+                <div class="flex-column "  id="form-content"></div>
+
+            </div>
+            </div>
+            <!--end::Group-->
+
+            <!--begin::Actions-->
+           {#  <div class="d-flex flex-stack">
+                <!--begin::Wrapper-->
+                <div class="me-2">
+                    <button type="button" class="btn btn-light btn-active-light-primary" data-kt-stepper-action="previous">
+                        Back
+                    </button>
+                </div>
+                <!--end::Wrapper-->
+
+                <!--begin::Wrapper-->
+                <div>
+                    <button type="button" class="btn btn-primary" data-kt-stepper-action="submit">
+                        <span class="indicator-label">
+                            Submit
+                        </span>
+                        <span class="indicator-progress">
+                            Please wait... <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                        </span>
+                    </button>
+
+                    <button type="button" class="btn btn-primary" data-kt-stepper-action="next">
+                        Continue
+                    </button>
+                </div>
+                <!--end::Wrapper-->
+            </div>
+            <!--end::Actions--> #}
+        </form>
+        <!--end::Form-->
+    </div>
+</div>
+<!--end::Stepper-->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block java %}
+    {# <script src="{{ asset('assets/js/datatables.js') }}"></script> #}
+    <script> 
+    $(function () {
+            function load_content(url) {
+                //alert('');
+                const $form_content = $(`#form-content`);
+                //const $form_content1 = $(`#${key-1}`);
+               
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    dataType: 'html',
+                    beforeSend: function () {
+                        
+                        $form_content.html(`<div class="d-flex align-items-center">
+                                    <strong>Chargement des données de l'étape</strong>
+                                    <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+                                    </div>`);
+                    },
+                    success: function (html) {
+                        
+                        $form_content.html(html);
+                    },
+                   
+                    error: function () {
+                        $form_content.html('<div class="text-center text-danger">Une erreur est survenue...</div>');
+                    }
+                })
+            }
+
+         $('#parametre-tabs').on('click', '.nav-link', function (e) {
+
+           
+                e.preventDefault();
+                const $this = $(this);
+                 const $form_content = $('#0');
+              
+                if ($this.attr('data-href')) {
+                    load_content($this.attr('data-href'));
+                }
+            });
+
+            
+            load_content($('.stepper-item.current').first().find('a').attr('data-href'));
+        });
+       
+
+        
+  
+        // Stepper lement
+var element = document.querySelector("#kt_stepper_example_vertical");
+
+// Initialize Stepper
+var stepper = new KTStepper(element);
+stepper.on("kt.stepper.click", function (stepper) {
+    stepper.goTo(stepper.getClickedStepIndex()); // go to clicked step
+
+});
+// Handle next step
+stepper.on("kt.stepper.next", function (stepper) {
+   
+    stepper.goNext(); // go next step
+});
+
+// Handle previous step
+stepper.on("kt.stepper.previous", function (stepper) {
+    stepper.goPrevious(); // go previous step
+});
+    </script>
+{% endblock %}

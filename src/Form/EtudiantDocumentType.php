@@ -27,29 +27,28 @@ class EtudiantDocumentType extends AbstractType
             'entry_options' => [
                 'label' => false,
                 'doc_options' => $options['doc_options'],
-                'doc_required' => $options['doc_required']
+                'doc_required' => $options['doc_required'],
+                'validation_groups' => $options['validation_groups'],
             ],
             'allow_add' => true,
             'label' => false,
             'by_reference' => false,
             'allow_delete' => true,
             'prototype' => true,
-        ])  ;
-
-
+        ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Personne::class,
+            'data_class' => Etudiant::class,
             'doc_required' => true,
             'doc_options' => [],
             'validation_groups' => [],
         ]);
         $resolver->setRequired('doc_options');
         $resolver->setRequired('doc_required');
-        $resolver->setRequired(['validation_groups']);
         $resolver->setRequired(['type']);
+        $resolver->setRequired(['validation_groups']);
     }
 }

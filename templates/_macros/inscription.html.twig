@@ -1,0 +1,37 @@
+{% macro prototype_ligne_echeancier(form,etat) %}
+    <div class="proto-container" data-prototype="{{ _self.ligne_echeancier(form.echeanciers.vars.prototype)|e }}"></div>
+    {# {% if etat not in ['echeance_soumis','valider','rejete','solde'] %} #}
+    
+    <button type="button" data-protoname="__name__" class="btn btn-default add-collection add-ligne btn-xs" id="add_ligne" data-protoclass=".proto-container" data-container=".row-container">
+        <i class="fa fa-plus"></i>
+        Ajouter une ligne
+    </button>
+    {# {% endif %} #}
+    <table class="table table-bordered table-custom">
+        <thead class="thead-dark">
+            <tr>
+                <th width="50%" class="p-2">Date versement</th>
+                <th width="40%" class="p-2">Montant</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody  class="row-container">
+            {% for item in form.echeanciers %}
+                {{ _self.ligne_echeancier(item|e) }}
+            {% endfor %}
+        </tbody>
+    </table>
+    
+{% endmacro %}
+
+{% macro ligne_echeancier(data) %}
+   
+    <tr class="row-colonne even pointer table-light">
+        <td class="p-2">
+           {#  <span class="label">{{ data.dateCreation.vars.data.libelle | default('') }}</span> #}
+            <div style="display: " class="field-matiere">{{ form_widget(data.dateCreation) }}</div>
+        </td>
+        <td class="p-2">{{ form_widget(data.montant) }}</td>
+        <td class="p-2 del-col"><a href="#" class="btn btn-danger btn-xs"><span class="bi bi-trash"></span></a></td>
+    </tr>
+{% endmacro %}

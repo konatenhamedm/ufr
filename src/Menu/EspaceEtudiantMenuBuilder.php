@@ -38,7 +38,8 @@ class EspaceEtudiantMenuBuilder
         if (isset($menu[self::MODULE_NAME])) {
             $menu->addChild('information', ['route' => 'site_information', 'label' => 'Mes informations'])->setExtra('icon', 'bi bi-person')->setExtra('role', 'ROLE_ETUDIANT');
             $menu->addChild('document', ['route' => 'site_document', 'label' => 'Mes documents'])->setExtra('icon', 'bi bi-person')->setExtra('role', 'ROLE_ETUDIANT');
-            $menu->addChild('preinscription.index', ['route' => 'app_config_preinscription_index', 'label' => 'Mes pré-inscriptions'])->setExtra('icon', 'bi bi-gear')->setExtra('role', 'ROLE_ETUDIANT');
+            $menu->addChild('preinscription.index', ['route' => 'app_config_preinscription_formation_index', 'label' => 'Mes formations'])->setExtra('icon', 'bi bi-gear')->setExtra('role', 'ROLE_ETUDIANT');
+            $menu->addChild('workflow.index', ['route' => 'app_home_timeline_etudiant_index', 'label' => 'Suivi  dossiers'])->setExtra('icon', 'bi bi-person')->setExtra('role', 'ROLE_ETUDIANT');
             $menu->addChild('note.index', ['route' => 'app_utilisateur_personne_index', 'label' => 'Mes notes'])->setExtra('icon', 'bi bi-person')->setExtra('role', 'ROLE_ETUDIANT');
             $menu->addChild('scolarite.index', ['route' => 'app_utilisateur_personne_index', 'label' => 'Ma scolarité'])->setExtra('icon', 'bi bi-person')->setExtra('role', 'ROLE_ETUDIANT');
             // $menu->addChild('groupe.index', ['route' => 'app_utilisateur_groupe_index', 'label' => 'Groupes'])->setExtra('icon', 'bi bi-people-fill');

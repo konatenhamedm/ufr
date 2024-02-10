@@ -39,6 +39,7 @@ framework:
                 - valide
                 - attente_inscription
                 - inscription
+                - attente_informations
                 - ajourne_inscription
                 - paiement_confirmation
             transitions:
@@ -63,6 +64,9 @@ framework:
                 paiement_confirmation:
                     from: attente_paiement
                     to: paiement_confirmation
+                attente_information:
+                    from: attente_validation
+                    to: attente_informations
 
         niveau_etudiant:
             type: 'state_machine'
@@ -89,5 +93,39 @@ framework:
                 paiement:
                     from: attente_paiement
                     to: valide
+
+
+        inscription:
+            type: 'state_machine'
+            audit_trail:
+                enabled: true
+            marking_store:
+                type: 'method'
+                property: 'etat'
+            supports:
+                - App\Entity\Inscription
+            initial_marking: attente_echeancier
+            places:
+                - attente_echeancier
+                - echeance_soumis
+                - valide
+                - rejete
+                - solde
+            transitions:
+                soumission:
+                    from: attente_echeancier
+                    to: echeance_soumis
+                rejet:
+                    from: echeance_soumis
+                    to: rejete
+                retour:
+                    from: rejete
+                    to: echeance_soumis
+                valider:
+                    from: echeance_soumis
+                    to: valide
+                paiement:
+                    from: valide
+                    to: solde
                
 

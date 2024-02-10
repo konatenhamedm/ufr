@@ -80,7 +80,7 @@ class HomeController extends AbstractController
         return ($code . '-' . date("y") . '-' . str_pad($nb, 3, '0', STR_PAD_LEFT));
     }
 
-    #[Route(path: '/', name: 'site_home')]
+    #[Route(path: '/', name: 'site_home', methods: ['GET', 'POST'])]
     public function index(Request $request, FiliereRepository $filiereRepository): Response
     {
 
@@ -128,13 +128,14 @@ class HomeController extends AbstractController
 
                 if (!$user) {
                     $etudiant = new Etudiant();
-                    $etudiant->setNom($inscriptionDTO->getNom());
-                    $etudiant->setPrenom($inscriptionDTO->getPrenom());
+                    $etudiant->setNom(strtoupper($inscriptionDTO->getNom()));
+                    $etudiant->setPrenom(ucwords($inscriptionDTO->getPrenom()));
                     $etudiant->setDateNaissance($inscriptionDTO->getDateNaissance());
                     $etudiant->setCivilite($inscriptionDTO->getCivilite());
                     $etudiant->setGenre($inscriptionDTO->getGenre());
                     $etudiant->setFonction($fonctionRepository->findOneBy(['code' => 'ETD']));
                     $etudiant->setLieuNaissance('');
+                    $etudiant->setEtat('pas_complet');
                     $etudiant->setEmail($inscriptionDTO->getEmail());
                     $etudiant->setContact($inscriptionDTO->getContact());
                     $etudiant->setFonction($fonction);
@@ -163,7 +164,8 @@ class HomeController extends AbstractController
                         $request
                     );
                     $preinscription = new Preinscription();
-                    $preinscription->setEtat('attente_paiement');
+                    $preinscription->setEtat('attente_validation');
+                    $preinscription->setEtatDeliberation('pas_deliberer');
                     $preinscription->setEtudiant($etudiant);
                     $preinscription->setDatePreinscription(new \DateTime());
                     $preinscription->setNiveau($inscriptionDTO->getNiveau());
@@ -201,7 +203,8 @@ class HomeController extends AbstractController
                     } else {
 
                         $preinscription = new Preinscription();
-                        $preinscription->setEtat('attente_paiement');
+                        $preinscription->setEtat('attente_validation');
+                        $preinscription->setEtatDeliberation('pas_deliberer');
                         $preinscription->setEtudiant($user->getPersonne());
                         $preinscription->setDatePreinscription(new \DateTime());
                         $preinscription->setNiveau($inscriptionDTO->getNiveau());
@@ -246,16 +249,22 @@ class HomeController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/site/information', name: 'site_information')]
-    public function information(Request $request, UserInterface $user, PersonneRepository $personneRepository, FormError $formError, NiveauRepository $niveauRepository, UtilisateurRepository $utilisateurRepository): Response
+    #[Route(path: '/site/information', name: 'site_information', methods: ['GET', 'POST'])]
+    public function information(Request $request, UserInterface $user, EtudiantRepository $etudiantRepository, PersonneRepository $personneRepository, FormError $formError, NiveauRepository $niveauRepository, UtilisateurRepository $utilisateurRepository): Response
     {
         $etudiant = $user->getPersonne();
 
+        $validationGroups = ['Default', 'FileRequired', 'autre'];
         //dd($niveauRepository->findNiveauDisponible(21));
 
         $form = $this->createForm(EtudiantType::class, $etudiant, [
             'method' => 'POST',
             'type' => 'info',
+            'doc_options' => [
+                'uploadDir' => $this->getUploadDir(self::UPLOAD_PATH, true),
+                'attrs' => ['class' => 'filestyle'],
+            ],
+            'validation_groups' => $validationGroups,
             'action' => $this->generateUrl('site_information')
         ]);
 
@@ -276,7 +285,13 @@ class HomeController extends AbstractController
 
             if ($form->isValid()) {
 
-                $personneRepository->add($etudiant, true);
+                if ($form->getClickedButton()->getName() === 'valider') {
+                    $etudiant->setEtat('complete');
+                    $personneRepository->add($etudiant, true);
+                } else {
+                    $personneRepository->add($etudiant, true);
+                }
+
                 //$entityManager->flush();
 
                 $data = true;
@@ -303,16 +318,19 @@ class HomeController extends AbstractController
 
         return $this->render('site/informations.html.twig', [
             'etudiant' => $etudiant,
+            'etat' => 'ok',
             'form' => $form->createView(),
         ]);
 
         //return $this->render('site/admin/pages/informations.html.twig');
     }
 
-    #[Route(path: '/site/document', name: 'site_document')]
-    public function document(Request $request, UserInterface $user, PersonneRepository $personneRepository, FormError $formError): Response
+    #[Route(path: '/site/document', name: 'site_document', methods: ['GET', 'POST'])]
+    public function document(Request $request, UserInterface $user, PersonneRepository $personneRepository, EtudiantRepository $etudiantRepository, FormError $formError): Response
     {
-        $etudiant = $user->getPersonne();
+        $etudiant = $personneRepository->find($user->getPersonne()->getId());
+
+        /* dd($user); */
 
         //dd($etudiant);
         $validationGroups = ['Default', 'FileRequired', 'autre'];
@@ -338,8 +356,6 @@ class HomeController extends AbstractController
         if ($form->isSubmitted()) {
             $response = [];
             $redirect = $this->generateUrl('site_document');
-
-
 
 
             if ($form->isValid()) {

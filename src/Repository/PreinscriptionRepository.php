@@ -23,7 +23,7 @@ class PreinscriptionRepository extends ServiceEntityRepository
 {
 
     private $user;
-    public function __construct(ManagerRegistry $registry,Security $security)
+    public function __construct(ManagerRegistry $registry, Security $security)
     {
         parent::__construct($registry, Preinscription::class);
         $this->user = $security->getUser();
@@ -37,16 +37,16 @@ class PreinscriptionRepository extends ServiceEntityRepository
         }
     }
 
-    public function getLastRecord(){
+    public function getLastRecord()
+    {
         return $this->createQueryBuilder('p')
-        ->select('p')
-            ->innerJoin('p.utilisateur','u')
+            ->select('p')
+            ->innerJoin('p.utilisateur', 'u')
             ->andWhere('u.id = :user')
-            ->setParameter('user',$this->user->getId())
-            ->orderBy('p.id' ,'DESC')
+            ->setParameter('user', $this->user->getId())
+            ->orderBy('p.id', 'DESC')
             ->getQuery()
             ->getResult();
-
     }
 
     /**
@@ -64,35 +64,39 @@ class PreinscriptionRepository extends ServiceEntityRepository
         $qb->select('p')
             ->andWhere($qb->expr()->not($qb->expr()->exists($stmtExists->getDQL())))
             ->andWhere('p.niveau = :niveau')
+            ->andWhere('p.etat = :etat')
+            ->andWhere('p.etatDeliberation = :deliberation')
             ->setParameter('niveau', $examen->getNiveau())
-            ->setParameter('examen', $examen);
+            ->setParameter('examen', $examen)
+            ->setParameter('etat', 'valide')
+            ->setParameter('deliberation', 'pas_deliberer');
 
         return $qb;
     }
 
 
-//    /**
-//     * @return Preinscription[] Returns an array of Preinscription objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('p.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    //    /**
+    //     * @return Preinscription[] Returns an array of Preinscription objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('p')
+    //            ->andWhere('p.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('p.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
 
-//    public function findOneBySomeField($value): ?Preinscription
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    //    public function findOneBySomeField($value): ?Preinscription
+    //    {
+    //        return $this->createQueryBuilder('p')
+    //            ->andWhere('p.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
 }
