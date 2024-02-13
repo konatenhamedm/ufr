@@ -1,12 +1,13 @@
 {% extends 'base-layout.html.twig' %}
 
+
 {% block title %}Infos documents{% endblock %}
    {% from '_macros/macro_document.html.twig' import prototype_ligne_colonne %}
 
 {% block body %}
     <div class="card shadow-sm">
         <div class="card-header card-header-sm">
-            <h3 class="card-title"> Informations étudiant</h3>
+            <h3 class="card-title">Mes documents</h3>
             <div class="card-toolbar">
                {# <a href="{{ path('app_utilisateur_utilisateur_new') }}" class="btn btn-main btn-sm"
                    data-bs-toggle="modal" data-bs-target="#exampleModalSizeLg2">

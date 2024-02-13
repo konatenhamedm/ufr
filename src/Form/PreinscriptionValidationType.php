@@ -22,7 +22,7 @@ class PreinscriptionValidationType extends AbstractType
                 'required' => true,
                 'mapped' => true,
                 'widget' => 'single_text',
-                'label'   => 'Date de validation',
+                'label'   => 'Date',
                 'format'  => 'dd/MM/yyyy',
                 'html5' => false,
                 'attr'    => ['autocomplete' => 'off', 'class' => 'datepicker no-auto'],
@@ -33,7 +33,7 @@ class PreinscriptionValidationType extends AbstractType
                     'Recaler' => 'Recaler',
                     'Attente_info' => 'En attente informations',
                 ],
-                'label' => 'DECISION',
+                'label' => 'Décision',
                 'attr' => ['class' => 'has-select2']
             ]);
         $builder->add('commentaire', TextareaType::class, ['label' => 'Commentaire', 'required' => false, 'empty_data' => '']);

@@ -31,25 +31,22 @@ class PreinscriptionPaiementType extends AbstractType
                 'attr'    => ['autocomplete' => 'off', 'class' => 'datepicker no-auto'],
             ])
             ->add('modePaiement', EntityType::class, [
-               'class' => NaturePaiement::class,
+                'class' => NaturePaiement::class,
                 'required' => true,
                 'mapped' => false,
                 'placeholder' => '----',
                 'label_attr' => ['class' => 'label-required'],
                 'choice_label' => 'libelle',
-                'label' => 'Mode paiement',
+                'label' => 'Mode de paiement',
                 'attr' => ['class' => 'has-select2']
-            ])  ;
-                $builder
-                    //->add('annuler', SubmitType::class, ['label' => 'Annuler', 'attr' => ['class' => 'btn btn-primary btn-sm', 'data-bs-dismiss' => 'modal']])
-                   /* ->add('save', SubmitType::class, ['label' => 'Enregister', 'attr' => ['class' => 'btn btn-main btn-ajax btn-sm']])*/
-                  /*  ->add('passer', SubmitType::class, ['label' => 'Valider préinscription', 'attr' => ['class' => 'btn btn-success btn-ajax btn-sm']])*/
-                   /* ->add('rejeter', SubmitType::class, ['label' => 'Réjeter la demande', 'attr' => ['class' => 'btn btn-danger btn-ajax btn-sm']])*/
-                    ->add('payer', SubmitType::class, ['label' => 'valider', 'attr' => ['class' => 'btn btn-warning btn-ajax btn-sm']])
-                    ->add('confirmation', SubmitType::class, ['label' => 'Confirmer', 'attr' => ['class' => 'btn btn-warning btn-ajax btn-sm']]);
-
-
-
+            ]);
+        $builder
+            //->add('annuler', SubmitType::class, ['label' => 'Annuler', 'attr' => ['class' => 'btn btn-primary btn-sm', 'data-bs-dismiss' => 'modal']])
+            /* ->add('save', SubmitType::class, ['label' => 'Enregister', 'attr' => ['class' => 'btn btn-main btn-ajax btn-sm']])*/
+            /*  ->add('passer', SubmitType::class, ['label' => 'Valider préinscription', 'attr' => ['class' => 'btn btn-success btn-ajax btn-sm']])*/
+            /* ->add('rejeter', SubmitType::class, ['label' => 'Réjeter la demande', 'attr' => ['class' => 'btn btn-danger btn-ajax btn-sm']])*/
+            ->add('payer', SubmitType::class, ['label' => 'valider', 'attr' => ['class' => 'btn btn-warning btn-ajax btn-sm']])
+            ->add('confirmation', SubmitType::class, ['label' => 'Confirmer', 'attr' => ['class' => 'btn btn-warning btn-ajax btn-sm']]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

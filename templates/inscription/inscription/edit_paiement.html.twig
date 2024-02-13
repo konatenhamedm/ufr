@@ -36,7 +36,7 @@
         </td>
         <td class="p-2 text-end">{{ item.montant|number_format(0, '.', '.')}}</td>
         <td class="p-2 text-center">{% if item.etat == 'pas_payer' %}
-           {{ ' Pas payée'|upper }}
+           {{ ' NON SOLDé'|upper }}
         {% else %}
             {{ ' Payée'|upper }}
         {% endif %}  </td>
@@ -48,12 +48,12 @@
         </tbody>
         <tfoot>
             <tr>
-                <th class="text-end p-2" style="color: red;font-weight:bolder">TOTAL PAYE</th>
-                <th class="total-saisi text-end p-2 fw-bolder total" style="color: red;font-weight:bolder">{{ inscription.totalPaye|number_format(0, '.', '.') }} </td>
-            </tr>
-            <tr>
                 <th class="text-end p-2">TOTAL</th>
                 <th class="total text-end p-2 fw-bolder total">{{ somme|number_format(0, '.', '.') }} </td>
+            </tr>
+            <tr>
+                <th class="text-end p-2" style="color: red;font-weight:bolder">TOTAL PAYE</th>
+                <th class="total-saisi text-end p-2 fw-bolder total" style="color: red;font-weight:bolder">{{ inscription.totalPaye|number_format(0, '.', '.') }} </td>
             </tr>
         </tfoot>
     </table>

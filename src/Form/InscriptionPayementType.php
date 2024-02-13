@@ -36,7 +36,7 @@ class InscriptionPayementType extends AbstractType
                 'placeholder' => '----',
                 'label_attr' => ['class' => 'label-required'],
                 'choice_label' => 'libelle',
-                'label' => 'Mode paiement',
+                'label' => 'Mode de paiement',
                 'attr' => ['class' => 'has-select2']
             ])
             ->add('montant', TextType::class, ['label' => 'Montant', 'mapped' => false, 'attr' => ['class' => 'input-money input-mnt']]);

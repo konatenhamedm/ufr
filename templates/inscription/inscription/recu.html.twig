@@ -1,8 +1,8 @@
-
+{# {% set code =facture.typeFacture.code(true) %} #}
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Liste des maisons</title>
+    <title>{# {{ code =='a' ? 'AVOIR': 'FACTURE' }} {{ facture.numero }} #}dd</title>
     <style>
       {% block page_css %}
         @page {
@@ -13,8 +13,7 @@
           footer: html_pageFooter;
           margin-top: 0.5cm;
           margin-header: 0cm;
-          margin-left: 1cm;
-           margin-right: 1cm;
+         
           /*background: ...
   background-image: ...
   background-position ...
@@ -35,22 +34,6 @@
         .mention {
   position: absolute;
   bottom: 100px;
-}
-
-.ok{
-  width: 30%;
-    border: 1px solid black;
-    text-align: center;
-}
-.deuxieme{
-  width: 38%;
-}
-.montant{
-    font-weight: bolder;
-}
-
-.Info_client h4{
-   magin-left:15px !important;
 }
 
         /*@page :first {
@@ -129,71 +112,115 @@
         }
     </style>
   </head>
-<body style="font-size:12px;">
- <div class="Info_client">
-            <br>
-            <div>
-              {% set var = "uploads/" ~ 'media_etudiant' ~"/"~ 'lg.jpeg' %}
-        <img src="{{ var |replace({'/': "\\"}) }}" width="100px" height="60px"/>
-               {#  <img height="60px" width="100px" src="K:\PROJET\GOMBOS\new_ufrseg\public\assets\lg.jpeg"> #}
-            
-     <h4 style="font-weight: bolder;"><strong>UFR-SEG</strong></h4></div>
+  <body style="font-size:12px;">
+    <div class="clearfix">
+     <div style="width:10%;text-align:left;float:left;"  class="">
+     {% set var = "uploads/" ~ 'media_etudiant' ~"/"~ 'lg.jpeg' %}
+        <img src="{{ var |replace({'/': "\\"}) }}" width="100px" />
+        {# <img src="{{ absolute_url(asset(var)) }}" width="100px" /> #}
+       {#  <div style="text-align:left;border: 1px solid #000;padding:8px;width:70%"  class="">
+              CC N° 9904215 D<br>
+              Régime d'imposition: Réel Normal<br>
+              Centre des impôts: D G E<br>
         </div>
+        {{ "facture.typeFacture.libelle" | upper }} N° {{ 'facture.numero' }} #}
+      </div>
+     
+       <div style="width:65%;text-align:right;float:center;">
+            <div style="text-align:center;"  class="">
+                    <b>COLLEGE LE PEROUSE</b><br>
+                  22 BP 1484 Abidjan 2 - Tél : 27 22 49 60 49 - college.laperouse@yahoo.com <br>
+                  Abidjan-Cocody
+               <div style="border-top:1px solid #000"></div>
+              </div>
+           
+        </div>
+       <div style="width:25%;text-align:right;float:right;margin-top:0px,padding:8px">
 
+           <div style="text-align:center;margin-top:-45px"  class="">
+                    République de COTE D'IVOIRE <br>
+                <span style="text-decoration: underline;">Union - Discipline - Travail</span> <br>
+               <b style="font-weight: bolder;">Année scolaire : 2021-2022</b>
+              </div>
+          
+        </div>
+    </div>
+   {#   <div class="clearfix">
+       <div style="width:35%;text-align:center;float:right;">
+         
+            <div style="margin-top:-25px;text-align:center;border: 1px solid #000;padding:8px;font-size:15px;font-weight:bold"  class="">
+               <b><u>DOIT</u></b><br>
+              {{ "facture.raisonSociale" }}<br>
+              {{ "facture.adresse" }}<br>
+              CC: {{ "facture.compteContribuable" }}<br>
+              TEL: {{ "facture.contact" }}
+            </div>
+        </div>
+    </div> #}
 
-
-
-<table style="width:100%">
-  <tr>
-    <td >N :</td>
-    <td span="2" class="deuxieme">{{ "data.code" }}</td>
-    <td span="3"   class="ok" >
-        <h6>Le comptable</h6>
-    </td>
-  </tr>
-
-  <tr>
-    <td>Nom :</td>
-    <td>{{ "data.etudiant.getNomComplet" }}</td>
-    <td rowspan="5" class="ok"></td>
-
-  </tr>
-  <tr>
-    <td>Filière :</td>
-    <td>{{ "data.niveau.filiere.code" }}</td>
+    <br>
+    <div style="text-align:center;margin-top:10px;">{{ "facture.commentaire"}}</div>
+    {# <table style="margin-top:0;font-size:12px;width:100%;border-collapse: collapse">
+      <thead>
+        <tr>
+          <th style="vertical-align:middle;width:10%;border:1px solid #000">Quantité</th>
+          <th style="vertical-align:middle;border:1px solid #000">Description</th>
+          <th style="vertical-align:middle;width:12%;border:1px solid #000">Prix Unitaire</th>
+          <th style="vertical-align:middle;width:12%;text-align:right;padding-right:5px;border:1px solid #000">Montant</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% set total = 0 %}
+        {% for ligne in facture.ligneFactures %}
+          {% set total = total + ligne.montant %}
+          <tr>
+            <td style="vertical-align:middle;text-align:center;padding:8px 5px;border-left: 1px solid #000;border-right: 1px solid #000;"></td>
+            <td style="vertical-align:middle;border-left: 1px solid #000;border-right: 1px solid #000;"><b>{{ ligne.libelle }}</b></td>
+            <td style="vertical-align:bottom;text-align:right;border-left: 1px solid #000;border-right: 1px solid #000;padding-right:5px;" >{{ ligne.montant | format_number }}</td>
+          
+            <td style="vertical-align:bottom;text-align:right;border-left: 1px solid #000;border-right: 1px solid #000;padding-right:5px;">{{ ligne.montant | format_number }}</td>
+            
+          </tr>
+        {% endfor %}
+        
+        {% set is_taxable = facture.taxable %}
+        <tfoot>
+         
+          <tr>
+            <td style="text-align:left;border-top: 1px solid #000;border-bottom: 1px solid #000;border-left: 1px solid #000;padding:5px;font-weight:bold" colspan="3">MONTANT HORS TAXE</td>
+            <td style="vertical-align:middle;text-align:right;border-top: 1px solid #000;border-bottom: 1px solid #000;border-right: 1px solid #000;padding:5px;font-weight:bold">{{ total | format_number }}</td>
+          </tr>
+           <tr>
+            <td style="text-align:left;border-top: 1px solid #000;border-bottom: 1px solid #000;border-left: 1px solid #000;padding:5px;font-weight:bold" colspan="3">TVA 18% {% if not is_taxable %}NON FACTUREE{% endif %}</td>
+            <td style="vertical-align:middle;text-align:right;border-top: 1px solid #000;border-bottom: 1px solid #000;border-right: 1px solid #000;padding:5px;font-weight:bold">{{ facture.getMontantTvaNonFacture | format_number }}</td>
+          </tr>
+           <tr>
+            <td style="text-align:left;border-top: 1px solid #000;border-bottom: 1px solid #000;border-left: 1px solid #000;padding:5px;font-weight:bold" colspan="3">MONTANT {% if is_taxable %}TTC{% else%}HT{% endif %} A PAYER</td>
+            <td style="vertical-align:middle;text-align:right;border-top: 1px solid #000;border-bottom: 1px solid #000;border-right: 1px solid #000;padding:5px;font-weight:bold">{{ (total + (is_taxable ? facture.montantTva: 0 ))| format_number }}</td>
+          </tr>
   
-  </tr>
-  <tr>
-    <td>Année academique :</td>
-    <td>2023 - 2024</td>
-
-  </tr>
-    <tr>
-    <td>Date paiement :</td>
-    <td> 
-     </td>
-
-  </tr>
-    <tr>
-    <td>Montant payé :</td>
-    <td class="montant"><strong>
-      </strong></td>
-
-  </tr>
-
-</table>
- <hr>
-<div>
- <h5 style="text-align: center;">Cel:(225) 01 15 44 44 - BPV 43 Abidjan -Email: ufrseg-sf2@gmail.com</h5>
-</div>
-
-
+        </tfoot>
+    </table>
+    <p><b>ARRETE {{ code == 'a' ? 'LE PRESENT AVOIR': 'LA PRESENTE FACTURE' }} A LA SOMME DE: {{ (is_taxable ? facture.montant : facture.montantHt) | localize_number | upper }} FRANCS CFA</b></p>
     
+     #}
     <htmlpagefooter name="pageFooter">
-      
+       {#  <table style="width:100%">
+          <tr>
+            <td style="width:50%;text-align:left;padding-bottom:8px">
+              <i><b>Client</b></i>
+            </td>
+            <td style="width:50%;text-align:right">
+              <i><b>Souche</b></i>
+            </td>
+          </tr>
+        </table> #}
+        <div style="border-top:2px solid #000"></div>
+       <p  align="center" style="align: center;margin-top:-1px">
+        VRIDI FACE GESTOCI - 01 BP 5889 Abidjan 01 - e-mail: 
+        <a href="mailto:info@kuyopipeline.com">info@kuyopipeline.com</a><br>
+        Tél: +225 21 27 53 50 FAX.: +225 21 27 53 29 - Fax: (225) 21 27 53 29 - RC: 236319
+       </p>
     </htmlpagefooter>
-</body>
+  </body>
 </html>
-
-
-

@@ -15,7 +15,7 @@
             </span>
         </div>
     </div>
-    {{ form_start(form, {'attr': {'role':'form', 'class': 'form'}}) }}
+     {{ form_start(form, {'attr': {'role':'form', 'class': 'form'}}) }}
     <div class="modal-body">
         {{ include('_includes/ajax/response.html.twig') }}
            <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6">
@@ -36,6 +36,7 @@
             </ul>
 
             <div class="tab-content" id="myTabContent">
+
                 <div class="tab-pane fade show active" id="kt_tab_pane_1" role="tabpanel">
                     <div class="row">
                         <div class="form-group col-md-12 mb-2">{{ form_row(form.nom) }}</div>
@@ -84,6 +85,7 @@
                         <div class="form-group  col-md-3 mb-2">{{ form_row(form.autreExistence,{'attr':{'placeholder':'Saisissez vos informations'}}) }}</div>
                     </div>
                 </div> 
+
                 <div class="tab-pane fade" id="kt_tab_pane_4" role="tabpanel">
                     <div class="row mb-4">
                         <h6>Votre cursus universitaire</h6>
@@ -92,12 +94,12 @@
 
                         {{ prototype_ligne_colonne(form) }}
 
-<br>
+                        <br>
                     <div class="row mb-4">
                         <h6>Votre cursus professionnel</h6>
                     </div>
                     {{ prototype_ligne_colonne_professionnel(form) }}
-<br>
+                    <br>
                     <div class="row mb-4">
                         <h6>Vos stages éffectués</h6>
                     </div>
@@ -108,24 +110,26 @@
 
                 </div>
 
+                {# fin first #}
+
                 <div class="tab-pane fade" id="kt_tab_pane_5" role="tabpanel">
                      <div class="row mb-4">
-                <h6>Mes documents</h6>
-            </div>
-            <br>
+                        <h6>Mes documents</h6>
+                    </div>
+                     <br>
 
-            {{ prototype_ligne_colonne_document(form) }}
-            <br>
-                   
-
-    
-
+                    {{ prototype_ligne_colonne_document(form) }}
+                     <br>
                 </div>
 
-
-
+                 {# fin first #}
+            </div>
+                
 
     </div>
+
+
+  
     <div class="modal-footer">
         {# {{ include('_includes/ajax/loader.html.twig') }} #}
         <button type="button" class="btn btn-default btn-sm" data-bs-dismiss="modal">Annuler</button>
@@ -135,8 +139,8 @@
         
         {# <button type="submit" class="btn btn-main btn-ajax btn-sm"><span class="spinner-border d-none  spinner-ajax spinner-border-sm" role="status" aria-hidden="true"></span> Valider</button> #}
     </div>
-      {{ form_widget(form._token) }}
-            {{ form_end(form, {render_rest: false}) }}
+    {{ form_widget(form._token) }}
+    {{ form_end(form, {render_rest: false}) }}
 {% endblock %}
 
 {% block javascripts_inline %}
@@ -161,7 +165,7 @@ $(function () {
                 $(this).val(picker.startDate.format('DD/MM/YYYY'));
             });
         });
-           $("#modal-xl2").find('.modal-header').css("background","red");
+           //$("#modal-xl2").find('.modal-header').css("background","red");
             var elements = Array.from(document.querySelectorAll("[data-bs-stacked-modal]"));
 
             if (elements && elements.length > 0) {

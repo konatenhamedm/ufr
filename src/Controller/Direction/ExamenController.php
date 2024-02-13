@@ -3,18 +3,23 @@
 namespace App\Controller\Direction;
 
 use App\Entity\Examen;
+use App\Entity\Filiere;
 use App\Entity\Matiere;
 use App\Entity\MatiereExamen;
 use App\Form\ExamenType;
 use App\Repository\ExamenRepository;
+use App\Repository\PreinscriptionRepository;
 use App\Service\ActionRender;
 use App\Service\FormError;
+use App\Service\SendMailService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\QueryBuilder;
 use Omines\DataTablesBundle\Adapter\Doctrine\ORMAdapter;
 use Omines\DataTablesBundle\Column\BoolColumn;
 use Omines\DataTablesBundle\Column\DateTimeColumn;
 use Omines\DataTablesBundle\Column\TextColumn;
 use Omines\DataTablesBundle\DataTableFactory;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,9 +28,24 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/admin/direction/examen')]
 class ExamenController extends AbstractController
 {
-    #[Route('/', name: 'app_direction_examen_index', methods: ['GET', 'POST'])]
+    #[Route('/', name: 'app_direction_examen_index',   methods: ['GET', 'POST'], options: ['expose' => true])]
     public function index(Request $request, DataTableFactory $dataTableFactory): Response
     {
+
+        $filiere = $request->query->get('filiere');
+
+        $builder = $this->createFormBuilder(null, [
+            'method' => 'GET',
+            'action' => $this->generateUrl('app_direction_examen_index', compact('filiere'))
+        ])->add('filiere', EntityType::class, [
+            'class' => Filiere::class,
+            'choice_label' => 'libelle',
+            'label' => 'Filière',
+            'placeholder' => '---',
+            'required' => false,
+            'attr' => ['class' => 'form-control-sm has-select2']
+        ]);
+
         $table = $dataTableFactory->create()
             ->add('code', TextColumn::class, ['label' => 'Code'])
             ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
@@ -33,8 +53,22 @@ class ExamenController extends AbstractController
             ->add('dateExamen', DateTimeColumn::class, ['label' => 'Date Prévue', 'format' => 'd-m-Y'])
             ->createAdapter(ORMAdapter::class, [
                 'entity' => Examen::class,
+                'query' => function (QueryBuilder $qb) use ($filiere) {
+                    $qb->select(['d', 'n', 'f'])
+                        ->from(Examen::class, 'd')
+                        ->innerJoin('d.niveau', 'n')
+                        ->innerJoin('n.filiere', 'f')
+                        ->orderBy('d.id', 'DESC');
+
+                    if ($filiere) {
+                        if ($filiere) {
+                            $qb->andWhere('f.id = :filiere')
+                                ->setParameter('filiere', $filiere);
+                        }
+                    }
+                }
             ])
-            ->setName('dt_app_direction_examen');
+            ->setName('dt_app_direction_examen_' . $filiere);
 
         $renders = [
             'edit' =>  new ActionRender(function () {
@@ -47,7 +81,7 @@ class ExamenController extends AbstractController
                 return true;
             }),
         ];
-
+        $gridId = $filiere;
 
         $hasActions = false;
 
@@ -108,21 +142,23 @@ class ExamenController extends AbstractController
 
 
         return $this->render('direction/examen/index.html.twig', [
-            'datatable' => $table
+            'datatable' => $table,
+            'form' => $builder->getForm(),
+            'grid_id' => $gridId
         ]);
     }
 
 
     #[Route('/new', name: 'app_direction_examen_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, FormError $formError): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, FormError $formError, SendMailService $sendMailService, PreinscriptionRepository $preinscriptionRepository): Response
     {
         $examen = new Examen();
         $matieres = $entityManager->getRepository(Matiere::class)->findAll();
-        foreach ($matieres as $matiere) {
+        /*  foreach ($matieres as $matiere) {
             $matiereExamen = new MatiereExamen();
             $matiereExamen->setMatiere($matiere);
             $examen->addMatiereExamen($matiereExamen);
-        }
+        } */
         $form = $this->createForm(ExamenType::class, $examen, [
             'method' => 'POST',
             'action' => $this->generateUrl('app_direction_examen_new')
@@ -137,6 +173,27 @@ class ExamenController extends AbstractController
         if ($form->isSubmitted()) {
             $response = [];
             $redirect = $this->generateUrl('app_direction_examen_index');
+            /*    $data = $preinscriptionRepository->findBy(array('niveau' => $examen->getNiveau(), 'etat' => 'valide'));
+
+            $matieres = $examen->getMatiereExamens();
+
+            $date = $examen->getDateExamen();
+
+            $context = compact('data', 'date', 'matieres');
+
+
+            foreach ($data as $key => $preinscription) {
+
+                $sendMailService->send(
+                    //'konatefvaly@gmail.com',
+                    'konatenhamed@ufrseg.enig-sarl.com',
+                    $preinscription->getEtudiant()->getEmail(),
+                    'Informations',
+                    'template',
+                    $context
+                );
+            } */
+            // TO DO
 
 
 

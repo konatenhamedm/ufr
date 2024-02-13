@@ -63,8 +63,8 @@ class InscriptionController extends AbstractController
                 $this->getParameter('font_dir') . '/arial',
                 $this->getParameter('font_dir') . '/trebuchet',
             ],
-            'watermarkImg' => $imgFiligrame,
-            'entreprise' => ''
+            'watermarkImg' => '',
+            'entreprise' => 'UFR SEG'
         ], true);
         //return $this->renderForm("stock/sortie/imprime.html.twig");
 
@@ -387,7 +387,7 @@ class InscriptionController extends AbstractController
 
 
     #[Route('/{etat}', name: 'app_inscription_inscription_index', methods: ['GET', 'POST'])]
-    public function index(Request $request, UserInterface $user, string $etat, DataTableFactory $dataTableFactory): Response
+    public function index(Request $request, UserInterface $user, string $etat, DataTableFactory $dataTableFactory, EcheancierRepository $echeancierRepository): Response
     {
 
         //dd($etat);
@@ -423,6 +423,35 @@ class InscriptionController extends AbstractController
             $table
                 ->add('solde', NumberFormatColumn::class, ['label' => 'Solde', 'render' => function ($value, Inscription $preinscription) {
                     return   abs($preinscription->getMontant() - $preinscription->getTotalPaye());
+                }]);
+        } elseif ($etat == 'echeance_soumis') {
+            $table = $dataTableFactory->create()->add('code', TextColumn::class, ['label' => 'Code'])
+                ->add('filiere', TextColumn::class, ['field' => 'filiere.libelle', 'label' => 'Filière']);
+
+            if (!$isEtudiant) {
+                $table->add('nom_prenom', TextColumn::class, ['label' => 'Nom et prénoms', 'render' => function ($value, Inscription $preinscription) {
+                    return $preinscription->getEtudiant()->getNomComplet();
+                }]);
+            }
+
+            $table->add('montant', NumberFormatColumn::class, ['label' => 'Total à payer', 'field' => 'p.montant']);
+            //$table->add('totalPaye', NumberFormatColumn::class, ['label' => 'Total payé', 'field' => 'p.totalPaye']);
+            $table
+                ->add('nombre', NumberFormatColumn::class, ['label' => 'Nombre échéances', 'render' => function ($value, Inscription $preinscription) {
+                    return   count($preinscription->getEcheanciers());
+                }])
+                /*     ->add('dateDebut', TextColumn::class, ['label' => 'Nombre échéances', 'render' => function ($value, Inscription $preinscription) use ($echeancierRepository) {
+                    dd($echeancierRepository->findAllEcheanceDateFirst($preinscription->getId())[0]['debut']);
+                    return;
+                }]); */
+
+                ->add('debut', DateTimeColumn::class, ['label' => 'Date début', 'format' => 'd-m-Y', 'searchable' => false, 'render' => function ($value, Inscription $preinscription) use ($echeancierRepository) {
+
+                    return $echeancierRepository->findAllEcheanceDateFirst($preinscription->getId())[0]['debut'];
+                }])
+                ->add('debutFin', DateTimeColumn::class, ['label' => 'Date fin', 'format' => 'd-m-Y', 'searchable' => false, 'render' => function ($value, Inscription $preinscription) use ($echeancierRepository) {
+
+                    return $echeancierRepository->findAllEcheanceDateFirst($preinscription->getId())[0]['fin'];
                 }]);
         } else {
 
@@ -472,11 +501,18 @@ class InscriptionController extends AbstractController
         $renders = [
             'edit_etudiant' => new ActionRender(fn () => $etat == 'attente_echeance' || $etat == 'rejete'),
             'edit' => new ActionRender(fn () => $etat == 'echeance_soumis'),
+            'recu' => new ActionRender(function () use ($etat) {
+                if ($etat == 'solde') {
+                    return true;
+                } else {
+                    return false;
+                }
+            }),
             'delete' => new ActionRender(function () {
                 return false;
             }),
             'payer' => new ActionRender(fn () => $etat == 'valide' && $isEtudiant == false),
-            'recu' => new ActionRender(fn () => $etat == 'solde' && $isEtudiant == false),
+            //'recu' => new ActionRender(fn () => $etat == 'solde'),
 
         ];
 
@@ -508,8 +544,8 @@ class InscriptionController extends AbstractController
                                 'ajax' => true,
                                 'target' =>  '#exampleModalSizeSm2',
                                 'icon' => '%icon% bi bi-printer',
-                                'attrs' => ['class' => 'btn-main btn-stack']
-                                //, 'render' => new ActionRender(fn() => $source || $etat != 'cree')
+                                'attrs' => ['class' => 'btn-main btn-stack'],
+                                'render' => $renders['recu']
                             ],
 
                             /*  'recu' => [
@@ -641,6 +677,7 @@ class InscriptionController extends AbstractController
             'delete' => new ActionRender(function () {
                 return true;
             }),
+            // 'recu' => new ActionRender(fn () => $etat == 'solde'),
         ];
 
 
@@ -661,6 +698,19 @@ class InscriptionController extends AbstractController
                         'target' => '#modal-lg',
 
                         'actions' => [
+                            'recu' => [
+                                'url' => $this->generateUrl('default_print_iframe', [
+                                    'r' => 'app_comptabilite_inscription_print',
+                                    'params' => [
+                                        'id' => $value,
+                                    ]
+                                ]),
+                                'ajax' => true,
+                                'target' =>  '#exampleModalSizeSm2',
+                                'icon' => '%icon% bi bi-printer',
+                                'attrs' => ['class' => 'btn-main btn-stack']
+                                //, 'render' => new ActionRender(fn() => $source || $etat != 'cree')
+                            ],
                             'payer' => [
                                 'url' => $this->generateUrl('app_inscription_inscription_paiement_ok', ['id' => $value]),
                                 'ajax' => true,
@@ -782,7 +832,7 @@ class InscriptionController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_inscription_inscription_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit/admin', name: 'app_inscription_inscription_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Inscription $inscription, EntityManagerInterface $entityManager, InscriptionRepository $inscriptionRepository, FormError $formError, FraisInscriptionRepository $fraisRepository): Response
     {
 
@@ -939,7 +989,7 @@ class InscriptionController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-    #[Route('/{id}/paiement/bene', name: 'app_inscription_inscription_paiement_ok', methods: ['GET', 'POST'])]
+    #[Route('/{id}/paiement/admin/ok', name: 'app_inscription_inscription_paiement_ok', methods: ['GET', 'POST'])]
     public function paiement(Request $request, Inscription $inscription, EntityManagerInterface $entityManager, InscriptionRepository $inscriptionRepository, FormError $formError, FraisInscriptionRepository $fraisRepository, EcheancierRepository $echeancierRepository, UserInterface $user): Response
     {
 

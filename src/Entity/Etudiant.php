@@ -86,12 +86,16 @@ class Etudiant extends Personne
     #[ORM\Column(length: 255)]
     private ?string $etat = null;
 
+    #[ORM\OneToMany(mappedBy: 'etudiant', targetEntity: Document::class, orphanRemoval: true, cascade: ['persist'])]
+    private Collection $documents;
+
 
     public function __construct()
     {
         $this->niveauEtudiants = new ArrayCollection();
         $this->preinscriptions = new ArrayCollection();
         $this->inscriptions = new ArrayCollection();
+        $this->documents = new ArrayCollection();
     }
 
     /**
@@ -435,6 +439,36 @@ class Etudiant extends Personne
     public function setEtat(string $etat): static
     {
         $this->etat = $etat;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Document>
+     */
+    public function getDocuments(): Collection
+    {
+        return $this->documents;
+    }
+
+    public function addDocument(Document $document): static
+    {
+        if (!$this->documents->contains($document)) {
+            $this->documents->add($document);
+            $document->setEtudiant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDocument(Document $document): static
+    {
+        if ($this->documents->removeElement($document)) {
+            // set the owning side to null (unless already changed)
+            if ($document->getEtudiant() === $this) {
+                $document->setEtudiant(null);
+            }
+        }
 
         return $this;
     }

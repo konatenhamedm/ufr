@@ -250,7 +250,7 @@ class HomeController extends AbstractController
     }
 
     #[Route(path: '/site/information', name: 'site_information', methods: ['GET', 'POST'])]
-    public function information(Request $request, UserInterface $user, EtudiantRepository $etudiantRepository, PersonneRepository $personneRepository, FormError $formError, NiveauRepository $niveauRepository, UtilisateurRepository $utilisateurRepository): Response
+    public function information(Request $request, UserInterface $user, EtudiantRepository $etudiantRepository, PersonneRepository $personneRepository, FormError $formError, NiveauRepository $niveauRepository, UtilisateurRepository $utilisateurRepository, PreinscriptionRepository $preinscriptionRepository,): Response
     {
         $etudiant = $user->getPersonne();
 
@@ -279,7 +279,7 @@ class HomeController extends AbstractController
         if ($form->isSubmitted()) {
             $response = [];
             $redirect = $this->generateUrl('site_information');
-
+            $data = $preinscriptionRepository->findBy(array('etudiant' => $etudiant, 'etat' => 'attente_informations'));
 
 
 
@@ -287,15 +287,22 @@ class HomeController extends AbstractController
 
                 if ($form->getClickedButton()->getName() === 'valider') {
                     $etudiant->setEtat('complete');
+                    $message       = 'Votre dossier a bien été transmis pour validation. Vous recevrez une notification après traitement.';
                     $personneRepository->add($etudiant, true);
+
+                    foreach ($data as $key => $value) {
+                        $value->setEtat('attente_validation');
+                        $preinscriptionRepository->add($value, true);
+                    }
                 } else {
                     $personneRepository->add($etudiant, true);
+                    $message       = 'Opération effectuée avec succès';
                 }
 
                 //$entityManager->flush();
 
                 $data = true;
-                $message       = 'Opération effectuée avec succès';
+
                 $statut = 1;
                 $this->addFlash('success', $message);
             } else {
@@ -325,12 +332,16 @@ class HomeController extends AbstractController
         //return $this->render('site/admin/pages/informations.html.twig');
     }
 
+    #[Route(path: '/site/document/{id}', name: 'site_document_autre', methods: ['GET', 'POST'])]
     #[Route(path: '/site/document', name: 'site_document', methods: ['GET', 'POST'])]
     public function document(Request $request, UserInterface $user, PersonneRepository $personneRepository, EtudiantRepository $etudiantRepository, FormError $formError): Response
     {
-        $etudiant = $personneRepository->find($user->getPersonne()->getId());
+        $etudiant = $etudiantRepository->find($user->getPersonne()->getId());
 
-        /* dd($user); */
+        //  dd($user->getPersonne()->getId());
+
+        //$this->getUploadDir(self::UPLOAD_PATH, true);
+        /*  } */
 
         //dd($etudiant);
         $validationGroups = ['Default', 'FileRequired', 'autre'];

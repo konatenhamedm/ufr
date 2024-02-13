@@ -34,9 +34,15 @@ class PreinscriptionController extends AbstractController
                 'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_index')
             ],
             [
+                'label' => 'Préinscriptions payées',
+                'icon' => 'bi bi-list',
+                'module' => 'gestiono',
+                'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_preinscription_solde_index')
+            ],
+            [
                 'label' => 'En attente de complement',
                 'icon' => 'bi bi-list',
-                'module' => 'gestion',
+                'module' => 'gestionk',
                 'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_preinscription_index', ['etat' => 'attente_informations'])
             ],
         ];

@@ -9,11 +9,18 @@ use App\Entity\Preinscription;
 use App\Form\EtudiantType;
 use App\Form\EtudiantVerificationType;
 use App\Form\PreinscriptionValidationType;
+use App\Repository\EtudiantRepository;
 use App\Repository\NiveauRepository;
 use App\Repository\PersonneRepository;
 use App\Repository\PreinscriptionRepository;
 use App\Repository\UtilisateurRepository;
+use App\Service\ActionRender;
 use App\Service\FormError;
+use App\Service\Omines\Adapter\ORMAdapter;
+use Doctrine\ORM\QueryBuilder;
+use Omines\DataTablesBundle\Column\DateTimeColumn;
+use Omines\DataTablesBundle\Column\TextColumn;
+use Omines\DataTablesBundle\DataTableFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -104,6 +111,13 @@ class HomeController extends AbstractController
                 'module' => 'gestion',
                 'href' => $this->generateUrl('app_inscription_inscription_list_ls', ['etat' => 'attente_echeance'])
             ],
+            [
+                'label' => 'En attente validation échéancier de paiement',
+                'icon' => 'bi bi-list',
+                'module' => 'gestion',
+                'href' => $this->generateUrl('app_inscription_inscription_list_ls', ['etat' => 'echeance_soumis'])
+            ],
+
             [
                 'label' => 'En cours de paiement ',
                 'icon' => 'bi bi-list',
@@ -253,7 +267,7 @@ class HomeController extends AbstractController
 
         if ($form->isSubmitted()) {
             $response = [];
-            $redirect = $this->generateUrl('site_information');
+            $redirect = $this->generateUrl('app_home_timeline_index');
 
 
 
@@ -298,7 +312,7 @@ class HomeController extends AbstractController
     }
 
     #[Route('/{id}/rejeter', name: 'app_demande_rejeter', methods: ['GET', 'POST'])]
-    public function Rejeter(Request $request, Preinscription $preinscription, PreinscriptionRepository $preinscriptionRepository, FormError $formError, Registry $workflow,): Response
+    public function Rejeter(Request $request, Preinscription $preinscription, PreinscriptionRepository $preinscriptionRepository, FormError $formError, Registry $workflow, EtudiantRepository $etudiantRepository): Response
     {
         //dd();
 
@@ -337,6 +351,11 @@ class HomeController extends AbstractController
                     $preinscription->setEtat('rejete');
                 } else {
                     $preinscription->setEtat('attente_informations');
+
+                    $etudiant = $preinscription->getEtudiant();
+
+                    $etudiant->setEtat('pas_complet');
+                    $etudiantRepository->add($etudiant, true);
                 }
                 $preinscriptionRepository->add($preinscription, true);
                 // $demandeRepository->save($demande, true);
@@ -371,6 +390,118 @@ class HomeController extends AbstractController
             'preinscription' => $preinscription,
             // 'fichiers' => $repository->findOneBySomeFields($demande),
             'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/preinscription/solde', name: 'app_comptabilite_niveau_etudiant_preinscription_solde_index', methods: ['GET', 'POST'])]
+    public function indexPreinscriptionSolde(Request $request, DataTableFactory $dataTableFactory, UserInterface $user): Response
+    {
+
+        //dd('vv');
+        $ver = $this->isGranted('ROLE_ETUDIANT');
+        $table = $dataTableFactory->create()
+            ->add('code', TextColumn::class, ['label' => 'Code Preinscription'])
+            ->add('etudiant', TextColumn::class, ['label' => 'Nom et Prénoms', 'render' => function ($value, Preinscription $preinscription) {
+                return   $preinscription->getEtudiant()->getNomComplet();
+            }])
+            /* ->add('etudiant', TextColumn::class, ['field' => 'etudiant.nom', 'label' => 'Nom'])
+            ->add('prenoms', TextColumn::class, ['field' => 'etudiant.prenom', 'label' => 'Prénoms']) */
+            ->add('dateNaissance', DateTimeColumn::class, ['label' => 'Date de naissance', 'format' => 'd-m-Y', "searchable" => false, 'field' => 'etudiant.dateNaissance'])
+            ->add('filiere', TextColumn::class, ['label' => 'Filiere', 'field' => 'filiere.libelle'])
+            ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date pré-inscription', 'format' => 'd/m/Y', "searchable" => false,])
+            /*   ->add('caissiere', TextColumn::class, ['field' => 'c.getNomComplet', 'label' => 'Caissière ']) */
+            //->add('montantPreinscription', NumberFormatColumn::class, ['label' => 'Mnt. Préinscr.'])
+            ->createAdapter(ORMAdapter::class, [
+                'entity' => Preinscription::class,
+                'query' => function (QueryBuilder $qb) use ($user, $ver) {
+                    $qb->select('e, filiere, etudiant,niveau,c')
+                        ->from(Preinscription::class, 'e')
+                        ->join('e.etudiant', 'etudiant')
+                        ->join('e.niveau', 'niveau')
+                        ->join('niveau.filiere', 'filiere')
+                        ->leftJoin('e.caissiere', 'c')
+                        ->andWhere('e.etat = :statut')
+                        ->setParameter('statut', 'valide');
+
+                    if ($this->isGranted('ROLE_ETUDIANT')) {
+                        $qb->andWhere('e.etudiant = :etudiant')
+                            ->setParameter('etudiant', $user->getPersonne());
+                    }
+                }
+            ])
+            ->setName('dt_app_comptabilite_niveau_etudiant_preinscription_solde');
+        // dd($this->isGranted('ROLE_ETUDIANT'));
+        $renders = [
+            'edit' => new ActionRender(fn () => $ver == false),
+            'delete' => new ActionRender(function () {
+                return false;
+            }),
+            'show' => new ActionRender(function () {
+                return true;
+            }),
+            'imprime' => new ActionRender(function () {
+                return true;
+            }),
+        ];
+
+
+        $hasActions = false;
+
+        foreach ($renders as $_ => $cb) {
+            if ($cb->execute()) {
+                $hasActions = true;
+                break;
+            }
+        }
+
+        if ($hasActions) {
+            $table->add('id', TextColumn::class, [
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Preinscription $context) use ($renders) {
+                    $options = [
+                        'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
+                        'target' => '#modal-lg',
+
+                        'actions' => [
+                            'imprime' => [
+                                'url' => $this->generateUrl('default_print_iframe', [
+                                    'r' => 'app_comptabilite_print',
+                                    'params' => [
+                                        'id' => $value,
+                                    ]
+                                ]),
+                                'ajax' => true,
+                                'target' =>  '#exampleModalSizeSm2',
+                                'icon' => '%icon% bi bi-printer',
+                                'attrs' => ['class' => 'btn-main btn-stack']
+                                //, 'render' => new ActionRender(fn() => $source || $etat != 'cree')
+                            ],
+                            'show' => [
+                                'url' => $this->generateUrl('app_comptabilite_preinscription_show', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-eye',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['show']
+                            ],
+
+                        ]
+
+                    ];
+                    return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
+                }
+            ]);
+        }
+
+
+        $table->handleRequest($request);
+
+        if ($table->isCallback()) {
+            return $table->getResponse();
+        }
+
+
+        return $this->render('comptabilite/niveau_etudiant/index_solde.html.twig', [
+            'datatable' => $table
         ]);
     }
 }

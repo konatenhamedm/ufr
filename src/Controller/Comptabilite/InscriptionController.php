@@ -62,7 +62,7 @@ class InscriptionController extends AbstractController
             ->add('mode', EntityType::class, [
                 'class' => NaturePaiement::class,
                 'choice_label' => 'libelle',
-                'label' => 'Mode paiement',
+                'label' => 'Mode de paiement',
                 'placeholder' => '---',
                 'required' => false,
                 'attr' => ['class' => 'form-control-sm has-select2']
@@ -115,7 +115,7 @@ class InscriptionController extends AbstractController
             ->add('datePaiement', DateTimeColumn::class, ['label' => 'Date paiement', 'format' => 'd-m-Y H:i:s', 'field' => 'info.datePaiement'])
             ->add('montantPaiement', NumberFormatColumn::class, ['label' => 'Montant', 'field' => 'info.montant'])
             /*  ->add('montant', NumberFormatColumn::class, ['label' => 'Montant', 'field' => 'info.montant']) */
-            ->add('mode', TextColumn::class, ['label' => 'Mode paiement', 'render' => function ($value, Preinscription $context) {
+            ->add('mode', TextColumn::class, ['label' => 'Mode de paiement', 'render' => function ($value, Preinscription $context) {
                 return $context->getInfoPreinscription() ? $context->getInfoPreinscription()->getModePaiement()->getLibelle() : 'En attente de paiement';
             }])
             ->add('caissiere', TextColumn::class, ['label' => 'Caissière', 'field' => 'ca.getNomComplet'])

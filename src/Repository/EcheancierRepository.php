@@ -34,6 +34,17 @@ class EcheancierRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findAllEcheanceDateFirst($value): array
+    {
+        return $this->createQueryBuilder('f')
+            ->select('MIN(f.dateCreation) debut ,MAX(f.dateCreation) fin')
+            ->innerJoin('f.inscription', 'l')
+            ->andWhere('l.id = :id')
+            ->setParameter('id', $value)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Echeancier[] Returns an array of Echeancier objects
     //     */

@@ -26,8 +26,32 @@
                     <th>Etat</th>
                     <td>{{ preinscription.etat }}</td>
                 </tr>
+                            <tr>
+                    <th>Montant préinscription</th>
+                    <td>{{ preinscription.niveau.filiere.montantPreinscription }}</td>
+                </tr>
                     </tbody>
     </table>
+
+    {% if preinscription.commentaire and preinscription.etat in ['rejete','attente_informations','attente_validation'] %}
+    <div class="alert alert-danger d-flex align-items-center p-5">
+    <!--begin::Icon-->
+    <span class="svg-icon svg-icon-2hx svg-icon-primary me-3">...</span>
+    <!--end::Icon-->
+
+    <!--begin::Wrapper-->
+    <div class="d-flex flex-column">
+        <!--begin::Title-->
+        <h4 class="mb-1 text-dark">Alerte Commentaire</h4>
+        <!--end::Title-->
+        <!--begin::Content-->
+        <span>{{ preinscription.commentaire }}.</span>
+        <!--end::Content-->
+    </div>
+    <!--end::Wrapper-->
+</div>
+    {% endif %}
+    
     </div>
     <div class="modal-footer">
         <button type="button" class="btn dark btn-outline" data-bs-dismiss="modal">Fermer</button>

@@ -70,8 +70,8 @@ class Personne
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $contact = null;
 
-    #[ORM\OneToMany(mappedBy: 'personne', targetEntity: Document::class, orphanRemoval: true, cascade: ['persist'])]
-    private Collection $documents;
+    /*   #[ORM\OneToMany(mappedBy: 'personne', targetEntity: Document::class, orphanRemoval: true, cascade: ['persist'])]
+    private Collection $documents; */
 
     #[ORM\OneToMany(mappedBy: 'personne', targetEntity: CursusUniversitaire::class, orphanRemoval: true, cascade: ['persist'])]
     private Collection $cursusUniversitaires;
@@ -84,7 +84,7 @@ class Personne
 
     public function __construct()
     {
-        $this->documents = new ArrayCollection();
+        // $this->documents = new ArrayCollection();
         $this->cursusUniversitaires = new ArrayCollection();
         $this->cursusProfessionnels = new ArrayCollection();
         $this->stages = new ArrayCollection();
@@ -227,35 +227,6 @@ class Personne
         return $this;
     }
 
-    /**
-     * @return Collection<int, Document>
-     */
-    public function getDocuments(): Collection
-    {
-        return $this->documents;
-    }
-
-    public function addDocument(Document $document): static
-    {
-        if (!$this->documents->contains($document)) {
-            $this->documents->add($document);
-            $document->setPersonne($this);
-        }
-
-        return $this;
-    }
-
-    public function removeDocument(Document $document): static
-    {
-        if ($this->documents->removeElement($document)) {
-            // set the owning side to null (unless already changed)
-            if ($document->getPersonne() === $this) {
-                $document->setPersonne(null);
-            }
-        }
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, CursusUniversitaire>

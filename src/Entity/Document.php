@@ -22,9 +22,9 @@ class Document
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\ManyToOne(inversedBy: 'documents')]
-    /* #[ORM\JoinColumn(nullable: false)] */
-    private ?Personne $personne = null;
+    /*  #[ORM\ManyToOne(inversedBy: 'documents')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Personne $personne = null; */
 
     public function __construct()
     {
@@ -33,6 +33,9 @@ class Document
 
     #[ORM\Column(length: 255)]
     private ?string $libelle = null;
+
+    #[ORM\ManyToOne(inversedBy: 'documents')]
+    private ?Etudiant $etudiant = null;
 
     public function getId(): ?int
     {
@@ -63,7 +66,7 @@ class Document
         return $this;
     }
 
-    public function getPersonne(): ?Personne
+    /*   public function getPersonne(): ?Personne
     {
         return $this->personne;
     }
@@ -73,7 +76,7 @@ class Document
         $this->personne = $personne;
 
         return $this;
-    }
+    } */
 
     /* public function getTypeDocument(): ?TypeDocument
     {
@@ -95,6 +98,18 @@ class Document
     public function setLibelle(string $libelle): static
     {
         $this->libelle = $libelle;
+
+        return $this;
+    }
+
+    public function getEtudiant(): ?Etudiant
+    {
+        return $this->etudiant;
+    }
+
+    public function setEtudiant(?Etudiant $etudiant): static
+    {
+        $this->etudiant = $etudiant;
 
         return $this;
     }

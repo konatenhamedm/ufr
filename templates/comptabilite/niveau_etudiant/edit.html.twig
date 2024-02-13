@@ -15,30 +15,83 @@
     <div class="modal-body corp">
         {{ include('_includes/ajax/response.html.twig') }}
 
-        <div class="alert alert-dismissible bg-light-primary border border-info border-1 border-dashed p-5 mb-5">
+            <table class="table table-bordered table-custom">
+       {#  <thead class="thead-dark">
+            <tr>
+                <th width="70%" class="p-2">Code pré-inscription</th>
+                <th width="30%" class="p-2">Montant</th>
+            </tr>
+        </thead> #}
+        <tbody  class="row-container">
+             <tr class="row-colonne even pointer table-light">
+                <td class="p-2">
+                Code pré-inscription
+                    
+                </td>
+                 <td class="p-2"><b>{% if(preinscription.code) %}  {{ preinscription.code }} {% else %} NEANT {% endif %}</b></td>
+            </tr>
+             <tr class="row-colonne even pointer table-light">
+                <td class="p-2">
+                Nom et prénoms
+                    
+                </td>
+                 <td class="p-2"> <b>{{ etudiant.getNomComplet }}</b></td>
+            </tr>
+             <tr class="row-colonne even pointer table-light">
+                <td class="p-2">
+               <b>Montant à payer</b>
+                    
+                </td>
+                 <td class="p-2 total" style="color: red;"> <b> {{ preinscription.niveau.filiere.montantPreinscription }} Frcfa</b></td>
+            </tr>
+             <tr class="row-colonne even pointer table-light">
+                <td class="p-2">
+                Date de naissance
+                    
+                </td>
+                 <td class="p-2"> <b>{{ etudiant.dateNaissance |date("m/d/Y") }}</b></td>
+            </tr>
+             <tr class="row-colonne even pointer table-light">
+                <td class="p-2">
+                Filière
+                    
+                </td>
+                 <td class="p-2"> <b>{{ preinscription.niveau.filiere.libelle }}</b></td>
+            </tr>
+        </tbody>
+       {#  <tfoot>
+            <tr>
+                <th class="text-end p-2">TOTAL</th>
+                <th class="total text-end p-2 fw-bolder">0</td>
+            </tr>
+        </tfoot> #}
+    </table><br>
+
+
+       {#  <div class="alert alert-dismissible bg-light-primary border border-info border-1 border-dashed p-5 mb-5">
         <div class="row p-0 m-0 mb-4">
 
             <div class="col">
                 Code pré-inscription: <b>{% if(preinscription.code) %}  {{ preinscription.code }} {% else %} NEANT {% endif %}</b>
             </div>
             <div class="col">
-                Nom et prenom: <b>{{ etudiant.getNomComplet }}</b>
+                Nom et prénoms: <b>{{ etudiant.getNomComplet }}</b>
             </div>
 
-            </div>
+        </div>
             <div class="row p-0 m-0">
                 <div class="col">
-                    Montant pré-inscription: <b> {{ preinscription.niveau.filiere.montantPreinscription }} Frcfa</b>
+                    <b>Montant à payer</b>: <b> {{ preinscription.niveau.filiere.montantPreinscription }} Frcfa</b>
                 </div>
                 <div class="col">
-                    Date naissance: <b>{{ etudiant.dateNaissance |date("m/d/Y") }}</b>
+                    Date de naissance: <b>{{ etudiant.dateNaissance |date("m/d/Y") }}</b>
                 </div>
                 <div class="col">
-                    Filiere: <b>{{ preinscription.niveau.filiere.libelle }}</b>
+                    Filière : <b>{{ preinscription.niveau.filiere.libelle }}</b>
                 </div>
                 
             </div>
-    </div>
+    </div> #}
        {% if(etat != 'paiement_confirmation') %}
         <div class="row">
             <div class="col-md-6">

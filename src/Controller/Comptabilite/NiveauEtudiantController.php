@@ -56,9 +56,10 @@ class NiveauEtudiantController extends AbstractController
     }
 
     #[Route('/{etat}/{id}', name: 'app_comptabilite_niveau_etudiant_preinscription_suivi_formation_index', methods: ['GET', 'POST'])]
-    public function indexFormation(Request $request, DataTableFactory $dataTableFactory, $etat, $id, UtilisateurGroupeRepository $utilisateurGroupeRepository): Response
+    public function indexFormation(UserInterface $user, Request $request, DataTableFactory $dataTableFactory, $etat, $id, UtilisateurGroupeRepository $utilisateurGroupeRepository): Response
     {
-        // dd($etat);
+        //dd($etat);
+        $isEtudiant = $this->isGranted('ROLE_ETUDIANT');
         $titre = '';
         if ($etat == "attente_paiement") {
             $titre = "Liste des préinscriptions en attente de finalisation";
@@ -73,7 +74,7 @@ class NiveauEtudiantController extends AbstractController
         if ($etat == "valider_non_paye" || $etat == "valider_paye") {
             $table = $dataTableFactory->create()
                 //->add('nom', TextColumn::class, ['field' => 'etudiant.getNomComplet', 'label' => 'Nom et Prénoms'])
-                ->add('code', TextColumn::class, ['label' => 'Code'])
+                /* ->add('code', TextColumn::class, ['label' => 'Code']) */
                 ->add('etudiant', TextColumn::class, ['label' => 'Nom et Prénoms', 'render' => function ($value, Preinscription $preinscription) {
                     return   $preinscription->getEtudiant()->getNomComplet();
                 }])
@@ -94,9 +95,20 @@ class NiveauEtudiantController extends AbstractController
                             ->join('niveau.filiere', 'filiere')
 
                             ->andWhere('e.id = :id')
-                            ->andWhere('e.etat = :statut')
-                            ->setParameter('id', $id)
-                            ->setParameter('statut', $etat);
+
+                            ->setParameter('id', $id);
+
+                        if ($etat == 'attente_informations') {
+                            $qb->andWhere('e.etat = :etat')
+                                ->orWhere('e.etat = :etat1')
+                                ->orWhere('e.etat = :etat2')
+                                ->setParameter('etat', 'attente_informations')
+                                ->setParameter('etat1', 'attente_paiement')
+                                ->setParameter('etat2', 'rejete');
+                        } else {
+                            $qb->andWhere('e.etat = :etat')
+                                ->setParameter('etat', $etat);
+                        }
 
                         if ($utilisateurGroupeRepository->findOneBy(array('utilisateur' => $this->utilisateur))->getGroupe()->getLibelle() == "Etudiants") {
                             $qb->andWhere('etudiant.id = :etudiant')
@@ -130,9 +142,9 @@ class NiveauEtudiantController extends AbstractController
                             ->join('niveau.filiere', 'filiere')
 
                             ->andWhere('e.id = :id')
-                            ->andWhere('e.etat = :statut')
-                            ->setParameter('id', $id)
-                            ->setParameter('statut', $etat);
+
+                            ->setParameter('id', $id);
+
 
                         if ($utilisateurGroupeRepository->findOneBy(array('utilisateur' => $this->utilisateur))->getGroupe()->getLibelle() == "Etudiants") {
                             $qb->andWhere('etudiant.id = :etudiant')
@@ -157,8 +169,8 @@ class NiveauEtudiantController extends AbstractController
                     return false;
                 }
             }),
-            'verification' =>  new ActionRender(function () use ($etat) {
-                if ($etat == 'attente_validation') {
+            'verification' =>  new ActionRender(function () use ($etat, $isEtudiant) {
+                if ($etat == 'attente_validation' && $isEtudiant == false) {
                     return true;
                 } else {
                     return false;
@@ -167,6 +179,14 @@ class NiveauEtudiantController extends AbstractController
             'delete' => new ActionRender(function () {
                 return false;
             }),
+            'show' => new ActionRender(function () use ($etat) {
+                if ($etat == 'attente_validation') {
+                    return true;
+                } else {
+                    return false;
+                }
+            }),
+
         ];
 
 
@@ -204,6 +224,14 @@ class NiveauEtudiantController extends AbstractController
                                 'attrs' => ['class' => 'btn-main'],
                                 'render' => $renders['edit']
                             ],
+                            'show' => [
+                                'url' => $this->generateUrl('app_comptabilite_preinscription_show', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-eye',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['show']
+                            ],
                             'delete' => [
                                 'target' => '#modal-small',
                                 'url' => $this->generateUrl('app_comptabilite_niveau_etudiant_delete', ['id' => $value]),
@@ -240,9 +268,10 @@ class NiveauEtudiantController extends AbstractController
 
 
     #[Route('/{etat}', name: 'app_comptabilite_niveau_etudiant_preinscription_index', methods: ['GET', 'POST'])]
-    public function indexPreinscription(Request $request, DataTableFactory $dataTableFactory, $etat, UtilisateurGroupeRepository $utilisateurGroupeRepository): Response
+    public function indexPreinscription(Request $request, DataTableFactory $dataTableFactory, $etat, UtilisateurGroupeRepository $utilisateurGroupeRepository, UserInterface $user): Response
     {
         // dd($etat);
+        $isEtudiant = $this->isGranted('ROLE_ETUDIANT');
         $titre = '';
         if ($etat == "attente_paiement") {
             $titre = "Liste des préinscriptions en attente de finalisation";
@@ -257,7 +286,7 @@ class NiveauEtudiantController extends AbstractController
         if ($etat == "valider_non_paye" || $etat == "valider_paye") {
             $table = $dataTableFactory->create()
                 //->add('nom', TextColumn::class, ['field' => 'etudiant.getNomComplet', 'label' => 'Nom et Prénoms'])
-                ->add('code', TextColumn::class, ['label' => 'Code'])
+                /*  ->add('code', TextColumn::class, ['label' => 'Code']) */
                 ->add('etudiant', TextColumn::class, ['label' => 'Nom et Prénoms', 'render' => function ($value, Preinscription $preinscription) {
                     return   $preinscription->getEtudiant()->getNomComplet();
                 }])
@@ -275,10 +304,22 @@ class NiveauEtudiantController extends AbstractController
                             /*   ->join('e.filiere', 'filiere') */
                             /*  ->leftJoin('e.caissiere', 'c') */
                             ->join('e.niveau', 'niveau')
-                            ->join('niveau.filiere', 'filiere')
+                            ->join('niveau.filiere', 'filiere');
 
-                            ->andWhere('e.etat = :statut')
-                            ->setParameter('statut', $etat);
+                        /* ->andWhere('e.etat = :statut')
+                            ->setParameter('statut', $etat); */
+
+                        if ($etat == 'attente_informations') {
+                            $qb->andWhere('e.etat = :etat')
+                                ->orWhere('e.etat1 = :etat1')
+                                ->orWhere('e.etat2 = :etat2')
+                                ->setParameter('etat', 'attente_informations')
+                                ->setParameter('etat1', 'attente_paiement')
+                                ->setParameter('etat2', 'rejete');
+                        } else {
+                            $qb->andWhere('e.etat = :etat')
+                                ->setParameter('etat', $etat);
+                        }
 
                         if ($utilisateurGroupeRepository->findOneBy(array('utilisateur' => $this->utilisateur))->getGroupe()->getLibelle() == "Etudiants") {
                             $qb->andWhere('etudiant.id = :etudiant')
@@ -293,7 +334,7 @@ class NiveauEtudiantController extends AbstractController
                 ->setName('dt_app_comptabilite_niveau_etudiant_preinscription' . $etat);
         } else {
             $table = $dataTableFactory->create()
-                ->add('code', TextColumn::class, ['label' => 'Code'])
+                /*  ->add('code', TextColumn::class, ['label' => 'Code']) */
                 ->add('etudiant', TextColumn::class, ['label' => 'Nom et Prénoms', 'render' => function ($value, Preinscription $preinscription) {
                     return   $preinscription->getEtudiant()->getNomComplet();
                 }])
@@ -337,8 +378,8 @@ class NiveauEtudiantController extends AbstractController
                     return false;
                 }
             }),
-            'verification' =>  new ActionRender(function () use ($etat) {
-                if ($etat == 'attente_validation') {
+            'verification' =>  new ActionRender(function () use ($etat, $isEtudiant) {
+                if ($etat == 'attente_validation' &&  $isEtudiant == false) {
                     return true;
                 } else {
                     return false;
@@ -346,6 +387,13 @@ class NiveauEtudiantController extends AbstractController
             }),
             'delete' => new ActionRender(function () {
                 return false;
+            }),
+            'show' => new ActionRender(function () use ($etat) {
+                if ($etat == 'attente_validation') {
+                    return true;
+                } else {
+                    return false;
+                }
             }),
         ];
 
@@ -367,12 +415,20 @@ class NiveauEtudiantController extends AbstractController
                         'target' => '#modal-lg',
 
                         'actions' => [
+                            'show' => [
+                                'url' => $this->generateUrl('app_comptabilite_preinscription_show', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-eye',
+                                'attrs' => ['class' => 'btn-primary'],
+                                'render' => $renders['show']
+                            ],
                             'verification' => [
                                 'target' => '#modal-xl',
                                 'url' => $this->generateUrl('verification_validation_dossier', ['id' => $context->getEtudiant()->getId(), 'preinscription' => $value]),
                                 'ajax' => true,
                                 'stacked' => false,
-                                'icon' => '%icon% bi bi-pen',
+                                'icon' => '%icon% bi bi-folder',
                                 'attrs' => ['class' => 'btn-main'],
                                 'render' => $renders['verification']
                             ],
@@ -416,6 +472,8 @@ class NiveauEtudiantController extends AbstractController
         ]);
     }
 
+
+
     #[Route('/', name: 'app_comptabilite_niveau_etudiant_index', methods: ['GET', 'POST'])]
     public function index(Request $request, DataTableFactory $dataTableFactory, UserInterface $user): Response
     {
@@ -427,7 +485,7 @@ class NiveauEtudiantController extends AbstractController
             }])
             /* ->add('etudiant', TextColumn::class, ['field' => 'etudiant.nom', 'label' => 'Nom'])
             ->add('prenoms', TextColumn::class, ['field' => 'etudiant.prenom', 'label' => 'Prénoms']) */
-            ->add('etudiant.dateNaissance', DateTimeColumn::class, ['label' => 'Date de naissance', 'format' => 'd-m-Y', "searchable" => false, 'field' => 'etudiant.dateNaissance'])
+            ->add('dateNaissance', DateTimeColumn::class, ['label' => 'Date de naissance', 'format' => 'd-m-Y', "searchable" => false, 'field' => 'etudiant.dateNaissance'])
             ->add('filiere', TextColumn::class, ['label' => 'Filiere', 'field' => 'filiere.libelle'])
             ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date pré-inscription', 'format' => 'd/m/Y', "searchable" => false,])
             /*   ->add('caissiere', TextColumn::class, ['field' => 'c.getNomComplet', 'label' => 'Caissière ']) */
@@ -799,7 +857,7 @@ class NiveauEtudiantController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_comptabilite_paiement_etudiant_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit/paiement', name: 'app_comptabilite_paiement_etudiant_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Preinscription  $preinscription, PaiementRepository $paiementRepository, InfoPreinscriptionRepository $infoPreinscriptionRepository, PreinscriptionRepository $preinscriptionRepository, EntityManagerInterface $entityManager, FormError $formError, NaturePaiementRepository $naturePaiementRepository): Response
     {
         // dd($niveauEtudiant->getEtudiant()->getNom());
@@ -842,6 +900,7 @@ class NiveauEtudiantController extends AbstractController
                         $workflow->apply($preinscription, 'paiement');
                     } else {
                         $workflow->apply($preinscription, 'paiement_confirmation');
+                        //$workflow->apply($preinscription, 'paiement_confirmation');
                     }
                     $paiement = new Paiement();
                     $paiement->setDatePaiement($form->get('datePaiement')->getData());

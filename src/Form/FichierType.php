@@ -24,8 +24,6 @@ class FichierType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-
-
         if (isset($options['doc_options']['mime_types'])) {
             $mimeTypes = $options['doc_options']['mime_types'];
             unset($options['doc_options']['mime_types']);
@@ -119,13 +117,12 @@ class FichierType extends AbstractType
             'attrs' => [],
             'mime_types' => self::DEFAULT_MIME_TYPES,
             'required' => false,
-            //'validation_groups' => ['Default', 'FileRequired']
+            'validation_groups' => ['Default', 'FileRequired']
         ]);
 
         $resolver->setRequired('doc_options');
         $resolver->setRequired('mime_types');
         $resolver->setRequired('attrs');
         $resolver->setRequired('required');
-        $resolver->setRequired(['validation_groups']);
     }
 }

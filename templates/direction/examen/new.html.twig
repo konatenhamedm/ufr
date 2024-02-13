@@ -104,12 +104,14 @@
 
             function addDeleteLink($prototype) {
                 // Création du lien
-                $deleteLink = $('<a href="#" class="btn btn-main btn-xs"><span class="bi bi-trash"></span></a>');
+                $deleteLink = $('<a href="#" class="btn btn-danger btn-xs"><span class="bi bi-trash"></span></a>');
                 // Ajout du lien
                 $prototype.find(".del-col").append($deleteLink);
                 // Ajout du listener sur le clic du lien
                 $deleteLink.click(function (e) {
-                    const $parent = $(this).closest('.row-line');
+                     const $this = $(this);
+                   //  alert('')
+                    const $parent =  $this.closest('.row-colonne');
                     $parent.remove();
 
                     if (index > 0) {

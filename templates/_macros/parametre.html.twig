@@ -61,11 +61,11 @@
    
     <tr class="row-colonne even pointer table-light">
         <td class="p-2">
-            <span class="label">{{ data.matiere.vars.data.libelle | default('') }}</span>
-            <div style="display:none " class="field-matiere">{{ form_widget(data.matiere) }}</div>
+            {# <span class="label">{{ data.matiere.vars.data.libelle | default('') }}</span> #}
+            <div style="display:no " class="field-matiere">{{ form_widget(data.matiere) }}</div>
         </td>
         <td class="p-2">{{ form_widget(data.coefficient) }}</td>
-        <td class="p-2 del-col"><a href="#" class="btn btn-danger btn-xs"><span class="bi bi-trash"></span></a></td>
+        <td class="p-2 del-col">{# <a href="#" class="btn btn-danger btn-xs"><span class="bi bi-trash"></span></a> #}</td>
     </tr>
 {% endmacro %}
 

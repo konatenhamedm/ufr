@@ -288,7 +288,7 @@ class PreinscriptionController extends AbstractController
         $table->createAdapter(ORMAdapter::class, [
             'entity' => Preinscription::class,
             'query' => function (QueryBuilder $qb) use ($user, $etat) {
-                $qb->select(['p', 'niveau', 'c', 'filiere', 'etudiant', 'info'])
+                $qb->select(['p', 'niveau', 'c', 'filiere', 'etudiant'])
                     ->from(Preinscription::class, 'p')
                     ->join('p.niveau', 'niveau')
                     ->join('niveau.filiere', 'filiere')
@@ -346,13 +346,17 @@ class PreinscriptionController extends AbstractController
 
                         'actions' => [
                             'imprime' => [
-                                'url' => $this->generateUrl('app_comptabilite_print', ['id' => $value]),
-                                'ajax' => false,
-                                'stacked' => false,
-                                'icon' => '%icon% fa fa-print',
-                                'attrs' => ['class' => 'btn-main', 'title' => 'Imprime'],
-                                'render' => new ActionRender(fn () => $context->getEtat() == 'valide')
-                                //'render' => $renders['imprime']
+                                'url' => $this->generateUrl('default_print_iframe', [
+                                    'r' => 'app_comptabilite_print',
+                                    'params' => [
+                                        'id' => $value,
+                                    ]
+                                ]),
+                                'ajax' => true,
+                                'target' =>  '#exampleModalSizeSm2',
+                                'icon' => '%icon% bi bi-printer',
+                                'attrs' => ['class' => 'btn-main btn-stack'],
+                                'render' => $renders['imprime']
                             ],
                             'edit' => [
                                 'url' => $this->generateUrl('app_comptabilite_preinscription_validate', ['id' => $value]),

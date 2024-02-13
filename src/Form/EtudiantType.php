@@ -53,7 +53,7 @@ class EtudiantType extends AbstractType
                     'placeholder' => '----',
                     'label_attr' => ['class' => 'label-required'],
                     'choice_label' => 'libelle',
-                    'label' => 'Sexe',
+                    'label' => 'Genre',
                     'attr' => ['class' => 'has-select2']
                 ])
                 ->add('civilite', EntityType::class, [
