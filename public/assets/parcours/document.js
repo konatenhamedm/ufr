@@ -1,5 +1,5 @@
 $(function () {
-    const $container = $('.proto-container');
+    const $container = $('.proto-container_document');
 
     var index = $container.find('.row-colonne_document').length;
 
@@ -22,6 +22,7 @@ $(function () {
 
     const $addLink = $('.add_line_document');
     $addLink.click(function(e) {
+
         const $this  = $(this);
         const proto_class = $this.attr('data-protoclass');
         const name = $this.attr('data-protoname');
@@ -46,7 +47,7 @@ $(function () {
 
             $select.each(function() {
                 const $this = $(this);
-                init_select2($this, null, '.document');
+                init_select2($this, null, '#exampleModalSizeSm2');
                 if ($this.hasClass('select-type')) {
                     let field_str = $this.find('option:selected').attr('data-require-fields');
                     const $parent = $this.closest('.row-colonne_document');
@@ -66,9 +67,6 @@ $(function () {
 
     }
 
-
-
-
     // La fonction qui ajoute un formulaire Categorie
     function addLine($container, name, proto_class) {
         // Dans le contenu de l'attribut « data-prototype », on remplace :
@@ -80,7 +78,7 @@ $(function () {
             .replace(new RegExp(name, 'g'), index));
 
 
-        init_select2($prototype.find('select'), null );
+        init_select2($prototype.find('select'), null, '#exampleModalSizeSm2');
 
 
         // On ajoute au prototype un lien pour pouvoir supprimer la prestation

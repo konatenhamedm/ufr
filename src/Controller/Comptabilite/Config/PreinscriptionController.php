@@ -28,11 +28,17 @@ class PreinscriptionController extends AbstractController
                 'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_index')
             ],
             [
+                'label' => 'Point des paiements',
+                'icon' => 'bi bi-list',
+                'module' => 'gestion',
+                'href' => $this->generateUrl('app_comptabilite_inscription_index')
+            ],
+            /* [
                 'label' => 'Payés',
                 'icon' => 'bi bi-list',
                 'module' => 'gestion',
-                'href' => $this->generateUrl('app_parametre_preinscription_ls', ['module' => 'valider'])
-            ],
+                'href' => $this->generateUrl('app_comptabilite_preinscription_ls', ['etat' => 'valide'])
+            ], */
         ];
 
         $breadcrumb->addItem([
@@ -66,16 +72,21 @@ class PreinscriptionController extends AbstractController
         $parametres = [
             'valider' => [
                 [
-                    'label' => 'Payées',
+                    'label' => 'PAIEMENTS PREINSCRIPTIONS',
                     'id' => 'param_non_paye',
-                    'href' => $this->generateUrl('app_comptabilite_preinscription_ls', ['etat' => 'valide'])
+                    'href' => $this->generateUrl('app_comptabilite_inscription_index')
                 ],
                 [
+                    'label' => 'PAIEMENTS SCOLARITE',
+                    'id' => 'param_scolarite',
+                    'href' => $this->generateUrl('app_comptabilite_inscription_index')
+                ],
+                /*, [
                     'label' => 'Attente confirmation',
                     'id' => 'param_paye',
                     'href' => $this->generateUrl('app_comptabilite_preinscription_ls', ['etat' => 'paiement_confirmation'])
 
-                ]/*,
+                ]
                 [
                     'label' => 'Réjetés',
                     'id' => 'param_rejeter',

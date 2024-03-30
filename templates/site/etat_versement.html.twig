@@ -1,0 +1,234 @@
+{# {% set code =facture.typeFacture.code(true) %} #}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{# {{ code =='a' ? 'AVOIR': 'FACTURE' }} {{ facture.numero }} #}dd</title>
+    <style>
+      {% block page_css %}
+        @page {
+
+          margin-footer: 0.5cm;
+
+          /*header: html_headerContent;*/
+          footer: html_pageFooter;
+          margin-top: 0.5cm;
+          margin-header: 0cm;
+         
+          /*background: ...
+  background-image: ...
+  background-position ...
+  background-repeat ...
+  background-color ...
+  background-gradient: ...*/
+        }
+        .clearfix:after,
+        {% endblock %} .clearfix:before {
+          content: " ";
+          display: table;
+        }
+
+        .clearfix:after {
+          clear: both;
+        }
+
+        .mention {
+  position: absolute;
+  bottom: 100px;
+}
+
+        /*@page :first {
+   header: html_headerContent;
+}*/
+caption{
+  margin-bottom: 15px;
+}
+      fieldset 
+	{
+		border: 1px solid #000 !important;
+		margin: 0;
+		xmin-width: 0;
+		padding: 10px;       
+		position: relative;
+		border-radius:4px;
+		background-color:#fff;
+		padding-left:10px!important;
+	}	
+	
+		legend
+		{
+       padding: 0 10px; 
+      margin-left: 100px;
+			font-size:14px;
+			font-weight:bold;
+			margin-bottom: 0px; 
+			width: 35%; 
+			border: 1px solid #ddd;
+			border-radius: 4px; 
+			background-color: #ffffff;
+		}
+
+        table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  
+}
+        @media all {
+          /*.content { display: block; page-break-inside: avoid; }*/
+        }
+
+        .content {
+          /*margin-top: 18cm;*/
+        }
+
+        {# .table-responsive.table-bordered {
+          border: 0;
+        } #}
+
+        .double_underline {
+            text-decoration:underline;
+            border-bottom: 1px solid #000;
+            text-align: center;
+        }
+    </style>
+  </head>
+  <body style="font-size:12px;">
+    <div class="clearfix">
+     <div style="width:10%;text-align:left;float:left;"  class="">
+     {% set var = "uploads/" ~ 'media_etudiant' ~"/"~ 'lg.jpeg' %}
+        <img src="{{ var |replace({'/': "\\"}) }}" width="100px" />
+        {# <img src="{{ absolute_url(asset(var)) }}" width="100px" /> #}
+       {#  <div style="text-align:left;border: 1px solid #000;padding:8px;width:70%"  class="">
+              CC N° 9904215 D<br>
+              Régime d'imposition: Réel Normal<br>
+              Centre des impôts: D G E<br>
+        </div>
+        {{ "facture.typeFacture.libelle" | upper }} N° {{ 'facture.numero' }} #}
+      </div>
+     
+       <div style="width:65%;text-align:right;float:center;">
+            <div style="text-align:center;"  class="">
+                    <b>UFR-SEG</b><br>
+                  22 BP 1484 Abidjan 2 - Tél : 27 22 49 60 49 - ufrseg@yahoo.com <br>
+                  Abidjan-Cocody
+               <div style="border-top:1px solid #000"></div>
+              </div>
+           
+        </div>
+       <div style="width:25%;text-align:right;float:right;margin-top:0px,padding:8px">
+
+           <div style="text-align:center;margin-top:-45px"  class="">
+                    République de COTE D'IVOIRE <br>
+                <span style="text-decoration: underline;">Union - Discipline - Travail</span> <br>
+              {#  <b style="font-weight: bolder;">Année scolaire : 2021-2022</b> #}
+              </div>
+          
+        </div>
+    </div>
+  
+
+    <br>
+
+ <form action="/action_page.php">
+    <fieldset>
+        <legend></legend>
+       <h2 class="text-center" style="text-align: center;">ETAT DE VERSEMENTS <br>{{titre['min_year'] ~ '-'~ titre['max_year']}}</h2>
+       {# <h2 class="text-center" style="text-align: center;">ETAT DE VERSEMENTS <br>{{ id }}</h2> #}
+      </fieldset>
+   </form>
+   
+<br/>
+
+ <div class="clearfix">
+    
+       <div style="width:100%;text-align:right;float:center;">
+         
+            {# <div style="margin-top:-25px;text-align:center;bosrder: 1px solid #000;padding:8px;font-size:15px;font-weight:bold"  class=""> #}
+               {# <b>DOIT</b><br><br> #}
+              <table>
+             {#  <caption>
+               <b>Récapitulatif des frais d'écolage</b><br>
+              </caption>  #}
+                  <tr style="background-color: #dddddd">
+                    <th style="text-align: center;">N° D'ordre</th>
+                    <th style="text-align: center;">NOM ET PRENOMS</th>
+                    <th style="text-align: center;">COUT DE LA FORMATION</th>
+                    {% for item in dates %}
+                          <th style="text-align: center;">VERSEMENTS <br>{{item}}</th>
+                    {% endfor %}
+                      <th style="text-align: center;">MONTANT {{'Payé' | upper }}</th>
+                      <th style="text-align: center;">MONTANT {{'imPayé' | upper }}</th>
+                      <th style="text-align: center;">TAUX de  {{'paiement' | upper }}</th>
+                  </tr>
+                  {% for key,data in datas %}
+{% set difference=0 %}
+{% set total=0 %}
+{% set percent=0 %}
+
+                  {% set total = total + menu.getSommeTotal(data['etudiant'],data['niveau']) %}
+                  {% set difference = data['montant'] - total  %}
+                  {% set percent = total*100/data['montant']  %}
+                    <tr>
+                    <td style="text-align: center;">{{ key+1 }}</td>
+                    <td>{{ data['nom_prenom'] }}</td>
+                    <td>{{ data['montant'] | number_format(0, '.')}}</td>
+                        {% for item_date in dates %}
+                   
+                            
+                        
+                            <td style="text-align: center;"> {{ menu.getSomme(data['etudiant'],item_date,data['niveau'])  | number_format(0, '.') }} </td>
+
+                        
+
+                    {% endfor %}
+                    <td style="text-align: center;"> {{ total | number_format(0, '.') }} </td>
+                    <td style="text-align: center;"> {{ difference | number_format(0, '.') }} </td>
+                    <td style="text-align: center;"> {{ percent | number_format(0, '.') }}% </td>
+
+                    </tr>
+                  {% endfor %}
+                  
+                 
+                 
+          </table>
+           {#  </div> #}
+        </div>
+       </div>
+
+                
+</div><br>
+  <div style="border-top:20px solid grey"></div><br>
+
+
+
+</div>
+    
+    <htmlpagefooter name="pageFooter">
+       {#  <table style="width:100%">
+          <tr>
+            <td style="width:50%;text-align:left;padding-bottom:8px">
+              <i><b>Client</b></i>
+            </td>
+            <td style="width:50%;text-align:right">
+              <i><b>Souche</b></i>
+            </td>
+          </tr>
+        </table> #}
+        <div style="border-top:2px solid #000"></div>
+       <p  align="center" style="align: center;margin-top:-1px">
+        COCODY ECOLE POLICEI - 01 BP 5889 Abidjan 01 - e-mail: 
+        <a href="mailto:ufr@gmail.com">ufr@gmail.com</a><br>
+        Tél: +225 21 27 53 50 FAX.: +225 21 27 53 29 - Fax: (225) 21 27 53 29 - RC: 236319
+       </p>
+    </htmlpagefooter>
+  </body>
+</html>

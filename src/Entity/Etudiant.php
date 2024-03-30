@@ -7,9 +7,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Table;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: EtudiantRepository::class)]
 #[Table(name: 'user_etudiant')]
+/* #[Groups(['show_product'])] */
 class Etudiant extends Personne
 {
     #[ORM\OneToMany(mappedBy: 'etudiant', targetEntity: NiveauEtudiant::class)]
@@ -25,69 +27,110 @@ class Etudiant extends Personne
     private Collection $inscriptions;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?string $ville = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?string $adresse = null;
 
 
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?string $boite = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?string $fax = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?bool $employeur = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?bool $bailleur = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?bool $parent = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?string $autre = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?bool $radio = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?bool $presse = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?bool $affiche = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?bool $ministere = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?bool $mailing = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?bool $siteWeb = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?bool $vousMeme = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?bool $professeur = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?bool $amiCollegue = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['show_product', 'list_product'])]
     private ?string $autreExistence = null;
 
     #[ORM\ManyToOne(inversedBy: 'etudiants')]
+    #[Groups(['show_product', 'list_product'])]
     private ?Pays $pays = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['show_product', 'list_product'])]
     private ?string $etat = null;
 
     #[ORM\OneToMany(mappedBy: 'etudiant', targetEntity: Document::class, orphanRemoval: true, cascade: ['persist'])]
     private Collection $documents;
+
+    #[ORM\OneToMany(mappedBy: 'etudiant', targetEntity: InfoEtudiant::class, orphanRemoval: true, cascade: ['persist'])]
+    private Collection $infoEtudiants;
+
+    #[ORM\OneToMany(mappedBy: 'etudiant', targetEntity: Note::class)]
+    private Collection $notes;
+
+    #[ORM\OneToMany(mappedBy: 'etudiant', targetEntity: MoyenneMatiere::class)]
+    private Collection $moyenneMatieres;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $numeroWhatsapp = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $statutTravail = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $travail = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $statutEtudiant = null;
 
 
     public function __construct()
@@ -96,6 +139,11 @@ class Etudiant extends Personne
         $this->preinscriptions = new ArrayCollection();
         $this->inscriptions = new ArrayCollection();
         $this->documents = new ArrayCollection();
+        $this->infoEtudiants = new ArrayCollection();
+        $this->notes = new ArrayCollection();
+        $this->moyenneMatieres = new ArrayCollection();
+        $this->statutEtudiant = 'non';
+        $this->statutTravail = 'non';
     }
 
     /**
@@ -469,6 +517,144 @@ class Etudiant extends Personne
                 $document->setEtudiant(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, InfoEtudiant>
+     */
+    public function getInfoEtudiants(): Collection
+    {
+        return $this->infoEtudiants;
+    }
+
+    public function addInfoEtudiant(InfoEtudiant $infoEtudiant): static
+    {
+        if (!$this->infoEtudiants->contains($infoEtudiant)) {
+            $this->infoEtudiants->add($infoEtudiant);
+            $infoEtudiant->setEtudiant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInfoEtudiant(InfoEtudiant $infoEtudiant): static
+    {
+        if ($this->infoEtudiants->removeElement($infoEtudiant)) {
+            // set the owning side to null (unless already changed)
+            if ($infoEtudiant->getEtudiant() === $this) {
+                $infoEtudiant->setEtudiant(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Note>
+     */
+    public function getNotes(): Collection
+    {
+        return $this->notes;
+    }
+
+    public function addNote(Note $note): static
+    {
+        if (!$this->notes->contains($note)) {
+            $this->notes->add($note);
+            $note->setEtudiant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeNote(Note $note): static
+    {
+        if ($this->notes->removeElement($note)) {
+            // set the owning side to null (unless already changed)
+            if ($note->getEtudiant() === $this) {
+                $note->setEtudiant(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MoyenneMatiere>
+     */
+    public function getMoyenneMatieres(): Collection
+    {
+        return $this->moyenneMatieres;
+    }
+
+    public function addMoyenneMatiere(MoyenneMatiere $moyenneMatiere): static
+    {
+        if (!$this->moyenneMatieres->contains($moyenneMatiere)) {
+            $this->moyenneMatieres->add($moyenneMatiere);
+            $moyenneMatiere->setEtudiant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMoyenneMatiere(MoyenneMatiere $moyenneMatiere): static
+    {
+        if ($this->moyenneMatieres->removeElement($moyenneMatiere)) {
+            // set the owning side to null (unless already changed)
+            if ($moyenneMatiere->getEtudiant() === $this) {
+                $moyenneMatiere->setEtudiant(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getNumeroWhatsapp(): ?string
+    {
+        return $this->numeroWhatsapp;
+    }
+
+    public function setNumeroWhatsapp(?string $numeroWhatsapp): static
+    {
+        $this->numeroWhatsapp = $numeroWhatsapp;
+
+        return $this;
+    }
+
+    public function getStatutTravail(): ?string
+    {
+        return $this->statutTravail;
+    }
+
+    public function setStatutTravail(string $statutTravail): static
+    {
+        $this->statutTravail = $statutTravail;
+
+        return $this;
+    }
+
+    public function getTravail(): ?string
+    {
+        return $this->travail;
+    }
+
+    public function setTravail(?string $travail): static
+    {
+        $this->travail = $travail;
+
+        return $this;
+    }
+
+    public function getStatutEtudiant(): ?string
+    {
+        return $this->statutEtudiant;
+    }
+
+    public function setStatutEtudiant(string $statutEtudiant): static
+    {
+        $this->statutEtudiant = $statutEtudiant;
 
         return $this;
     }

@@ -83,9 +83,14 @@ class DashboardController extends AbstractController
             ],
             'gestion' => [
                 [
-                    'label' => 'UFR',
-                    'id' => 'param_ufr',
-                    'href' => $this->generateUrl('app_parametre_unite_formation_index')
+                    'label' => 'Années scolaire',
+                    'id' => 'param_as',
+                    'href' => $this->generateUrl('app_parametre_annee_scolaire_index')
+                ],
+                [
+                    'label' => 'Semestres',
+                    'id' => 'param_sem',
+                    'href' => $this->generateUrl('app_parametre_semestre_index')
                 ],
                 [
                     'label' => 'Types de frais',
@@ -98,6 +103,11 @@ class DashboardController extends AbstractController
                     'href' => $this->generateUrl('app_parametre_nature_paiement_index')
                 ],
                 [
+                    'label' => 'UFR',
+                    'id' => 'param_ufr',
+                    'href' => $this->generateUrl('app_parametre_unite_formation_index')
+                ],
+                [
                     'label' => 'Filières',
                     'id' => 'param_filiere',
                     'href' => $this->generateUrl('app_parametre_filiere_index')
@@ -108,26 +118,37 @@ class DashboardController extends AbstractController
                     'href' => $this->generateUrl('app_parametre_niveau_index')
                 ],
                 [
+                    'label' => 'Classes',
+                    'id' => 'param_classe',
+                    'href' => $this->generateUrl('app_parametre_classe_index')
+                ],
+                [
                     'label' => 'Type de matière',
                     'id' => 'param_type_matiere',
                     'href' => $this->generateUrl('app_parametre_type_matiere_index')
-                ],
-
-                [
-                    'label' => 'Mentions',
-                    'id' => 'param_mention',
-                    'href' => $this->generateUrl('app_parametre_mention_index')
                 ],
                 [
                     'label' => 'Matières',
                     'id' => 'param_matiere',
                     'href' => $this->generateUrl('app_parametre_matiere_index')
-                ]/* ,
+                ],
+
                 [
-                    'label' => 'Examens',
-                    'id' => 'param_examen',
-                    'href' => $this->generateUrl('app_direction_examen_index')
-                ], */
+                    'label' => 'Enseignants par matière',
+                    'id' => 'param_em',
+                    'href' => $this->generateUrl('app_parametre_cours_index')
+                ],
+                [
+                    'label' => "Unité d'enseigenement",
+                    'id' => 'param_ue',
+                    'href' => $this->generateUrl('app_parametre_unite_enseignement_index')
+                ],
+                [
+                    'label' => 'Mentions',
+                    'id' => 'param_mention',
+                    'href' => $this->generateUrl('app_parametre_mention_index')
+                ],
+
 
             ],
         ];

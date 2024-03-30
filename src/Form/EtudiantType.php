@@ -10,6 +10,7 @@ use App\Entity\Personne;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -42,11 +43,54 @@ class EtudiantType extends AbstractType
                     'html5' => false,
                     'attr' => ['class' => 'datepicker no-auto skip-init'], 'widget' => 'single_text',   /*'format' => 'yyyy-MM-dd',*/
                 ])
-                ->add('lieuNaissance', null, ['label' => 'Lieu de naissance', 'required' => false, 'empty_data' => ''])
-                ->add('email', EmailType::class, ['label' => 'Adresse E-mail', 'required' => false, 'empty_data' => ''])
+                ->add('lieuNaissance', TextType::class, ['label' => 'Lieu de naissance', 'required' => true, 'empty_data' => '', "constraints" => array(
+                    new NotNull(null, "S'il vous veillez renseigner le champs lieu de  naissance")
+                ),])
+                ->add('email', EmailType::class, ['label' => 'Adresse E-mail', 'required' => true, 'empty_data' => '', "constraints" => array(
+                    new NotNull(null, "S'il vous veillez renseigner le champs email")
+                ),])
                 ->add('contact', null, ['label' => 'Téléphone', 'required' => true, "constraints" => array(
                     new NotNull(null, "S'il vous veillez renseigner le champs contact")
                 )])
+                ->add('travail', null, ['label' => false, 'required' => false, 'attr' => ['class' => 'travail']])
+
+                ->add(
+                    'statutTravail',
+                    ChoiceType::class,
+                    [
+                        'choices' => [
+                            'Oui' => 'oui',
+                            'Non' => 'non',
+
+                        ],
+                        'label' => false,
+                        // 'choice_value' => null,
+                        'multiple' => false,
+                        'expanded' => true,
+                        'required' => true,
+                        'data' => 'non',
+                        // 'attr' => ['class' => 'choiceCheck']
+                    ]
+                )
+                ->add(
+                    'statutEtudiant',
+                    ChoiceType::class,
+                    [
+                        'choices' => [
+                            'Oui' => 'oui',
+                            'Non' => 'non',
+
+                        ],
+                        'label' => false,
+                        // 'choice_value' => null,
+                        'multiple' => false,
+                        'expanded' => true,
+                        'required' => true,
+                        'data' => 'non',
+                    ]
+                )
+
+                ->add('numeroWhatsapp', null, ['label' => 'Numéro whatsapp', 'required' => false])
                 ->add('genre', EntityType::class, [
                     'class' => Genre::class,
                     'required' => false,
@@ -134,11 +178,24 @@ class EtudiantType extends AbstractType
                     'label' => 'Civilité',
                     'attr' => ['class' => 'has-select2']
                 ]) */
-
+                ->add('infoEtudiants', CollectionType::class, [
+                    'entry_type' => InfoEtudiantType::class,
+                    'entry_options' => [
+                        'label' => false,
+                    ],
+                    'allow_add' => true,
+                    'label' => false,
+                    'by_reference' => false,
+                    'allow_delete' => true,
+                    'prototype' => true,
+                ])
                 ->add('cursusUniversitaires', CollectionType::class, [
                     'entry_type' => CursusUniversitaireType::class,
                     'entry_options' => [
                         'label' => false,
+                        'doc_options' => $options['doc_options'],
+                        'doc_required' => $options['doc_required'],
+                        'validation_groups' => $options['validation_groups'],
                     ],
                     'allow_add' => true,
                     'label' => false,
@@ -172,6 +229,9 @@ class EtudiantType extends AbstractType
                     'entry_type' => DocumentType::class,
                     'entry_options' => [
                         'label' => false,
+                        'doc_options' => $options['doc_options'],
+                        'doc_required' => $options['doc_required'],
+                        'validation_groups' => $options['validation_groups'],
                     ],
                     'allow_add' => true,
                     'label' => false,
@@ -185,6 +245,9 @@ class EtudiantType extends AbstractType
                 'entry_type' => DocumentType::class,
                 'entry_options' => [
                     'label' => false,
+                    'doc_options' => $options['doc_options'],
+                    'doc_required' => $options['doc_required'],
+                    'validation_groups' => $options['validation_groups'],
                 ],
                 'allow_add' => true,
                 'label' => false,
@@ -211,8 +274,12 @@ class EtudiantType extends AbstractType
                     'html5' => false,
                     'attr' => ['class' => 'datepicker no-auto skip-init'], 'widget' => 'single_text',   /*'format' => 'yyyy-MM-dd',*/
                 ])
-                ->add('lieuNaissance', null, ['label' => 'Lieu de naissance', 'required' => false, 'empty_data' => ''])
-                ->add('email', EmailType::class, ['label' => 'Adresse E-mail', 'required' => false, 'empty_data' => ''])
+                ->add('lieuNaissance', TextType::class, ['label' => 'Lieu de naissance', 'required' => true, 'empty_data' => '', "constraints" => array(
+                    new NotNull(null, "S'il vous veillez renseigner le champs lieu de  naissance")
+                ),])
+                ->add('email', EmailType::class, ['label' => 'Adresse E-mail', 'required' => true, 'empty_data' => '', "constraints" => array(
+                    new NotNull(null, "S'il vous veillez renseigner le champs email")
+                ),])
                 ->add('contact', null, ['label' => 'Téléphone', 'required' => true,  "constraints" => array(
                     new NotNull(null, "S'il vous veillez renseigner le champs contact")
                 )])
@@ -242,7 +309,7 @@ class EtudiantType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Personne::class,
+            'data_class' => Etudiant::class,
             'doc_required' => true,
             'doc_options' => [],
             'validation_groups' => [],

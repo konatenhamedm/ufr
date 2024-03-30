@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\MatiereRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Table;
@@ -35,6 +37,22 @@ class Matiere
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotBlank(message: 'Veuillez sélectionner le type de matière')]
     private ?TypeMatiere $typeMatiere = null;
+
+    #[ORM\OneToMany(mappedBy: 'matiere', targetEntity: Cours::class)]
+    private Collection $cours;
+
+    #[ORM\OneToMany(mappedBy: 'matiere', targetEntity: MatiereUe::class)]
+    private Collection $matiereUes;
+
+    #[ORM\OneToMany(mappedBy: 'matiere', targetEntity: MoyenneMatiere::class)]
+    private Collection $moyenneMatieres;
+
+    public function __construct()
+    {
+        $this->cours = new ArrayCollection();
+        $this->matiereUes = new ArrayCollection();
+        $this->moyenneMatieres = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -85,6 +103,96 @@ class Matiere
     public function setTypeMatiere(?TypeMatiere $typeMatiere): static
     {
         $this->typeMatiere = $typeMatiere;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Cours>
+     */
+    public function getCours(): Collection
+    {
+        return $this->cours;
+    }
+
+    public function addCour(Cours $cour): static
+    {
+        if (!$this->cours->contains($cour)) {
+            $this->cours->add($cour);
+            $cour->setMatiere($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCour(Cours $cour): static
+    {
+        if ($this->cours->removeElement($cour)) {
+            // set the owning side to null (unless already changed)
+            if ($cour->getMatiere() === $this) {
+                $cour->setMatiere(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MatiereUe>
+     */
+    public function getMatiereUes(): Collection
+    {
+        return $this->matiereUes;
+    }
+
+    public function addMatiereUe(MatiereUe $matiereUe): static
+    {
+        if (!$this->matiereUes->contains($matiereUe)) {
+            $this->matiereUes->add($matiereUe);
+            $matiereUe->setMatiere($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMatiereUe(MatiereUe $matiereUe): static
+    {
+        if ($this->matiereUes->removeElement($matiereUe)) {
+            // set the owning side to null (unless already changed)
+            if ($matiereUe->getMatiere() === $this) {
+                $matiereUe->setMatiere(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, MoyenneMatiere>
+     */
+    public function getMoyenneMatieres(): Collection
+    {
+        return $this->moyenneMatieres;
+    }
+
+    public function addMoyenneMatiere(MoyenneMatiere $moyenneMatiere): static
+    {
+        if (!$this->moyenneMatieres->contains($moyenneMatiere)) {
+            $this->moyenneMatieres->add($moyenneMatiere);
+            $moyenneMatiere->setMatiere($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMoyenneMatiere(MoyenneMatiere $moyenneMatiere): static
+    {
+        if ($this->moyenneMatieres->removeElement($moyenneMatiere)) {
+            // set the owning side to null (unless already changed)
+            if ($moyenneMatiere->getMatiere() === $this) {
+                $moyenneMatiere->setMatiere(null);
+            }
+        }
 
         return $this;
     }

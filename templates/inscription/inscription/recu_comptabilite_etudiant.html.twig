@@ -1,0 +1,249 @@
+{# {% set code =facture.typeFacture.code(true) %} #}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{# {{ code =='a' ? 'AVOIR': 'FACTURE' }} {{ facture.numero }} #}dd</title>
+    <style>
+      {% block page_css %}
+        @page {
+
+          margin-footer: 0.5cm;
+
+          /*header: html_headerContent;*/
+          footer: html_pageFooter;
+          margin-top: 0.5cm;
+          margin-header: 0cm;
+         
+          /*background: ...
+  background-image: ...
+  background-position ...
+  background-repeat ...
+  background-color ...
+  background-gradient: ...*/
+        }
+        .clearfix:after,
+        {% endblock %} .clearfix:before {
+          content: " ";
+          display: table;
+        }
+
+        .clearfix:after {
+          clear: both;
+        }
+
+        .mention {
+  position: absolute;
+  bottom: 100px;
+}
+
+        /*@page :first {
+   header: html_headerContent;
+}*/
+caption{
+  margin-bottom: 15px;
+}
+      fieldset 
+	{
+		border: 1px solid #000 !important;
+		margin: 0;
+		xmin-width: 0;
+		padding: 10px;       
+		position: relative;
+		border-radius:4px;
+		background-color:#fff;
+		padding-left:10px!important;
+	}	
+	
+		legend
+		{
+       padding: 0 10px; 
+      margin-left: 100px;
+			font-size:14px;
+			font-weight:bold;
+			margin-bottom: 0px; 
+			width: 35%; 
+			border: 1px solid #ddd;
+			border-radius: 4px; 
+			background-color: #ffffff;
+		}
+
+        table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+.tab {
+  overflow: hidden;
+  border: 1px solid aqua;
+  background-color: aqua;
+
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none=;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+        @media all {
+          /*.content { display: block; page-break-inside: avoid; }*/
+        }
+
+        .content {
+          /*margin-top: 18cm;*/
+        }
+
+        {# .table-responsive.table-bordered {
+          border: 0;
+        } #}
+
+        .double_underline {
+            text-decoration:underline;
+            border-bottom: 1px solid #000;
+            text-align: center;
+        }
+    </style>
+  </head>
+  <body style="font-size:12px;">
+    <div class="clearfix">
+     <div style="width:10%;text-align:left;float:left;"  class="">
+     {% set var = "uploads/" ~ 'media_etudiant' ~"/"~ 'lg.jpeg' %}
+        <img src="{{ var |replace({'/': "\\"}) }}" width="100px" />
+        {# <img src="{{ absolute_url(asset(var)) }}" width="100px" /> #}
+       {#  <div style="text-align:left;border: 1px solid #000;padding:8px;width:70%"  class="">
+              CC N° 9904215 D<br>
+              Régime d'imposition: Réel Normal<br>
+              Centre des impôts: D G E<br>
+        </div>
+        {{ "facture.typeFacture.libelle" | upper }} N° {{ 'facture.numero' }} #}
+      </div>
+     
+       <div style="width:65%;text-align:right;float:center;">
+            <div style="text-align:center;"  class="">
+                    <b>UFR-SEG</b><br>
+                  22 BP 1484 Abidjan 2 - Tél : 27 22 49 60 49 - ufrseg@yahoo.com <br>
+                  Abidjan-Cocody
+               <div style="border-top:1px solid #000"></div>
+              </div>
+           
+        </div>
+       <div style="width:25%;text-align:right;float:right;margin-top:0px,padding:8px">
+
+           <div style="text-align:center;margin-top:-45px"  class="">
+                    République de COTE D'IVOIRE <br>
+                <span style="text-decoration: underline;">Union - Discipline - Travail</span> <br>
+               <b style="font-weight: bolder;">Année scolaire : 2021-2022</b>
+              </div>
+          
+        </div>
+    </div>
+  
+
+    <br>
+
+<h1 style="text-align: center;">Fiche de préinscription</h1> <br>
+
+ <div class="clearfix">
+       <div style="width:40%;text-align:left;float:left;padding-right: 0px;">
+         
+            <table style=" border: 0px !important;">
+              {# <caption>
+               <b>Détails du paiement</b><br>
+              </caption>  #}
+                  <tr style=" border: 0px !important;">
+                    <td style=" border: 0px !important;">Code préinscription :</th>
+                    <td style=" border: 0px !important;"><p style="font-family: "Times New Roman", Times, serif;"><b><h3>{{ data.code }}</h3></b></p></th>
+                  </tr>
+                  <tr style=" border: 0px !important;">
+                     <td style=" border: 0px !important;">Nom :</th>
+                    <td style=" border: 0px !important;"><b>{{ data.etudiant.nom}}</b></th>
+                  </tr>
+                  <tr style=" border: 0px !important;">
+                    <td style=" border: 0px !important;">Prenoms :</td>
+                    <td style=" border: 0px !important;"><b>{{ data.etudiant.prenom }}</b></td>
+                  </tr>
+                 
+          </table>
+        </div>
+       <div style="width:38%;text-align:right;float:center;">
+         
+         
+        </div>
+       <div style="width:20%;text-align:right;float:right;">
+         
+             <div style="margin-top:0px;text-align:center;border: 1px solid black;padding:8px;font-size:15px;font-weight:bold;height: 100px;width: 150px;background-color: red;"  class="">
+               
+              
+           </div>
+        </div>
+      </div>
+
+                
+</div><br>
+
+
+<div class="tab" style="height: 10px; background-color: aqua;">
+  <button class="tablinks active" ><h2></h2></button>
+</div>
+
+<div id="London" class="tabcontent" style="text-align: center;">
+ <h3>{{ data.niveau.code}}</h3>
+  <p style="text-align: center;">{{ data.niveau.libelle}}</p>
+</div><br>
+
+  <div style="border-top:20px solid grey"></div><br>
+
+ 
+
+</div>
+    
+    <htmlpagefooter name="pageFooter">
+       {#  <table style="width:100%">
+          <tr>
+            <td style="width:50%;text-align:left;padding-bottom:8px">
+              <i><b>Client</b></i>
+            </td>
+            <td style="width:50%;text-align:right">
+              <i><b>Souche</b></i>
+            </td>
+          </tr>
+        </table> #}
+        <div style="border-top:2px solid #000"></div>
+       <p  align="center" style="align: center;margin-top:-1px">
+        COCODY ECOLE POLICEI - 01 BP 5889 Abidjan 01 - e-mail: 
+        <a href="mailto:ufr@gmail.com">ufr@gmail.com</a><br>
+        Tél: +225 21 27 53 50 FAX.: +225 21 27 53 29 - Fax: (225) 21 27 53 29 - RC: 236319
+       </p>
+    </htmlpagefooter>
+  </body>
+</html>

@@ -24,12 +24,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[Route('/admin/direction/examen')]
 class ExamenController extends AbstractController
 {
     #[Route('/', name: 'app_direction_examen_index',   methods: ['GET', 'POST'], options: ['expose' => true])]
-    public function index(Request $request, DataTableFactory $dataTableFactory): Response
+    public function index(Request $request, DataTableFactory $dataTableFactory, UserInterface $user): Response
     {
 
         $filiere = $request->query->get('filiere');
@@ -53,10 +54,11 @@ class ExamenController extends AbstractController
             ->add('dateExamen', DateTimeColumn::class, ['label' => 'Date Prévue', 'format' => 'd-m-Y'])
             ->createAdapter(ORMAdapter::class, [
                 'entity' => Examen::class,
-                'query' => function (QueryBuilder $qb) use ($filiere) {
-                    $qb->select(['d', 'n', 'f'])
+                'query' => function (QueryBuilder $qb) use ($filiere, $user) {
+                    $qb->select(['d', 'n', 'f', 'res'])
                         ->from(Examen::class, 'd')
                         ->innerJoin('d.niveau', 'n')
+                        ->join('n.responsable', 'res')
                         ->innerJoin('n.filiere', 'f')
                         ->orderBy('d.id', 'DESC');
 
@@ -65,6 +67,11 @@ class ExamenController extends AbstractController
                             $qb->andWhere('f.id = :filiere')
                                 ->setParameter('filiere', $filiere);
                         }
+                    }
+
+                    if ($this->isGranted('ROLE_DIRECTEUR')) {
+                        $qb->andWhere('res.id = :id')
+                            ->setParameter('id', $user->getPersonne()->getId());
                     }
                 }
             ])

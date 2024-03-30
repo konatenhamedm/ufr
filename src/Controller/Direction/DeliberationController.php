@@ -11,6 +11,7 @@ use App\Entity\LigneDeliberation;
 use App\Entity\Mention;
 use App\Form\DeliberationType;
 use App\Repository\DeliberationRepository;
+use App\Repository\ExamenRepository;
 use App\Repository\FraisRepository;
 use App\Service\ActionRender;
 use App\Service\FormError;
@@ -109,21 +110,37 @@ class DeliberationController extends AbstractController
             ->add('code', TextColumn::class, ['label' => 'Code'])
             ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
             ->add('niveau', TextColumn::class, ['label' => 'Niveau', 'field' => 'niveau.libelle'])
-
+            ->add('dateExamen', DateTimeColumn::class, ['label' => 'Date Prévue', 'format' => 'd-m-Y'])
             ->createAdapter(ORMAdapter::class, [
                 'entity' => Examen::class,
+                'query' => function (QueryBuilder $qb) use ($user) {
+                    $qb->select(['d', 'n', 'f', 'res'])
+                        ->from(Examen::class, 'd')
+                        ->innerJoin('d.niveau', 'n')
+                        ->join('n.responsable', 'res')
+                        ->innerJoin('n.filiere', 'f')
+                        ->orderBy('d.id', 'DESC');
+
+                    if ($this->isGranted('ROLE_DIRECTEUR')) {
+                        $qb->andWhere('res.id = :id')
+                            ->setParameter('id', $user->getPersonne()->getId());
+                    }
+                }
             ])
-            ->setName('dt_app_direction_examen_deliberation_time');
+            ->setName('dt_app_direction_deliberation_time');
 
         $renders = [
             'edit' =>  new ActionRender(function () {
+                return true;
+            }),
+            'delib' =>  new ActionRender(function () {
                 return true;
             }),
             'delete' => new ActionRender(function () {
                 return true;
             }),
         ];
-
+        //$gridId = $filiere;
 
         $hasActions = false;
 
@@ -142,14 +159,31 @@ class DeliberationController extends AbstractController
                         'target' => '#modal-lg',
 
                         'actions' => [
-                            'deliberation' => [
-                                'url' => $this->generateUrl('app_direction_deliberation_new', ['id' => $value]),
-                                'ajax' => false,
+                            'edit' => [
+                                'url' => $this->generateUrl('app_direction_examen_edit', ['id' => $value]),
+                                'ajax' => true,
                                 'stacked' => false,
                                 'icon' => '%icon% bi bi-pen',
                                 'attrs' => ['class' => 'btn-main'],
                                 'render' => $renders['edit']
                             ],
+                            'delib' => [
+                                'url' => $this->generateUrl('app_direction_deliberation_historique', ['id' => $value]),
+                                'ajax' => false,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-folder2-open',
+                                'attrs' => ['class' => 'btn-primary'],
+                                'render' => $renders['edit']
+                            ],
+                            'delete' => [
+                                'target' => '#modal-small',
+                                'url' => $this->generateUrl('app_direction_examen_delete', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-trash',
+                                'attrs' => ['class' => 'btn-danger'],
+                                'render' => $renders['delete']
+                            ]
                         ]
 
                     ];
@@ -174,7 +208,7 @@ class DeliberationController extends AbstractController
 
 
     #[Route('/historique/{id}', name: 'app_direction_deliberation_historique', methods: ['GET', 'POST'])]
-    public function historique(Request $request, UserInterface $user, $id, DataTableFactory $dataTableFactory): Response
+    public function historique(Request $request, UserInterface $user, $id, DataTableFactory $dataTableFactory, ExamenRepository $examenRepository): Response
     {
         $table = $dataTableFactory->create()
             //->add('date', TextColumn::class, ['label' => 'Code'])
@@ -196,18 +230,24 @@ class DeliberationController extends AbstractController
             ->createAdapter(ORMAdapter::class, [
                 'entity' => Deliberation::class,
                 'query' => function (QueryBuilder $qb) use ($user, $id) {
-                    $qb->select(['d', 'ex', 'n', 'm', 'dp', 'p'])
+                    $qb->select(['d', 'ex', 'n', 'm', 'dp', 'p', 'res'])
                         ->from(Deliberation::class, 'd')
                         ->join('d.infoPreinscription', 'dp')
                         ->join('dp.preinscription', 'p')
                         ->join('d.examen', 'ex')
                         ->join('ex.niveau', 'n')
+                        ->join('n.responsable', 'res')
                         ->join('d.mention', 'm')
                         ->andWhere('ex.id = :id')
                         ->setParameter('id', $id);
                     /*  ->orderBy('d.date', 'DESC') */
                     if ($this->isGranted('ROLE_ETUDIANT')) {
                         $qb->andWhere('p.etudiant = :etudiant')->setParameter('etudiant', $user->getPersonne());
+                    }
+
+                    if ($this->isGranted('ROLE_DIRECTEUR')) {
+                        $qb->andWhere('res.id = :id')
+                            ->setParameter('id', $user->getPersonne()->getId());
                     }
                 }
             ])
@@ -275,7 +315,8 @@ class DeliberationController extends AbstractController
         return $this->render('direction/deliberation/index_historique.html.twig', [
             'datatable' => $table,
             'title' => 'Historique des délibérations',
-            'id' => $id
+            'id' => $id,
+            'examen' => $examenRepository->find($id)
         ]);
     }
 
@@ -316,7 +357,7 @@ class DeliberationController extends AbstractController
 
         if ($form->isSubmitted()) {
             $response = [];
-            $redirect = $this->generateUrl('app_direction_deliberation_index');
+            $redirect = $this->generateUrl('app_direction_deliberation_new', ['id' => $examen->getId()]);
 
             //dd($form->get('infoPreinscription'));
 

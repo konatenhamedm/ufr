@@ -21,6 +21,15 @@ class EcheancierRepository extends ServiceEntityRepository
         parent::__construct($registry, Echeancier::class);
     }
 
+    public function save(Echeancier $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
     public function findAllEcheance($value): array
     {
         return $this->createQueryBuilder('f')
@@ -29,7 +38,7 @@ class EcheancierRepository extends ServiceEntityRepository
             ->andWhere('f.etat = :etat')
             ->setParameter('etat', 'pas_payer')
             ->setParameter('id', $value)
-            ->orderBy('f.dateCreation', 'DESC')
+            ->orderBy('f.dateCreation', 'ASC')
             ->getQuery()
             ->getResult();
     }
@@ -37,7 +46,7 @@ class EcheancierRepository extends ServiceEntityRepository
     public function findAllEcheanceDateFirst($value): array
     {
         return $this->createQueryBuilder('f')
-            ->select('MIN(f.dateCreation) debut ,MAX(f.dateCreation) fin')
+            ->select("MIN(DATE_FORMAT(f.dateCreation, '%d/%m/%Y')) debut ,MAX(DATE_FORMAT(f.dateCreation, '%d/%m/%Y')) fin")
             ->innerJoin('f.inscription', 'l')
             ->andWhere('l.id = :id')
             ->setParameter('id', $value)

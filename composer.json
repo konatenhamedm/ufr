@@ -33,7 +33,8 @@
         "symfony/twig-bundle": "6.3.*",
         "symfony/validator": "6.3.*",
         "symfony/workflow": "6.3.*",
-        "symfony/yaml": "6.3.*"
+        "symfony/yaml": "6.3.*",
+        "vich/uploader-bundle": "^2.3"
     },
     "config": {
         "allow-plugins": {

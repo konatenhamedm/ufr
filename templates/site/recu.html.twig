@@ -150,8 +150,13 @@
 
 
 <table style="width:100%">
+<tr>
+    <td>Année académique :</td>
+    <td>2023 - 2024</td>
+
+  </tr>
   <tr>
-    <td >N :</td>
+    <td >Code étudiant :</td>
     <td span="2" class="deuxieme">{{ data.code }}</td>
     <td span="3"   class="ok" >
         <h6>Le comptable</h6>
@@ -159,27 +164,24 @@
   </tr>
 
   <tr>
-    <td>Nom :</td>
+    <td>Nom et Prénoms :</td>
     <td>{{ data.etudiant.getNomComplet }}</td>
     <td rowspan="5" class="ok"></td>
 
   </tr>
   <tr>
-    <td>Filière :</td>
-    <td>{{ data.niveau.filiere.code }}</td>
-  
-  </tr>
-  <tr>
-    <td>Année academique :</td>
-    <td>2023 - 2024</td>
-
-  </tr>
-    <tr>
     <td>Date paiement :</td>
     <td> {% if data.infoPreinscription %} {{ data.infoPreinscription.datePaiement | date("m/d/Y") }}{% else %} 'NEANT' {% endif %}
      </td>
 
   </tr>
+{#   <tr>
+    <td>Filière :</td>
+    <td>{{ data.niveau.filiere.code }}</td>
+  
+  </tr> #}
+  
+    
     <tr>
     <td>Montant payé :</td>
     <td class="montant"><strong>{% if data.infoPreinscription %}{{ data.infoPreinscription.montant | number_format(0, '.') }} FCFA{% else %} 'NEANT' {% endif %}

@@ -261,37 +261,35 @@ class PreinscriptionController extends AbstractController
     public function liste(Request $request, UserInterface $user, string $etat, DataTableFactory $dataTableFactory): Response
     {
 
+
+
         $isEtudiant = $this->isGranted('ROLE_ETUDIANT');
 
         $table = $dataTableFactory->create()
-            ->add('code', TextColumn::class, ['label' => 'Code'])
-            ->add('filiere', TextColumn::class, ['field' => 'filiere.libelle', 'label' => 'Filière'])
-            ->add('niveau', TextColumn::class, ['field' => 'niveau.libelle', 'label' => 'Niveau'])
-            ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date de la demande', 'format' => 'd-m-Y'])
-
-            ->add('caissiere', TextColumn::class, ['field' => 'c.getNomComplet', 'label' => 'Caissière ']);
-
-
+            ->add('code', TextColumn::class, ['label' => 'Code']);
         if (!$isEtudiant) {
             $table->add('nom', TextColumn::class, ['field' => 'etudiant.nom', 'visible' => false])
                 ->add('prenom', TextColumn::class, ['field' => 'etudiant.prenom', 'visible' => false])
-                ->add('nom_prenom', TextColumn::class, ['label' => 'Demandeur', 'render' => function ($value, Preinscription $preinscription) {
+                ->add('nom_prenom', TextColumn::class, ['label' => 'Etudiant', 'render' => function ($value, Preinscription $preinscription) {
                     return $preinscription->getEtudiant()->getNomComplet();
                 }]);
         }
-
-
+        $table->add('niveau', TextColumn::class, ['field' => 'niveau.libelle', 'label' => 'Niveau'])
+            ->add('datePreinscription', DateTimeColumn::class, ['label' => 'Date de la demande', 'format' => 'd-m-Y', 'searchable' => false]);
         if ($etat == 'valide') {
-            $table->add('montant', NumberFormatColumn::class, ['label' => 'Montant', 'field' => 'info.montant']);
-            $table->add('datePaiement', DateTimeColumn::class, ['label' => 'Date de paiement', 'field' => 'info.datePaiement', 'format' => 'd-m-Y']);
+            $table->add('montant', NumberFormatColumn::class, ['label' => 'Montant payé', 'field' => 'info.montant']);
+            $table->add('dateValidation', DateTimeColumn::class, ['label' => 'Date de paiement',  'format' => 'd-m-Y', 'searchable' => false]);
         }
+        $table->add('caissiere', TextColumn::class, ['field' => 'c.getNomComplet', 'label' => 'Caissière ']);
+
         $table->createAdapter(ORMAdapter::class, [
             'entity' => Preinscription::class,
             'query' => function (QueryBuilder $qb) use ($user, $etat) {
-                $qb->select(['p', 'niveau', 'c', 'filiere', 'etudiant'])
+                $qb->select(['p', 'niveau', 'c', 'filiere', 'etudiant,res'])
                     ->from(Preinscription::class, 'p')
                     ->join('p.niveau', 'niveau')
                     ->join('niveau.filiere', 'filiere')
+                    ->join('niveau.responsable', 'res')
                     ->join('p.etudiant', 'etudiant')
                     ->leftJoin('p.caissiere', 'c')
                     ->andWhere('p.etat = :etat')
@@ -299,6 +297,10 @@ class PreinscriptionController extends AbstractController
                 if ($this->isGranted('ROLE_ETUDIANT')) {
                     $qb->andWhere('p.etudiant = :etudiant')
                         ->setParameter('etudiant', $user->getPersonne());
+                }
+                if ($this->isGranted('ROLE_DIRECTEUR')) {
+                    $qb->andWhere('res.id = :id')
+                        ->setParameter('id', $user->getPersonne()->getId());
                 }
             }
         ])

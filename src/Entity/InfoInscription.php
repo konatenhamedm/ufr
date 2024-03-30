@@ -13,6 +13,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[Table(name: 'compta_info_inscription')]
 class InfoInscription
 {
+    const ETATS = [
+        'payer' => 'payer',
+        'attente_confirmation' => 'Attente Confirmation',
+        'confirmer' => 'Confirmation valider',
+        'annuler' => 'Annuler',
+
+    ];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -44,6 +52,33 @@ class InfoInscription
 
     #[ORM\ManyToOne(inversedBy: 'infoInscriptions')]
     private ?Echeancier $echenacier = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $etat = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $banque = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateCheque = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $tireur = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $contact = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $observation = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $numeroCheque = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateCredit = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateValidation = null;
 
     public function getId(): ?int
     {
@@ -141,6 +176,114 @@ class InfoInscription
     public function setEchenacier(?Echeancier $echenacier): static
     {
         $this->echenacier = $echenacier;
+
+        return $this;
+    }
+
+    public function getEtat(): ?string
+    {
+        return $this->etat;
+    }
+
+    public function setEtat(string $etat): static
+    {
+        $this->etat = $etat;
+
+        return $this;
+    }
+
+    public function getBanque(): ?string
+    {
+        return $this->banque;
+    }
+
+    public function setBanque(?string $banque): static
+    {
+        $this->banque = $banque;
+
+        return $this;
+    }
+
+    public function getDateCheque(): ?\DateTimeInterface
+    {
+        return $this->dateCheque;
+    }
+
+    public function setDateCheque(?\DateTimeInterface $dateCheque): static
+    {
+        $this->dateCheque = $dateCheque;
+
+        return $this;
+    }
+
+    public function getTireur(): ?string
+    {
+        return $this->tireur;
+    }
+
+    public function setTireur(?string $tireur): static
+    {
+        $this->tireur = $tireur;
+
+        return $this;
+    }
+
+    public function getContact(): ?string
+    {
+        return $this->contact;
+    }
+
+    public function setContact(?string $contact): static
+    {
+        $this->contact = $contact;
+
+        return $this;
+    }
+
+    public function getObservation(): ?string
+    {
+        return $this->observation;
+    }
+
+    public function setObservation(?string $observation): static
+    {
+        $this->observation = $observation;
+
+        return $this;
+    }
+
+    public function getNumeroCheque(): ?string
+    {
+        return $this->numeroCheque;
+    }
+
+    public function setNumeroCheque(?string $numeroCheque): static
+    {
+        $this->numeroCheque = $numeroCheque;
+
+        return $this;
+    }
+
+    public function getDateCredit(): ?\DateTimeInterface
+    {
+        return $this->dateCredit;
+    }
+
+    public function setDateCredit(?\DateTimeInterface $dateCredit): static
+    {
+        $this->dateCredit = $dateCredit;
+
+        return $this;
+    }
+
+    public function getDateValidation(): ?\DateTimeInterface
+    {
+        return $this->dateValidation;
+    }
+
+    public function setDateValidation(?\DateTimeInterface $dateValidation): static
+    {
+        $this->dateValidation = $dateValidation;
 
         return $this;
     }

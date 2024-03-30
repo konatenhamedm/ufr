@@ -39,60 +39,49 @@
         /*@page :first {
    header: html_headerContent;
 }*/
+caption{
+  margin-bottom: 15px;
+}
+      fieldset 
+	{
+		border: 1px solid #000 !important;
+		margin: 0;
+		xmin-width: 0;
+		padding: 10px;       
+		position: relative;
+		border-radius:4px;
+		background-color:#fff;
+		padding-left:10px!important;
+	}	
+	
+		legend
+		{
+       padding: 0 10px; 
+      margin-left: 100px;
+			font-size:14px;
+			font-weight:bold;
+			margin-bottom: 0px; 
+			width: 35%; 
+			border: 1px solid #ddd;
+			border-radius: 4px; 
+			background-color: #ffffff;
+		}
 
-        .table {
-          width: 100%;
-          max-width: 100%;
-          border-collapse: collapse;
+        table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
 
-        }
-        .table {
-          page-break-before: auto;
-        }
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
 
-        body {
-          font-family: Trebuchet,Arial,Helvetica;
-        }
-
-        .table td,
-        .table th {
-          padding: 2px;
-          vertical-align: top;
-          border-top: 1px solid #191919;
-        }
-
-        .table thead th {
-          vertical-align: bottom;
-          border-bottom: 2px solid #191919;
-        }
-
-        .table tbody + tbody {
-          border-top: 1px solid #191919;
-        }
-
-        .table .table {
-          background-color: #fff;
-        }
-
-        .table-sm td,
-        .table-sm th {
-          padding: 0.3rem;
-        }
-
-        .table-bordered {
-          border: 1px solid #191919;
-        }
-
-        .table-bordered td,
-        .table-bordered th {
-          border: 1px solid #191919;
-        }
-
-        .table-bordered thead td,
-        .table-bordered thead th {
-          border-bottom-width: 1px;
-        }
-
+tr:nth-child(even) {
+  
+}
         @media all {
           /*.content { display: block; page-break-inside: avoid; }*/
         }
@@ -101,9 +90,9 @@
           /*margin-top: 18cm;*/
         }
 
-        .table-responsive.table-bordered {
+        {# .table-responsive.table-bordered {
           border: 0;
-        }
+        } #}
 
         .double_underline {
             text-decoration:underline;
@@ -128,8 +117,8 @@
      
        <div style="width:65%;text-align:right;float:center;">
             <div style="text-align:center;"  class="">
-                    <b>COLLEGE LE PEROUSE</b><br>
-                  22 BP 1484 Abidjan 2 - Tél : 27 22 49 60 49 - college.laperouse@yahoo.com <br>
+                    <b>UFR-SEG</b><br>
+                  22 BP 1484 Abidjan 2 - Tél : 27 22 49 60 49 - ufrseg@yahoo.com <br>
                   Abidjan-Cocody
                <div style="border-top:1px solid #000"></div>
               </div>
@@ -145,65 +134,141 @@
           
         </div>
     </div>
-   {#   <div class="clearfix">
-       <div style="width:35%;text-align:center;float:right;">
-         
-            <div style="margin-top:-25px;text-align:center;border: 1px solid #000;padding:8px;font-size:15px;font-weight:bold"  class="">
-               <b><u>DOIT</u></b><br>
-              {{ "facture.raisonSociale" }}<br>
-              {{ "facture.adresse" }}<br>
-              CC: {{ "facture.compteContribuable" }}<br>
-              TEL: {{ "facture.contact" }}
-            </div>
-        </div>
-    </div> #}
+  
 
     <br>
-    <div style="text-align:center;margin-top:10px;">{{ "facture.commentaire"}}</div>
-    {# <table style="margin-top:0;font-size:12px;width:100%;border-collapse: collapse">
-      <thead>
-        <tr>
-          <th style="vertical-align:middle;width:10%;border:1px solid #000">Quantité</th>
-          <th style="vertical-align:middle;border:1px solid #000">Description</th>
-          <th style="vertical-align:middle;width:12%;border:1px solid #000">Prix Unitaire</th>
-          <th style="vertical-align:middle;width:12%;text-align:right;padding-right:5px;border:1px solid #000">Montant</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% set total = 0 %}
-        {% for ligne in facture.ligneFactures %}
-          {% set total = total + ligne.montant %}
-          <tr>
-            <td style="vertical-align:middle;text-align:center;padding:8px 5px;border-left: 1px solid #000;border-right: 1px solid #000;"></td>
-            <td style="vertical-align:middle;border-left: 1px solid #000;border-right: 1px solid #000;"><b>{{ ligne.libelle }}</b></td>
-            <td style="vertical-align:bottom;text-align:right;border-left: 1px solid #000;border-right: 1px solid #000;padding-right:5px;" >{{ ligne.montant | format_number }}</td>
-          
-            <td style="vertical-align:bottom;text-align:right;border-left: 1px solid #000;border-right: 1px solid #000;padding-right:5px;">{{ ligne.montant | format_number }}</td>
+
+ <form action="/action_page.php">
+    <fieldset>
+        <legend>Identification Étudiant</legend>
+        <table style=" border: 0px !important;">
             
-          </tr>
-        {% endfor %}
-        
-        {% set is_taxable = facture.taxable %}
-        <tfoot>
+                  <tr style=" border: 0px !important;">
+                    <th style=" border: 0px !important;">Code : {{ data.code }}</th>
+                    <th style=" border: 0px !important;">Nom :{{ data.etudiant.nom }}</th>
+                    <th style=" border: 0px !important;">Filière :{{ data.niveau.filiere.libelle }}</th>
+                  </tr>
+                  <tr style=" border: 0px !important;">
+                    <td style=" border: 0px !important;">Date inscription :{{ data.dateInscription | date('d/m/Y') }}</td>
+                    <td style=" border: 0px !important;">Prénoms :{{ data.etudiant.prenom  }}</td>
+                    <td style=" border: 0px !important;">Niveau :{{ data.niveau.libelle }}</td>
+                  </tr>
+                
+                 
+          </table>
+      </fieldset>
+   </form>
+   
+<br/>
+
+ <div class="clearfix">
+       <div style="width:40%;text-align:left;float:left;padding-right: 0px;">
+         {# {{ dump()}} #}
+            <table style=" border: 0px !important;">
+              <caption>
+               <b>Détails du paiement</b><br>
+              </caption> 
+                  <tr style=" border: 0px !important;">
+                    <th style=" border: 0px !important;">Date début :</th>
+                    <th style=" border: 0px !important;"><b>{{ info[0]['debut'] | date('d/m/Y') }}</b></th>
+                  </tr>
+                  <tr style=" border: 0px !important;">
+                     <th style=" border: 0px !important;">Date fin :</th>
+                    <th style=" border: 0px !important;"><b>{{ info[0]['fin'] | date('d/m/Y') }}</b></th>
+                  </tr>
+                  <tr style=" border: 0px !important;">
+                    <td style=" border: 0px !important;">Nombre échéancier :</td>
+                    <td style=" border: 0px !important;"><b>{{ nombre }}</b></td>
+                  </tr>
+                  <tr style=" border: 0px !important;">
+                    <td style=" border: 0px !important;">Montant &nbsp;&nbsp;:</td>
+                    <td style=" border: 0px !important;"><b>{{ data.montant |number_format(0, '.', '.') }}</b></td>
+                  </tr>
+                 
+          </table>
+        </div>
+       <div style="width:58%;text-align:right;float:right;">
          
-          <tr>
-            <td style="text-align:left;border-top: 1px solid #000;border-bottom: 1px solid #000;border-left: 1px solid #000;padding:5px;font-weight:bold" colspan="3">MONTANT HORS TAXE</td>
-            <td style="vertical-align:middle;text-align:right;border-top: 1px solid #000;border-bottom: 1px solid #000;border-right: 1px solid #000;padding:5px;font-weight:bold">{{ total | format_number }}</td>
-          </tr>
-           <tr>
-            <td style="text-align:left;border-top: 1px solid #000;border-bottom: 1px solid #000;border-left: 1px solid #000;padding:5px;font-weight:bold" colspan="3">TVA 18% {% if not is_taxable %}NON FACTUREE{% endif %}</td>
-            <td style="vertical-align:middle;text-align:right;border-top: 1px solid #000;border-bottom: 1px solid #000;border-right: 1px solid #000;padding:5px;font-weight:bold">{{ facture.getMontantTvaNonFacture | format_number }}</td>
-          </tr>
-           <tr>
-            <td style="text-align:left;border-top: 1px solid #000;border-bottom: 1px solid #000;border-left: 1px solid #000;padding:5px;font-weight:bold" colspan="3">MONTANT {% if is_taxable %}TTC{% else%}HT{% endif %} A PAYER</td>
-            <td style="vertical-align:middle;text-align:right;border-top: 1px solid #000;border-bottom: 1px solid #000;border-right: 1px solid #000;padding:5px;font-weight:bold">{{ (total + (is_taxable ? facture.montantTva: 0 ))| format_number }}</td>
-          </tr>
-  
-        </tfoot>
-    </table>
-    <p><b>ARRETE {{ code == 'a' ? 'LE PRESENT AVOIR': 'LA PRESENTE FACTURE' }} A LA SOMME DE: {{ (is_taxable ? facture.montant : facture.montantHt) | localize_number | upper }} FRANCS CFA</b></p>
+            {# <div style="margin-top:-25px;text-align:center;bosrder: 1px solid #000;padding:8px;font-size:15px;font-weight:bold"  class=""> #}
+               {# <b>DOIT</b><br><br> #}
+              <table>
+              <caption>
+             
+               <b>{{'échéancier de paiement' | upper}}</b><br>
+              </caption> 
+                  <tr style="background-color: #dddddd">
+                    <th>Date</th>
+                    <th>Montant à payer</th>
+                    <th>Montant versé</th>
+                    <th>Solde</th>
+                  </tr>
+
+                  {% for item in data.echeanciers|filter(v => v.etat == "payer") %}
+                     <tr>
+                    <td>{{ item.dateCreation | date('d/m/Y')}}</td>
+                    <td>{{ item.montant |number_format(0, '.', ' ') }}</td>
+                    <td>{% if item.etat == 'payer' %}
+                      {{ item.montant |number_format(0, '.', ' ') }}
+                    {% else %}
+                      0
+                    {% endif %}</td>
+                    <td>{% if item.etat == 'payer' %}
+                        Soldé
+                         {% elseif item.etat == 'attente_confirmation' %}
+                        Attente confirmation
+                    {% else %}
+                        Non soldé
+                    {% endif %}</td>
+                   
+                  </tr>
+                  {% endfor %}
+                 
+                  
+                 
+          </table>
+           {#  </div> #}
+        </div>
+       </div>
+
+                
+</div><br>
+  <div style="border-top:20px solid grey"></div><br>
+
+{#  <div class="clearfix">
+       <div style="width:70%;text-align:left;float:left;padding-left: 0px;">
+         <table>
+              <caption>
+               <b>Modalités de versement</b><br>
+              </caption> 
+                  <tr >
+                    <th style="background-color: #dddddd;border:1px solide black;">N</th>
+                      {% for key,item in 1..4 %}
+                         <td>{{key+1}}</td>
+                 
+                      {% endfor %}
+                  </tr>
+                  <tr>
+                   <th style="background-color: #dddddd;border:1px solide black;">Date</th>
+                    {% for item in 1..4 %}
+                         <td>{{"12/02/2024"}}</td>
+                  
+                      {% endfor %}
+                  </tr>
+                  <tr>
+                    <th style="background-color: #dddddd;border:1px solide black;">Montant</th>
+                    {% for item in 1..4 %}
+                         <td>{{"12 0000"}}</td>
+                  
+                      {% endfor %}
+                  </tr>
+                
+                 
+          </table>
+        </div>
+</div> #}
+
+</div>
     
-     #}
     <htmlpagefooter name="pageFooter">
        {#  <table style="width:100%">
           <tr>
@@ -217,8 +282,8 @@
         </table> #}
         <div style="border-top:2px solid #000"></div>
        <p  align="center" style="align: center;margin-top:-1px">
-        VRIDI FACE GESTOCI - 01 BP 5889 Abidjan 01 - e-mail: 
-        <a href="mailto:info@kuyopipeline.com">info@kuyopipeline.com</a><br>
+        COCODY ECOLE POLICEI - 01 BP 5889 Abidjan 01 - e-mail: 
+        <a href="mailto:ufr@gmail.com">ufr@gmail.com</a><br>
         Tél: +225 21 27 53 50 FAX.: +225 21 27 53 29 - Fax: (225) 21 27 53 29 - RC: 236319
        </p>
     </htmlpagefooter>

@@ -25,12 +25,12 @@ class TypeFraisController extends AbstractController
     public function index(Request $request, DataTableFactory $dataTableFactory): Response
     {
         $table = $dataTableFactory->create()
-        ->add('code', TextColumn::class, ['label' => 'Code'])
-        ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
-        ->createAdapter(ORMAdapter::class, [
-            'entity' => TypeFrais::class,
-        ])
-        ->setName('dt_app_parametre_type_frais');
+            ->add('code', TextColumn::class, ['label' => 'Code'])
+            ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
+            ->createAdapter(ORMAdapter::class, [
+                'entity' => TypeFrais::class,
+            ])
+            ->setName('dt_app_parametre_type_frais');
 
         $renders = [
             'edit' =>  new ActionRender(function () {
@@ -53,11 +53,7 @@ class TypeFraisController extends AbstractController
 
         if ($hasActions) {
             $table->add('id', TextColumn::class, [
-                'label' => 'Actions'
-                , 'orderable' => false
-                ,'globalSearchable' => false
-                ,'className' => 'grid_row_actions'
-                , 'render' => function ($value, TypeFrais $context) use ($renders) {
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, TypeFrais $context) use ($renders) {
                     $options = [
                         'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
                         'target' => '#modal-lg',
@@ -70,17 +66,17 @@ class TypeFraisController extends AbstractController
                                 'icon' => '%icon% bi bi-pen',
                                 'attrs' => ['class' => 'btn-main'],
                                 'render' => $renders['edit']
-                        ],
-                        'delete' => [
-                            'target' => '#modal-small',
-                            'url' => $this->generateUrl('app_parametre_type_frais_delete', ['id' => $value]),
-                            'ajax' => true,
-                            'stacked' => false,
-                            'icon' => '%icon% bi bi-trash',
-                            'attrs' => ['class' => 'btn-danger'],
-                            'render' => $renders['delete']
+                            ],
+                            'delete' => [
+                                'target' => '#modal-small',
+                                'url' => $this->generateUrl('app_parametre_type_frais_delete', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-trash',
+                                'attrs' => ['class' => 'btn-danger'],
+                                'render' => $renders['delete']
+                            ]
                         ]
-                    ]
 
                     ];
                     return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
@@ -97,6 +93,81 @@ class TypeFraisController extends AbstractController
 
 
         return $this->render('parametre/type_frais/index.html.twig', [
+            'datatable' => $table
+        ]);
+    }
+    #[Route('/config', name: 'app_parametre_type_frais_config_index', methods: ['GET', 'POST'])]
+    public function indexConfig(Request $request, DataTableFactory $dataTableFactory): Response
+    {
+        $table = $dataTableFactory->create()
+            ->add('code', TextColumn::class, ['label' => 'Code'])
+            ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
+            ->createAdapter(ORMAdapter::class, [
+                'entity' => TypeFrais::class,
+            ])
+            ->setName('dt_app_parametre_type_frais');
+
+        $renders = [
+            'edit' =>  new ActionRender(function () {
+                return true;
+            }),
+            'delete' => new ActionRender(function () {
+                return true;
+            }),
+        ];
+
+
+        $hasActions = false;
+
+        foreach ($renders as $_ => $cb) {
+            if ($cb->execute()) {
+                $hasActions = true;
+                break;
+            }
+        }
+
+        if ($hasActions) {
+            $table->add('id', TextColumn::class, [
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, TypeFrais $context) use ($renders) {
+                    $options = [
+                        'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
+                        'target' => '#modal-lg',
+
+                        'actions' => [
+                            'edit' => [
+                                'url' => $this->generateUrl('app_parametre_type_frais_edit', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-pen',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['edit']
+                            ],
+                            'delete' => [
+                                'target' => '#modal-small',
+                                'url' => $this->generateUrl('app_parametre_type_frais_delete', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-trash',
+                                'attrs' => ['class' => 'btn-danger'],
+                                'render' => $renders['delete']
+                            ]
+                        ]
+
+                    ];
+                    return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
+                }
+            ]);
+        }
+
+
+        $table->handleRequest($request);
+
+        if ($table->isCallback()) {
+            return $table->getResponse();
+        }
+
+
+        return $this->render('parametre/type_frais/config_index.html.twig', [
             'datatable' => $table
         ]);
     }
@@ -133,28 +204,23 @@ class TypeFraisController extends AbstractController
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-
             }
 
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
-
         }
 
         return $this->render('parametre/type_frais/new.html.twig', [
@@ -178,7 +244,7 @@ class TypeFraisController extends AbstractController
         $form = $this->createForm(TypeFraisType::class, $typeFrai, [
             'method' => 'POST',
             'action' => $this->generateUrl('app_parametre_type_frais_edit', [
-                    'id' =>  $typeFrai->getId()
+                'id' =>  $typeFrai->getId()
             ])
         ]);
 
@@ -190,7 +256,7 @@ class TypeFraisController extends AbstractController
 
         $form->handleRequest($request);
 
-       if ($form->isSubmitted()) {
+        if ($form->isSubmitted()) {
             $response = [];
             $redirect = $this->generateUrl('app_parametre_type_frais_index');
 
@@ -206,26 +272,22 @@ class TypeFraisController extends AbstractController
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-
             }
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
         }
 
         return $this->render('parametre/type_frais/edit.html.twig', [
@@ -240,14 +302,14 @@ class TypeFraisController extends AbstractController
         $form = $this->createFormBuilder()
             ->setAction(
                 $this->generateUrl(
-                'app_parametre_type_frais_delete'
-                ,   [
+                    'app_parametre_type_frais_delete',
+                    [
                         'id' => $typeFrai->getId()
                     ]
                 )
             )
             ->setMethod('DELETE')
-        ->getForm();
+            ->getForm();
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $data = true;

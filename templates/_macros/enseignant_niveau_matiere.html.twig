@@ -1,0 +1,38 @@
+{% macro prototype_ligne_matiere(form) %}
+    <div class="proto-container" data-prototype="{{ _self.ligne_matiere_enseignant(form.cours.vars.prototype)|e }}"></div>
+    <button type="button" data-protoname="__name__" class="btn btn-default add-collection add-ligne btn-xs" id="add_ligne" data-protoclass=".proto-container" data-container=".row-container">
+        <i class="fa fa-plus"></i>
+        Ajouter une ligne
+    </button>
+    <table class="table table-bordered table-custom">
+        <thead class="thead-dark">
+            <tr>
+                <th width="70%" class="p-2">Matières</th>
+                <th width="25%" class="p-2">Enseigants</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody  class="row-container">
+            {% for item in form.cours %}
+                {{ _self.ligne_matiere_enseignant(item|e) }}
+            {% endfor %}
+        </tbody>
+    </table>
+    
+{% endmacro %}
+
+{% macro ligne_matiere_enseignant(data) %}
+   
+    <tr class="row-colonne even pointer table-light">
+        <td class="p-2">
+            {# <span class="label">{{ data.matiere.vars.data.libelle | default('') }}</span> #}
+            <div style="display:no " class="field-matiere">{{ form_widget(data.matiere) }}</div>
+        </td>
+        <td class="p-2">{{ form_widget(data.employe) }}</td>
+        <td class="p-2 del-col">{# <a href="#" class="btn btn-danger btn-xs"><span class="bi bi-trash"></span></a> #}</td>
+    </tr>
+{% endmacro %}
+
+
+
+

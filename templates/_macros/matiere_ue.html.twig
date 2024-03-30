@@ -1,0 +1,55 @@
+{% macro prototype_ligne(form) %}
+    <div class="proto-container" data-prototype="{{ _self.ligne(form.matiereUes.vars.prototype)|e }}"></div>
+    <button type="button" data-protoname="__name__" class="btn btn-default add-collection add-ligne btn-xs" id="add_ligne" data-protoclass=".proto-container" data-container=".row-container">
+        <i class="fa fa-plus"></i>
+        Ajouter une ligne
+    </button>
+
+   
+    <table class="table table-bordered table-custom">
+        <thead class="thead-dark">
+            <tr>
+                <th width="55%" class="p-2">Matières</th>
+                <th width="10%" class="p-2">Coef</th>
+                <th width="10%" class="p-2">Nbre Credit</th>
+                <th width="10%" class="p-2">Note Eliminatoire</th>
+                <th width="10%" class="p-2">Moyenne Validation</th>
+               
+                <th></th>
+            </tr>
+        </thead>
+        <tbody  class="row-container">
+            {% for item in form.matiereUes %}
+                {{ _self.ligne(item|e) }}
+            {% endfor %}
+        </tbody>
+            <tfoot>
+            <tr>
+                <th class="text-end p-2 col " colspan="2">Total crédit</th>
+                <th class="total text-center p-2 fw-bolder col-total"  data-class="col-total">0</td>
+                <th class="total text-center p-2 fw-bolder " colspan="3"></td>
+            </tr>
+          
+        </tfoot>
+    </table>
+    
+{% endmacro %}
+
+{% macro ligne(data) %}
+   
+    <tr class="row-colonne even pointer table-light">
+        <td class="p-2">
+            {# <span class="label">{{ data.matiere.vars.data.libelle | default('') }}</span> #}
+            <div style="display:no " class="field-matiere">{{ form_widget(data.matiere) }}</div>
+        </td>
+        <td class="p-2 text-center">{{ form_widget(data.coef) }}</td>
+        <td class="p-2 text-center">{{ form_widget(data.nombreCredit) }}</td>
+        <td class="p-2 text-center">{{ form_widget(data.noteEliminatoire) }}</td>
+        <td class="p-2 text-center">{{ form_widget(data.moyenneValidation) }}</td>
+        <td class="p-2 text-center del-col">{# <a href="#" class="btn btn-danger btn-xs"><span class="bi bi-trash"></span></a> #}</td>
+    </tr>
+{% endmacro %}
+
+
+
+

@@ -1,0 +1,124 @@
+{% block page_content %}
+    {% form_theme form 'widget/fields-block.html.twig' %}
+    <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Edition Cours</h5>
+        <div class="btn btn-icon btn-sm  ms-2" data-bs-dismiss="modal" aria-label="Close">
+            <span class="svg-icon svg-icon-2x text-white">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor"></rect>
+					<rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor"></rect>
+				</svg>
+            </span>
+        </div>
+    </div>
+      {% from '_macros/enseignant_niveau_matiere.html.twig' import prototype_ligne_matiere %}
+    {{ form_start(form, {'attr': {'role':'form', 'class': 'form'}}) }}
+    <div class="modal-body">
+        {{ include('_includes/ajax/response.html.twig') }}
+        <div class="row">
+            <div class="col-md-12">{{ form_row(form.classe) }}</div>
+        </div> <br>
+        
+         {{ prototype_ligne_matiere(form) }}
+    </div>
+    <div class="modal-footer">
+        {# {{ include('_includes/ajax/loader.html.twig') }} #}
+        <button type="button" class="btn btn-default btn-sm" data-bs-dismiss="modal">Annuler</button>
+        <button type="submit" class="btn btn-main btn-ajax btn-sm"><span class="spinner-border d-none  spinner-ajax spinner-border-sm" role="status" aria-hidden="true"></span> Valider</button>
+    </div>
+      {{ form_widget(form._token) }}
+    {{ form_end(form, {render_rest: false}) }}
+{% endblock %}
+
+{% block java %}
+    <script>
+       $(function () {
+            init_select2('select', null, '#modal-lg');
+             $('.no-auto').each(function () {
+                const $this = $(this);
+                const $id = $('#' + $this.attr('id'));
+                init_date_picker($id,  'down', (start, e) => {
+                    //$this.val(start.format('DD/MM/YYYY'));
+                }, null, null, false);
+
+                $id.on('apply.daterangepicker', function (ev, picker) {
+                    $(this).val(picker.startDate.format('DD/MM/YYYY'));
+                });
+            });
+
+
+
+           
+            const $container = $('.row-container');
+
+            var index = $container.find('.row-colonne').length;
+
+            const $addLink = $('.add-ligne');
+
+        
+            $addLink.click(function (e) {
+
+                addLine($container);
+
+                e.preventDefault(); // évite qu'un # apparaisse dans l'URL
+            });
+        // On ajoute un premier champ automatiquement s'il n'en existe pas déjà un (cas d'une nouvelle annonce par exemple).
+        /*if (index == 0) {
+                addimputation($container);
+                } else {*/
+            if (index > 0) {
+                $container.children('.row-colonne').each(function () {
+                    const $this = $(this);
+                    addDeleteLink($this);
+                    $this.find("select").each(function () {
+                        const $this = $(this);
+                        init_select2($this, null, '#modal-lg');
+                    });
+                });
+            }
+
+        // La fonction qui ajoute un formulaire Categorie
+            function addLine($container) {
+            // Dans le contenu de l'attribut « data-prototype », on remplace :
+            // - le texte "__name__label__" qu'il contient par le label du champ
+            // - le texte "__name__" qu'il contient par le numéro du champ
+                var $prototype = $($(".proto-container").attr('data-prototype').replace(/__name__label__/g, 'Ligne ' + (
+                index + 1)).replace(/__name__/g, index));
+                // On ajoute au prototype un lien pour pouvoir supprimer la prestation
+                addDeleteLink($prototype);
+                // On ajoute le prototype modifié à la fin de la balise <div>
+                $container.append($prototype);
+
+                $prototype.find("select").each(function () {
+                const $this = $(this);
+                    init_select2($this, null, '#modal-lg');
+                });
+
+            
+                index++;
+
+            }
+
+            function addDeleteLink($prototype) {
+                // Création du lien
+                $deleteLink = $('<a href="#" class="btn btn-danger btn-xs"><span class="bi bi-trash"></span></a>');
+                // Ajout du lien
+                $prototype.find(".del-col").append($deleteLink);
+                // Ajout du listener sur le clic du lien
+                $deleteLink.click(function (e) {
+                     const $this = $(this);
+                   //  alert('')
+                    const $parent =  $this.closest('.row-colonne');
+                    $parent.remove();
+
+                    if (index > 0) {
+                        index -= 1;
+                    }
+
+                    e.preventDefault(); // évite qu'un # apparaisse dans l'URL
+                });
+            }
+
+        });
+    </script>
+{% endblock %}

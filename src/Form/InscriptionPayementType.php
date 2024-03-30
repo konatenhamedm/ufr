@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotNull;
 
 class InscriptionPayementType extends AbstractType
 {
@@ -34,16 +35,41 @@ class InscriptionPayementType extends AbstractType
                 'required' => true,
                 'mapped' => false,
                 'placeholder' => '----',
-                'label_attr' => ['class' => 'label-required'],
+                'label_attr' => ['class' => 'label-required mode'],
+                'choice_attr' => function (NaturePaiement $mode) {
+                    return ['data-value' => $mode->getCode()];
+                },
                 'choice_label' => 'libelle',
                 'label' => 'Mode de paiement',
-                'attr' => ['class' => 'has-select2']
+                'attr' => ['class' => 'has-select2 form-select']
+            ])
+            ->add('banque', TextType::class, ['mapped' => false, 'label' => 'Banque', "constraints" => array(
+                //new NotNull(null, "S'il vous veillez renseigner le champs banque")
+            )])
+            ->add('tireur', TextType::class, ['mapped' => false, 'label' => 'Tireur', "constraints" => array(
+                //  new NotNull(null, "S'il vous veillez renseigner le champs tireur")
+            )])
+            ->add('contact', TextType::class, ['mapped' => false, 'label' => 'Contact tireur', "constraints" => array(
+                //new NotNull(null, "S'il vous veillez renseigner le champs contact")
+            )])
+
+            ->add('numeroCheque', TextType::class, ['mapped' => false, 'label' => 'Numéro chèque', "constraints" => array(
+                // new NotNull(null, "S'il vous veillez renseigner le champs tireur")
+            )])
+            ->add('dateCheque', DateType::class, [
+                'required' => true,
+                'mapped' => false,
+                'widget' => 'single_text',
+                'label'   => 'Date du chèque',
+                'format'  => 'dd/MM/yyyy',
+                'html5' => false,
+                'attr'    => ['autocomplete' => 'off', 'class' => 'datepicker no-auto'],
             ])
             ->add('montant', TextType::class, ['label' => 'Montant', 'mapped' => false, 'attr' => ['class' => 'input-money input-mnt']]);
 
 
         $builder->add('annuler', SubmitType::class, ['label' => 'Annuler', 'attr' => ['class' => 'btn btn-primary btn-sm', 'data-bs-dismiss' => 'modal']])
-            ->add('save', SubmitType::class, ['label' => 'Enregister', 'attr' => ['class' => 'btn btn-main btn-ajax btn-sm']]);
+            ->add('save', SubmitType::class, ['label' => 'Payer', 'attr' => ['class' => 'btn btn-primary btn-ajax btn-sm']]);
         $builder->get('montant')->addModelTransformer(new ThousandNumberTransformer());
     }
 

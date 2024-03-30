@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\NaturePaiement;
 use App\Entity\Niveau;
 use App\Entity\Preinscription;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -37,6 +38,11 @@ class PreinscriptionPaiementType extends AbstractType
                 'placeholder' => '----',
                 'label_attr' => ['class' => 'label-required'],
                 'choice_label' => 'libelle',
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('m')
+                        ->andWhere('m.code = :code')
+                        ->setParameter('code', 'ESP');
+                },
                 'label' => 'Mode de paiement',
                 'attr' => ['class' => 'has-select2']
             ]);

@@ -18,14 +18,9 @@ use Symfony\Component\Serializer\Annotation\Groups as Group;
 #[ORM\HasLifecycleCallbacks]
 class Fichier
 {
+
     const DEFAULT_MIME_TYPES = [
         'text/plain', 'application/octet-stream', 'application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    ];
-
-    const TYPE_REUNION_LP = 'liste_presence';
-
-    const TYPES = [
-        'liste_presence' => 'Liste des présence'
     ];
 
 
@@ -35,14 +30,14 @@ class Fichier
     #[Group(["fichier"])]
     private ?int $id = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $size = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Group(["fichier"])]
     private ?string $path = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Group(["fichier"])]
     private ?string $alt = null;
 
@@ -50,7 +45,7 @@ class Fichier
     #[Gedmo\Timestampable(on: 'create')]
     private ?\DateTimeInterface $dateCreation = null;
 
-    #[ORM\Column(length: 5)]
+    #[ORM\Column(length: 5, nullable: true)]
     #[Group(["fichier"])]
     private ?string $url = null;
 
@@ -96,11 +91,13 @@ class Fichier
 
     public function __construct()
     {
+        //$this->path = "media_entreprise";
     }
 
     // On modifie le setter de File, pour prendre en compte l'upload d'un fichier lorsqu'il en existe déjà un autre
+
     /**
-     * @param UploadedFile $file
+     * @param UploadedFile|null $file
      */
     public function setFile(UploadedFile $file = null)
     {
@@ -128,15 +125,14 @@ class Fichier
     #[ORM\PreUpdate()]
     public function preUpload()
     {
-
+        // dd($this->size);
         // Si jamais il n'y a pas de fichier (champ facultatif)
         if (null === $this->file) {
             //dump('foo00');exit;
             return false;
         }
-
         //dump('foo');exit;
-
+        // dd("jljklme");
         // Le nom du fichier est son id, on doit juste stocker également son extension
         // Pour faire propre, on devrait renommer cet attribut en « extension », plutôt que « url »
         //$this->url = $this->file->guessExtension();
@@ -232,7 +228,12 @@ class Fichier
 
     public function setSize(int $size): self
     {
-        $this->size = $size;
+        if ($this->getSize() !== null) {
+            $this->size = $size;
+        } else {
+
+            $this->size = 0;
+        }
 
         return $this;
     }

@@ -43,7 +43,7 @@ class Personne
     //#[Assert\NotBlank(message: 'Veuillez renseigner la date de naissance')]
     private ?\DateTimeInterface $dateNaissance = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
+    #[ORM\Column(length: 100)]
     private ?string $lieuNaissance = null;
 
     #[ORM\ManyToOne]

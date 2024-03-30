@@ -26,13 +26,13 @@ class FiliereController extends AbstractController
     public function index(Request $request, DataTableFactory $dataTableFactory): Response
     {
         $table = $dataTableFactory->create()
-        ->add('code', TextColumn::class, ['label' => 'Code'])
-        ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
-        ->add('montantPreinscription', NumberFormatColumn::class, ['label' => 'Mnt. Préinscr.'])
-        ->createAdapter(ORMAdapter::class, [
-            'entity' => Filiere::class,
-        ])
-        ->setName('dt_app_parametre_filiere');
+            ->add('code', TextColumn::class, ['label' => 'Code'])
+            ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
+            ->add('montantPreinscription', NumberFormatColumn::class, ['label' => 'Mnt. Préinscr.'])
+            ->createAdapter(ORMAdapter::class, [
+                'entity' => Filiere::class,
+            ])
+            ->setName('dt_app_parametre_filiere');
 
         $renders = [
             'edit' =>  new ActionRender(function () {
@@ -55,11 +55,7 @@ class FiliereController extends AbstractController
 
         if ($hasActions) {
             $table->add('id', TextColumn::class, [
-                'label' => 'Actions'
-                , 'orderable' => false
-                ,'globalSearchable' => false
-                ,'className' => 'grid_row_actions'
-                , 'render' => function ($value, Filiere $context) use ($renders) {
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Filiere $context) use ($renders) {
                     $options = [
                         'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
                         'target' => '#modal-lg',
@@ -73,17 +69,17 @@ class FiliereController extends AbstractController
                                 'icon' => '%icon% bi bi-pen',
                                 'attrs' => ['class' => 'btn-main'],
                                 'render' => $renders['edit']
-                        ],
-                        'delete' => [
-                            'target' => '#modal-small',
-                            'url' => $this->generateUrl('app_parametre_filiere_delete', ['id' => $value]),
-                            'ajax' => true,
-                            'stacked' => false,
-                            'icon' => '%icon% bi bi-trash',
-                            'attrs' => ['class' => 'btn-danger'],
-                            'render' => $renders['delete']
+                            ],
+                            'delete' => [
+                                'target' => '#modal-small',
+                                'url' => $this->generateUrl('app_parametre_filiere_delete', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-trash',
+                                'attrs' => ['class' => 'btn-danger'],
+                                'render' => $renders['delete']
+                            ]
                         ]
-                    ]
 
                     ];
                     return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
@@ -100,6 +96,83 @@ class FiliereController extends AbstractController
 
 
         return $this->render('parametre/filiere/index.html.twig', [
+            'datatable' => $table
+        ]);
+    }
+    #[Route('/config', name: 'app_parametre_filiere_config_index', methods: ['GET', 'POST'])]
+    public function indexConfig(Request $request, DataTableFactory $dataTableFactory): Response
+    {
+        $table = $dataTableFactory->create()
+            ->add('code', TextColumn::class, ['label' => 'Code'])
+            ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
+            ->add('montantPreinscription', NumberFormatColumn::class, ['label' => 'Mnt. Préinscr.'])
+            ->createAdapter(ORMAdapter::class, [
+                'entity' => Filiere::class,
+            ])
+            ->setName('dt_app_parametre_filiere');
+
+        $renders = [
+            'edit' =>  new ActionRender(function () {
+                return true;
+            }),
+            'delete' => new ActionRender(function () {
+                return true;
+            }),
+        ];
+
+
+        $hasActions = false;
+
+        foreach ($renders as $_ => $cb) {
+            if ($cb->execute()) {
+                $hasActions = true;
+                break;
+            }
+        }
+
+        if ($hasActions) {
+            $table->add('id', TextColumn::class, [
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Filiere $context) use ($renders) {
+                    $options = [
+                        'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
+                        'target' => '#modal-lg',
+
+                        'actions' => [
+                            'edit' => [
+                                'url' => $this->generateUrl('app_parametre_filiere_edit', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'target' => '#modal-xl',
+                                'icon' => '%icon% bi bi-pen',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['edit']
+                            ],
+                            'delete' => [
+                                'target' => '#modal-small',
+                                'url' => $this->generateUrl('app_parametre_filiere_delete', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-trash',
+                                'attrs' => ['class' => 'btn-danger'],
+                                'render' => $renders['delete']
+                            ]
+                        ]
+
+                    ];
+                    return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
+                }
+            ]);
+        }
+
+
+        $table->handleRequest($request);
+
+        if ($table->isCallback()) {
+            return $table->getResponse();
+        }
+
+
+        return $this->render('parametre/filiere/config_index.html.twig', [
             'datatable' => $table
         ]);
     }
@@ -136,28 +209,23 @@ class FiliereController extends AbstractController
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-
             }
 
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
-
         }
 
         return $this->render('parametre/filiere/new.html.twig', [
@@ -181,7 +249,7 @@ class FiliereController extends AbstractController
         $form = $this->createForm(FiliereType::class, $filiere, [
             'method' => 'POST',
             'action' => $this->generateUrl('app_parametre_filiere_edit', [
-                    'id' =>  $filiere->getId()
+                'id' =>  $filiere->getId()
             ])
         ]);
 
@@ -193,7 +261,7 @@ class FiliereController extends AbstractController
 
         $form->handleRequest($request);
 
-       if ($form->isSubmitted()) {
+        if ($form->isSubmitted()) {
             $response = [];
             $redirect = $this->generateUrl('app_parametre_filiere_index');
 
@@ -209,26 +277,22 @@ class FiliereController extends AbstractController
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-
             }
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
         }
 
         return $this->render('parametre/filiere/edit.html.twig', [
@@ -243,14 +307,14 @@ class FiliereController extends AbstractController
         $form = $this->createFormBuilder()
             ->setAction(
                 $this->generateUrl(
-                'app_parametre_filiere_delete'
-                ,   [
+                    'app_parametre_filiere_delete',
+                    [
                         'id' => $filiere->getId()
                     ]
                 )
             )
             ->setMethod('DELETE')
-        ->getForm();
+            ->getForm();
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $data = true;

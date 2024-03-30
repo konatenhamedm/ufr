@@ -2,15 +2,16 @@
 
 {% block title %}Mes informations{% endblock %}
  {# {% from '_macros/macro_document.html.twig' import prototype_ligne_colonne_document %} #}
-  {% from '_macros/macro_document.html.twig' import prototype_ligne_colonne_information %}
+  {% from '_macros/macro_document.html.twig' import prototype_ligne_colonne_document %}
 
    {% from '_macros/macro_cursus_universitaire.html.twig' import prototype_ligne_colonne %}
+   {% from '_macros/macro_info.html.twig' import prototype_ligne_colonne_info %}
    {% from '_macros/macro_cursus_professionnel.html.twig' import prototype_ligne_colonne_professionnel %}
    {% from '_macros/macro_cursus_stage.html.twig' import prototype_ligne_colonne_stage %}
 {% block body %}
     <div class="card shadow-sm">
         <div class="card-header card-header-sm">
-            <h3 class="card-title"> Informations etudiant</h3>
+            <h3 class="card-title"> Informations étudiant</h3>
             <div class="card-toolbar">
                {# <a href="{{ path('app_utilisateur_utilisateur_new') }}" class="btn btn-main btn-sm"
                    data-bs-toggle="modal" data-bs-target="#exampleModalSizeLg2">
@@ -21,7 +22,7 @@
         </div>
         <div class="card-body">
             {% form_theme form 'widget/fields-block.html.twig' %}
-            {{ form_start(form, {'attr': {'role':'form', 'class': 'form'}}) }}
+            {{ form_start(form, {'attr': {'role':'form', 'class': 'form','enctype':'multipart/form-data'}}) }}
 
                 {{ include('_includes/ajax/response.html.twig') }}
             <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6">
@@ -39,6 +40,10 @@
                 </li> <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_5">MES DOCUMENTS</a>
                 </li>
+                </li> <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_6">INFORMATIONS SUR LES PARENTS</a>
+                </li>
+                
             </ul>
 
             <div class="tab-content" id="myTabContent">
@@ -58,6 +63,8 @@
                     <div class="col-md-12">{{ form_row(form.pays) }}</div>
                     <div class="col-md-12">{{ form_row(form.boite) }}</div>
                     <div class="col-md-12">{{ form_row(form.contact) }}</div>
+                    <div class="col-md-12">{{ form_row(form.numeroWhatsapp) }}</div>
+                    <div class="col-md-12">{{ form_row(form.email) }}</div>
 
                 </div>
                 <div class="tab-pane fade" id="kt_tab_pane_3" role="tabpanel">
@@ -89,20 +96,39 @@
                         <div class="form-group  col-md-1 mb-2">Autre :</div>
                         <div class="form-group  col-md-3 mb-2">{{ form_row(form.autreExistence,{'attr':{'placeholder':'Saisissez vos informations'}}) }}</div>
                     </div>
-                </div> <div class="tab-pane fade" id="kt_tab_pane_4" role="tabpanel">
+
+                     <div class="row mb-7">
+                        <h4>AUTRES INFORMATIONS </h4>
+                    </div>
+
+                    <div class="row">
+                    <div class="form-group col-md-2 mb-7">Êtes vous un travailleur ?</div>
+                    <div class="form-group col-md-2 mb-7 text-start">{{ form_row(form.statutTravail) }}</div>
+                    <div class="form-group col-md-4 mb-7">{{ form_row(form.travail,{'attr':{'placeholder':'Précisé le nom de votre structure','style':'margin-top: -15px;
+                }'}}) }}</div>
+                    </div>
+                    <div class="row">
+                    <div class="form-group col-md-2 mb-7">Êtes vous un étudiant ?</div>
+                    <div class="form-group col-md-2 mb-7 text-start">{{ form_row(form.statutEtudiant) }}</div>
+                    
+                    </div>
+                   
+                </div> 
+                
+                <div class="tab-pane fade" id="kt_tab_pane_4" role="tabpanel">
                     <div class="row mb-4">
-                        <h6>Votre cursus universitaire</h6>
+                        <h6>CURSUS UNIVERSITAIRE DEPUIS LE BAC </h6>
                     </div>
                    
 
                         {{ prototype_ligne_colonne(form) }}
 
-<br>
+                    <br>
                     <div class="row mb-4">
                         <h6>Votre cursus professionnel</h6>
                     </div>
                     {{ prototype_ligne_colonne_professionnel(form) }}
-<br>
+                <br>
                     <div class="row mb-4">
                         <h6>Vos stages éffectués</h6>
                     </div>
@@ -119,13 +145,18 @@
                      </div>
                     <br>
 
-                     {{ prototype_ligne_colonne_information(form) }}
+                     {{ prototype_ligne_colonne_document(form) }}
                     <br>
                    
 
     
 
                 </div>
+                <div class="tab-pane fade" id="kt_tab_pane_6" role="tabpanel">
+                    {{ prototype_ligne_colonne_info(form) }}
+                
+                </div>
+               
 
 
             </div>
@@ -154,12 +185,15 @@
 
 
 {% block java %}
-<script src="{{ asset('assets/parcours/universitaitre.js') }}"></script>
+<script src="{{ asset('assets/parcours/universitaire.js') }}"></script>
+<script src="{{ asset('assets/parcours/info.js') }}"></script>
 <script src="{{ asset('assets/parcours/professionnel.js') }}"></script>
 <script src="{{ asset('assets/parcours/stage.js') }}"></script>
 <script src="{{ asset('assets/parcours/document.js') }}"></script>
     <script>
      const etat = "{{etudiant.etat}}";
+
+     $('#etudiant_infoEtudiants_0_habiteAvec_placeholder').closest( "label" ).hide()
 
      if(etat == "pas_complet"){
          Swal.fire({
@@ -185,6 +219,21 @@
             $id.on('apply.daterangepicker', function (ev, picker) {
                 $(this).val(picker.startDate.format('DD/MM/YYYY'));
             });
+        });
+      if($("#etudiant_statutTravail_0").checked){
+$('.travail').show()
+        }else{
+$('.travail').hide()
+        }
+       
+
+          $("#etudiant_statutTravail_0").on('click',function () {
+           $('.travail').show()
+
+        });
+          $("#etudiant_statutTravail_1").on('click',function () {
+           $('.travail').hide()
+
         });
     </script>
 {% endblock %}

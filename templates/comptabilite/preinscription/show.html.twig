@@ -19,7 +19,7 @@
                     <td>{{ preinscription.id }}</td>
                 </tr>
                             <tr>
-                    <th>DatePreinscription</th>
+                    <th>Dat préinscription</th>
                     <td>{{ preinscription.datePreinscription ? preinscription.datePreinscription|date('Y-m-d') : '' }}</td>
                 </tr>
                             <tr>
@@ -29,6 +29,21 @@
                             <tr>
                     <th>Montant préinscription</th>
                     <td>{{ preinscription.niveau.filiere.montantPreinscription }}</td>
+                </tr>
+                            <tr>
+                    <th>Date traitement</th>
+                    <td>{{ preinscription.dateValidation ? preinscription.datePreinscription|date('Y-m-d') : '' }}</td>
+                </tr>
+                            <tr>
+                    <th>Décision</th>
+                    <td> 
+                    {% if preinscription.etat in ['attente_paiement','valide'] %}Validé{% else %} en attente de complément {% endif %}
+                    
+                    </td>
+                </tr>
+                            <tr>
+                    <th>Observation</th>
+                    <td>{{ preinscription.commentaire ? preinscription.commentaire :'' }}</td>
                 </tr>
                     </tbody>
     </table>

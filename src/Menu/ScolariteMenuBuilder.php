@@ -31,12 +31,13 @@ class ScolariteMenuBuilder
     {
         $menu = $this->factory->createItem('root');
         $menu->setExtra('module', self::MODULE_NAME);
-        if ($this->user->hasRoleOnModule(self::MODULE_NAME)) {
+        if ($this->user->hasRoleIn('ROLE_SECRETAIRE')) {
             $menu->addChild(self::MODULE_NAME, ['label' => 'Scolarite']);
         }
 
         if (isset($menu[self::MODULE_NAME])) {
-            $menu->addChild('scolarite.index', ['route' => 'app_home_timeline_index', 'label' => ' GESTION DES DOSSIERS'])->setExtra('icon', 'bi bi-gear');
+            $menu->addChild('scolarite.index', ['route' => 'app_home_timeline_index', 'label' => ' Gestion des dossiers'])->setExtra('icon', 'bi bi-gear')->setExtra('role', 'ROLE_SECRETAIRE');
+            $menu->addChild('inscription', ['route' => 'app_inscription_etudiant_admin_index', 'label' => ' Inscription'])->setExtra('icon', 'bi bi-gear');
         }
 
         return $menu;

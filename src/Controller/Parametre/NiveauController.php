@@ -6,7 +6,10 @@ use App\Entity\Employe;
 use App\Entity\Frais;
 use App\Entity\Niveau;
 use App\Entity\TypeFrais;
+use App\Form\NiveauAddEnseignantType;
 use App\Form\NiveauType;
+use App\Repository\AnneeScolaireRepository;
+use App\Repository\CoursRepository;
 use App\Repository\NiveauRepository;
 use App\Service\ActionRender;
 use App\Service\FormError;
@@ -21,6 +24,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[Route('/admin/parametre/niveau')]
 class NiveauController extends AbstractController
@@ -29,30 +33,34 @@ class NiveauController extends AbstractController
     public function index(Request $request, DataTableFactory $dataTableFactory): Response
     {
         $table = $dataTableFactory->create()
-        ->add('code', TextColumn::class, ['label' => 'Code'])
-        ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
-        ->add('filiere', TextColumn::class, ['label' => 'Filière', 'field' => 'filiere.libelle'])
-        ->add('nom', TextColumn::class, ['field' => 'emp.nom', 'visible' => false])
-        ->add('prenom', TextColumn::class, ['field' => 'emp.prenom', 'visible' => false])
-        ->add('responsable', TextColumn::class, ['label' => 'Responsable', 'render' => fn ($value, Niveau $niveau) => $niveau->getResponsable()->getNomComplet()])
-        ->createAdapter(ORMAdapter::class, [
-            'entity' => Niveau::class,
-            'query' => function (QueryBuilder $builder) {
-                $builder->resetDQLPart('join');
-                $builder
-                    ->select('niveau,filiere,emp')
-                    ->from(Niveau::class,'niveau')
-                    ->join('niveau.filiere', 'filiere')
-                    ->join('niveau.responsable', 'emp');
-                ;
-            },
-        ])
-        ->setName('dt_app_parametre_niveau');
+            ->add('code', TextColumn::class, ['label' => 'Code'])
+            ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
+            ->add('filiere', TextColumn::class, ['label' => 'Filière', 'field' => 'filiere.libelle'])
+            ->add('nom', TextColumn::class, ['field' => 'emp.nom', 'visible' => false])
+            ->add('prenom', TextColumn::class, ['field' => 'emp.prenom', 'visible' => false])
+            ->add('responsable', TextColumn::class, ['label' => 'Responsable', 'render' => fn ($value, Niveau $niveau) => $niveau->getResponsable()->getNomComplet()])
+            ->createAdapter(ORMAdapter::class, [
+                'entity' => Niveau::class,
+                'query' => function (QueryBuilder $builder) {
+                    $builder->resetDQLPart('join');
+                    $builder
+                        ->select('niveau,filiere,emp')
+                        ->from(Niveau::class, 'niveau')
+                        ->join('niveau.filiere', 'filiere')
+                        ->join('niveau.responsable', 'emp');;
+                },
+            ])
+            ->setName('dt_app_parametre_niveau');
 
         $renders = [
             'edit' =>  new ActionRender(function () {
                 return true;
             }),
+            'personnalise' =>  new ActionRender(function () {
+                return true;
+            }),
+
+
             'delete' => new ActionRender(function () {
                 return true;
             }),
@@ -70,11 +78,7 @@ class NiveauController extends AbstractController
 
         if ($hasActions) {
             $table->add('id', TextColumn::class, [
-                'label' => 'Actions'
-                , 'orderable' => false
-                ,'globalSearchable' => false
-                ,'className' => 'grid_row_actions'
-                , 'render' => function ($value, Niveau $context) use ($renders) {
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Niveau $context) use ($renders) {
                     $options = [
                         'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
                         'target' => '#modal-lg',
@@ -87,17 +91,113 @@ class NiveauController extends AbstractController
                                 'icon' => '%icon% bi bi-pen',
                                 'attrs' => ['class' => 'btn-main'],
                                 'render' => $renders['edit']
-                        ],
-                        'delete' => [
-                            'target' => '#modal-small',
-                            'url' => $this->generateUrl('app_parametre_niveau_delete', ['id' => $value]),
-                            'ajax' => true,
-                            'stacked' => false,
-                            'icon' => '%icon% bi bi-trash',
-                            'attrs' => ['class' => 'btn-danger'],
-                            'render' => $renders['delete']
+                            ],
+
+                            'delete' => [
+                                'target' => '#modal-small',
+                                'url' => $this->generateUrl('app_parametre_niveau_delete', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-trash',
+                                'attrs' => ['class' => 'btn-danger'],
+                                'render' => $renders['delete']
+                            ]
                         ]
-                    ]
+
+                    ];
+                    return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
+                }
+            ]);
+        }
+
+        $table->handleRequest($request);
+
+        if ($table->isCallback()) {
+            return $table->getResponse();
+        }
+
+
+        return $this->render('parametre/niveau/index.html.twig', [
+            'datatable' => $table
+        ]);
+    }
+
+    #[Route('/config', name: 'app_parametre_niveau_config_index', methods: ['GET', 'POST'])]
+    public function indexConfig(Request $request, DataTableFactory $dataTableFactory, UserInterface $user): Response
+    {
+        $table = $dataTableFactory->create()
+            ->add('code', TextColumn::class, ['label' => 'Code'])
+            ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
+            ->add('filiere', TextColumn::class, ['label' => 'Filière', 'field' => 'filiere.libelle'])
+            ->add('nom', TextColumn::class, ['field' => 'emp.nom', 'visible' => false])
+            ->add('prenom', TextColumn::class, ['field' => 'emp.prenom', 'visible' => false])
+            ->add('responsable', TextColumn::class, ['label' => 'Responsable', 'render' => fn ($value, Niveau $niveau) => $niveau->getResponsable()->getNomComplet()])
+            ->createAdapter(ORMAdapter::class, [
+                'entity' => Niveau::class,
+                'query' => function (QueryBuilder $qb) use ($user) {
+                    $$qb->resetDQLPart('join');
+                    $qb
+                        ->select('niveau,filiere,emp,res')
+                        ->from(Niveau::class, 'niveau')
+                        ->join('niveau.filiere', 'filiere')
+                        ->join('niveau.responsable', 'res')
+                        ->join('niveau.responsable', 'emp');
+
+                    if ($this->isGranted('ROLE_DIRECTEUR')) {
+                        $qb->andWhere('res.id = :id')
+                            ->setParameter('id', $user->getPersonne()->getId());
+                    }
+                },
+            ])
+            ->setName('dt_app_parametre_niveau');
+
+        $renders = [
+            'edit' =>  new ActionRender(function () {
+                return true;
+            }),
+
+            'delete' => new ActionRender(function () {
+                return true;
+            }),
+        ];
+
+
+        $hasActions = false;
+
+        foreach ($renders as $_ => $cb) {
+            if ($cb->execute()) {
+                $hasActions = true;
+                break;
+            }
+        }
+
+        if ($hasActions) {
+            $table->add('id', TextColumn::class, [
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Niveau $context) use ($renders) {
+                    $options = [
+                        'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
+                        'target' => '#modal-lg',
+
+                        'actions' => [
+                            'edit' => [
+                                'url' => $this->generateUrl('app_parametre_niveau_edit', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-pen',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['edit']
+                            ],
+
+                            'delete' => [
+                                'target' => '#modal-small',
+                                'url' => $this->generateUrl('app_parametre_niveau_delete', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-trash',
+                                'attrs' => ['class' => 'btn-danger'],
+                                'render' => $renders['delete']
+                            ]
+                        ]
 
                     ];
                     return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
@@ -113,7 +213,7 @@ class NiveauController extends AbstractController
         }
 
 
-        return $this->render('parametre/niveau/index.html.twig', [
+        return $this->render('parametre/niveau/config_index.html.twig', [
             'datatable' => $table
         ]);
     }
@@ -129,7 +229,7 @@ class NiveauController extends AbstractController
             $frais->setTypeFrais($type);
             $niveau->addFrai($frais);
         }
-        
+
         $form = $this->createForm(NiveauType::class, $niveau, [
             'method' => 'POST',
             'action' => $this->generateUrl('app_parametre_niveau_new')
@@ -157,28 +257,23 @@ class NiveauController extends AbstractController
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-
             }
 
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
-
         }
 
         return $this->render('parametre/niveau/new.html.twig', [
@@ -205,7 +300,7 @@ class NiveauController extends AbstractController
             if (!$frais) {
                 $frais = new Frais();
             }
-           
+
             $frais->setTypeFrais($type);
             $niveau->addFrai($frais);
         }
@@ -225,7 +320,7 @@ class NiveauController extends AbstractController
 
         $form->handleRequest($request);
 
-       if ($form->isSubmitted()) {
+        if ($form->isSubmitted()) {
             $response = [];
             $redirect = $this->generateUrl('app_parametre_niveau_index');
 
@@ -241,26 +336,22 @@ class NiveauController extends AbstractController
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-
             }
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
         }
 
         return $this->render('parametre/niveau/edit.html.twig', [
@@ -269,20 +360,21 @@ class NiveauController extends AbstractController
         ]);
     }
 
+
     #[Route('/{id}/delete', name: 'app_parametre_niveau_delete', methods: ['DELETE', 'GET'])]
     public function delete(Request $request, Niveau $niveau, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createFormBuilder()
             ->setAction(
                 $this->generateUrl(
-                'app_parametre_niveau_delete'
-                ,   [
+                    'app_parametre_niveau_delete',
+                    [
                         'id' => $niveau->getId()
                     ]
                 )
             )
             ->setMethod('DELETE')
-        ->getForm();
+            ->getForm();
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $data = true;

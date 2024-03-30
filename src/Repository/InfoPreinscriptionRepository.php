@@ -83,6 +83,7 @@ SQL;
         return $stmt->fetchAllAssociative();
     }
 
+
     //    /**
     //     * @return InfoPreinscription[] Returns an array of InfoPreinscription objects
     //     */

@@ -2,6 +2,7 @@ twig:
     default_path: '%kernel.project_dir%/templates'
     globals:
         route: '@App\Service\ServiceRouter'
+        menu: '@App\Service\Menu'
 when@test:
     twig:
         strict_variables: true

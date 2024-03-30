@@ -1,17 +1,21 @@
 {% extends 'base-layout.html.twig' %}
 
 {% block title %}Direction{% endblock %}
-{% block header %}Examen{% endblock %}
+{% block header %}{{ examen.libelle ~' | '~ examen.niveau.libelle }}{% endblock %}
 {% block breadcrumb %}{% endblock %}
 {% block body %}
 <div class="card shadow-sm">
     <div class="card-header card-header-sm">
         <h3 class="card-title"> {{ title | default('Gestion des délibérations') }}</h3>
         <div class="card-toolbar">
-            <a href="{{ path('app_direction_deliberation_historique_new',{'id':id}) }}" class="btn btn-main btn-sm"  data-bs-toggle="modal" data-bs-target="#modal-xl">
+            <a href="{{ path('app_direction_deliberation_new',{'id':id}) }}" class="btn btn-main btn-sm"  data-bsd-toggle="modal" data-bs-targetd="#modal-xl">
                 <i class="bi bi-plus-square text-light"></i>
                 Nouveau
             </a>
+           {#  <a href="{{ path('app_direction_deliberation_historique_new',{'id':id}) }}" class="btn btn-main btn-sm"  data-bs-toggle="modal" data-bs-target="#modal-xl">
+                <i class="bi bi-plus-square text-light"></i>
+                Nouveau
+            </a> #}
         </div>
     </div>
     <div class="card-body">

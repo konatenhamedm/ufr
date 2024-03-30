@@ -1,0 +1,281 @@
+{# {% set code =facture.typeFacture.code(true) %} #}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{# {{ code =='a' ? 'AVOIR': 'FACTURE' }} {{ facture.numero }} #}dd</title>
+    <style>
+      {% block page_css %}
+        @page {
+
+          margin-footer: 0.5cm;
+
+          /*header: html_headerContent;*/
+          footer: html_pageFooter;
+          margin-top: 0.5cm;
+          margin-header: 0cm;
+         
+          /*background: ...
+  background-image: ...
+  background-position ...
+  background-repeat ...
+  background-color ...
+  background-gradient: ...*/
+        }
+        .clearfix:after,
+        {% endblock %} .clearfix:before {
+          content: " ";
+          display: table;
+        }
+
+        .clearfix:after {
+          clear: both;
+        }
+
+        .mention {
+  position: absolute;
+  bottom: 100px;
+}
+
+        /*@page :first {
+   header: html_headerContent;
+}*/
+caption{
+  margin-bottom: 15px;
+}
+      fieldset 
+	{
+		border: 1px solid #000 !important;
+		margin: 0;
+		xmin-width: 0;
+		padding: 10px;       
+		position: relative;
+		border-radius:4px;
+		background-color:#fff;
+		padding-left:10px!important;
+	}	
+	
+		legend
+		{
+       padding: 0 10px; 
+      margin-left: 100px;
+			font-size:14px;
+			font-weight:bold;
+			margin-bottom: 0px; 
+			width: 35%; 
+			border: 1px solid #ddd;
+			border-radius: 4px; 
+			background-color: #ffffff;
+		}
+
+        table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  
+}
+        @media all {
+          /*.content { display: block; page-break-inside: avoid; }*/
+        }
+
+        .content {
+          /*margin-top: 18cm;*/
+        }
+
+        {# .table-responsive.table-bordered {
+          border: 0;
+        } #}
+
+        .double_underline {
+            text-decoration:underline;
+            border-bottom: 1px solid #000;
+            text-align: center;
+        }
+    </style>
+  </head>
+  <body style="font-size:12px;">
+    <div class="clearfix">
+     <div style="width:10%;text-align:left;float:left;"  class="">
+     {% set var = "uploads/" ~ 'media_etudiant' ~"/"~ 'lg.jpeg' %}
+        <img src="{{ var |replace({'/': "\\"}) }}" width="100px" />
+        {# <img src="{{ absolute_url(asset(var)) }}" width="100px" /> #}
+       {#  <div style="text-align:left;border: 1px solid #000;padding:8px;width:70%"  class="">
+              CC N° 9904215 D<br>
+              Régime d'imposition: Réel Normal<br>
+              Centre des impôts: D G E<br>
+        </div>
+        {{ "facture.typeFacture.libelle" | upper }} N° {{ 'facture.numero' }} #}
+      </div>
+     
+       <div style="width:65%;text-align:right;float:center;">
+            <div style="text-align:center;"  class="">
+                    <b>UFR-SEG</b><br>
+                  22 BP 1484 Abidjan 2 - Tél : 27 22 49 60 49 - ufrseg@yahoo.com <br>
+                  Abidjan-Cocody
+               <div style="border-top:1px solid #000"></div>
+              </div>
+           
+        </div>
+       <div style="width:25%;text-align:right;float:right;margin-top:0px,padding:8px">
+
+           <div style="text-align:center;margin-top:-45px"  class="">
+                    République de COTE D'IVOIRE <br>
+                <span style="text-decoration: underline;">Union - Discipline - Travail</span> <br>
+               <b style="font-weight: bolder;">Année scolaire : 2021-2022</b>
+              </div>
+          
+        </div>
+    </div>
+  
+
+    <br>
+
+ <form action="/action_page.php">
+    <fieldset>
+        <legend>Identification Étudiant</legend>
+        <table style=" border: 0px !important;">
+            
+                  <tr style=" border: 0px !important;">
+                    <th style=" border: 0px !important;">Code : {{ data.code }}</th>
+                    <th style=" border: 0px !important;">Nom :{{ data.etudiant.nom }}</th>
+                    <th style=" border: 0px !important;">Filière :{{ data.niveau.filiere.libelle }}</th>
+                  </tr>
+                  <tr style=" border: 0px !important;">
+                    <td style=" border: 0px !important;">Date inscription :{{ data.dateInscription | date('d/m/Y') }}</td>
+                    <td style=" border: 0px !important;">Prénoms :{{ data.etudiant.prenom  }}</td>
+                    <td style=" border: 0px !important;">Niveau :{{ data.niveau.libelle }}</td>
+                  </tr>
+                
+                 
+          </table>
+      </fieldset>
+   </form>
+   
+<br/>
+
+ <div class="clearfix">
+       <div style="width:40%;text-align:left;float:left;padding-right: 0px;">
+         
+            <table style=" border: 0px !important;">
+              <caption>
+               <b>Détails du paiement</b><br>
+              </caption> 
+                  <tr style=" border: 0px !important;">
+                    <th style=" border: 0px !important;">Date début :</th>
+                    <th style=" border: 0px !important;"><b>17/12/2024</b></th>
+                  </tr>
+                  <tr style=" border: 0px !important;">
+                     <th style=" border: 0px !important;">Date fin :</th>
+                    <th style=" border: 0px !important;"><b>17/12/2024</b></th>
+                  </tr>
+                  <tr style=" border: 0px !important;">
+                    <td style=" border: 0px !important;">Nombre échéancier :</td>
+                    <td style=" border: 0px !important;"><b>4</b></td>
+                  </tr>
+                  <tr style=" border: 0px !important;">
+                    <td style=" border: 0px !important;">Montant &nbsp;&nbsp;:</td>
+                    <td style=" border: 0px !important;"><b>40 0000</b></td>
+                  </tr>
+                 
+          </table>
+        </div>
+       <div style="width:58%;text-align:right;float:right;">
+         
+            {# <div style="margin-top:-25px;text-align:center;bosrder: 1px solid #000;padding:8px;font-size:15px;font-weight:bold"  class=""> #}
+               {# <b>DOIT</b><br><br> #}
+              <table>
+              <caption>
+               <b>Récapitulatif des frais d'écolage</b><br>
+              </caption> 
+                  <tr style="background-color: #dddddd">
+                    <th>Type Frais</th>
+                    <th>Montant</th>
+                  </tr>
+                  <tr>
+                    <td>FRAIS DE SOUTENANCE</td>
+                    <td>12 0000</td>
+                   
+                  </tr>
+                  <tr>
+                    <td>FRAIS EXAMEN</td>
+                    <td>12 000</td>
+                   
+                  </tr>
+                  <tr>
+                    <td><b>Total</b></td>
+                    <td><b>24 000</b></td>
+                   
+                  </tr>
+                 
+          </table>
+           {#  </div> #}
+        </div>
+       </div>
+
+                
+</div><br>
+  <div style="border-top:20px solid grey"></div><br>
+
+ <div class="clearfix">
+       <div style="width:70%;text-align:left;float:left;padding-left: 0px;">
+         <table>
+              <caption>
+               <b>Modalités de versement</b><br>
+              </caption> 
+                  <tr >
+                    <th style="background-color: #dddddd;border:1px solide black;">N</th>
+                      {% for key,item in 1..4 %}
+                         <td>{{key+1}}</td>
+                  {#   <td>Germany</td> #}
+                      {% endfor %}
+                  </tr>
+                  <tr>
+                   <th style="background-color: #dddddd;border:1px solide black;">Date</th>
+                    {% for item in 1..4 %}
+                         <td>{{"12/02/2024"}}</td>
+                  {#   <td>Germany</td> #}
+                      {% endfor %}
+                  </tr>
+                  <tr>
+                    <th style="background-color: #dddddd;border:1px solide black;">Montant</th>
+                    {% for item in 1..4 %}
+                         <td>{{"12 0000"}}</td>
+                  {#   <td>Germany</td> #}
+                      {% endfor %}
+                  </tr>
+                
+                 
+          </table>
+        </div>
+</div>
+
+</div>
+    
+    <htmlpagefooter name="pageFooter">
+       {#  <table style="width:100%">
+          <tr>
+            <td style="width:50%;text-align:left;padding-bottom:8px">
+              <i><b>Client</b></i>
+            </td>
+            <td style="width:50%;text-align:right">
+              <i><b>Souche</b></i>
+            </td>
+          </tr>
+        </table> #}
+        <div style="border-top:2px solid #000"></div>
+       <p  align="center" style="align: center;margin-top:-1px">
+        COCODY ECOLE POLICEI - 01 BP 5889 Abidjan 01 - e-mail: 
+        <a href="mailto:ufr@gmail.com">ufr@gmail.com</a><br>
+        Tél: +225 21 27 53 50 FAX.: +225 21 27 53 29 - Fax: (225) 21 27 53 29 - RC: 236319
+       </p>
+    </htmlpagefooter>
+  </body>
+</html>

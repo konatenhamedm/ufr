@@ -23,7 +23,7 @@ class UtilisateurType extends AbstractType
     {
         $builder
             /*  ->add('username', TextType::class, ['label' => 'Pseudo']) */
-            ->add('email', EmailType::class, ['label' => 'Email'])
+            ->add('email', EmailType::class, ['label' => 'Email', 'required' => true])
             ->add(
                 'roles',
                 ChoiceType::class,
@@ -38,7 +38,10 @@ class UtilisateurType extends AbstractType
                         'ROLE_SUPER_ADMIN' => 'Super Administrateur',
                         'ROLE_ADMIN' => 'Administrateur',
                         'ROLE_ETUDIANT' => 'Etudiants',
-                        'ROLE_CAISSIERE' => 'Caissière'
+                        'ROLE_CAISSIERE' => 'Caissière',
+                        'ROLE_COMPTABLE' => 'Comptable',
+                        'ROLE_SECRETAIRE' => 'Secrétaire',
+                        'ROLE_DIRECTEUR' => 'Directeur'
                     ]),
                 ]
             )

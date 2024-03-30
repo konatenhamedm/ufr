@@ -378,6 +378,50 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface, 
         }
         return $this->hasRole('ROLE_ADMIN') || $result;
     }
+    public function hasRoleStartsWith2($roleName)
+    {
+        $result = false;
+
+        foreach ($this->getRoles() as $role) {
+            if (preg_match("/^{$roleName}/", $role, $matches)) {
+                $result = true;
+                break;
+            }
+        }
+        return  $result;
+    }
+    public function hasRoleIn($roleName)
+    {
+        $result = false;
+
+        if (in_array($roleName, $this->getRoles())) {
+            $result = true;
+        }
+
+        /*  foreach ($this->getRoles() as $role) {
+            if (preg_match("/^{$roleName}/", $role, $matches)) {
+                $result = true;
+                break;
+            }
+        } */
+        return  $this->hasRole('ROLE_ADMIN') || $this->hasRole('ROLE_SECRETAIRE') ||  $result;
+    }
+    public function hasRoleInExept($roleName)
+    {
+        $result = false;
+
+        if (in_array($roleName, $this->getRoles())) {
+            $result = true;
+        }
+
+        /*  foreach ($this->getRoles() as $role) {
+            if (preg_match("/^{$roleName}/", $role, $matches)) {
+                $result = true;
+                break;
+            }
+        } */
+        return  $result;
+    }
 
     public function hasRoleOnModule(string $module, $exclude = null, $append = null)
     {

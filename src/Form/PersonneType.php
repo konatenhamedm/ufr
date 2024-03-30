@@ -7,6 +7,7 @@ use App\Entity\Employe;
 use App\Entity\Fonction;
 use App\Entity\Genre;
 use App\Entity\Personne;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -29,7 +30,7 @@ class PersonneType extends AbstractType
                 'attr'    => ['autocomplete' => 'off', 'class' => 'datepicker no-auto'],
             ])
             ->add('lieuNaissance', null, ['label' => 'Lieu de naissance', 'required' => false, 'empty_data' => ''])
-            ->add('email', EmailType::class, ['label' => 'Adresse E-mail', 'required' => false, 'empty_data' => ''])
+            ->add('email', EmailType::class, ['label' => 'Adresse E-mail', 'required' => true, 'empty_data' => ''])
             ->add('contact', null, ['label' => 'Contacts', 'required' => false, 'empty_data' => ''])
             ->add('genre', EntityType::class, [
                 'class' => Genre::class,
@@ -54,12 +55,15 @@ class PersonneType extends AbstractType
                 'required' => false,
                 'placeholder' => '----',
                 'label_attr' => ['class' => 'label-required'],
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('f')
+                        ->andWhere('f.code not in (:code)')
+                        ->setParameter('code', 'ETD');
+                },
                 'choice_label' => 'libelle',
                 'label' => 'Fonction',
                 'attr' => ['class' => 'has-select2']
-            ])
-           
-        ;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

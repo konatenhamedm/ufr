@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\CursusUniversitaireRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CursusUniversitaireRepository::class)]
 class CursusUniversitaire
@@ -13,7 +14,7 @@ class CursusUniversitaire
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $etablissement = null;
 
     #[ORM\Column(length: 255)]
@@ -28,15 +29,52 @@ class CursusUniversitaire
     #[ORM\Column(length: 255)]
     private ?string $diplome = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $mention = null;
 
     #[ORM\ManyToOne(inversedBy: 'cursusUniversitaires')]
     private ?Personne $personne = null;
 
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Veuillez sélectionner un numéro diplome')]
+    private ?string $numeroDiplome = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $numeroMatricule = null;
+
+    #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Fichier $bac = null;
+
+    #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Fichier $releve = null;
+
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setBac(?Fichier $bac): static
+    {
+        $this->bac = $bac;
+        return $this;
+    }
+
+    public function getBac(): ?Fichier
+    {
+        return $this->bac;
+    }
+
+    public function setReleve(?Fichier $releve): static
+    {
+        $this->releve = $releve;
+        return $this;
+    }
+
+    public function getReleve(): ?Fichier
+    {
+        return $this->releve;
     }
 
     public function getEtablissement(): ?string
@@ -119,6 +157,30 @@ class CursusUniversitaire
     public function setPersonne(?Personne $personne): static
     {
         $this->personne = $personne;
+
+        return $this;
+    }
+
+    public function getNumeroDiplome(): ?string
+    {
+        return $this->numeroDiplome;
+    }
+
+    public function setNumeroDiplome(string $numeroDiplome): static
+    {
+        $this->numeroDiplome = $numeroDiplome;
+
+        return $this;
+    }
+
+    public function getNumeroMatricule(): ?string
+    {
+        return $this->numeroMatricule;
+    }
+
+    public function setNumeroMatricule(string $numeroMatricule): static
+    {
+        $this->numeroMatricule = $numeroMatricule;
 
         return $this;
     }

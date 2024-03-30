@@ -9,6 +9,7 @@ use App\Entity\Utilisateur;
 use App\Form\EditUtilisateurType;
 use Symfony\Component\Form\FormError as SfFormError;
 use App\Form\UtilisateurType;
+use App\Repository\PersonneRepository;
 use App\Service\ActionRender;
 use Doctrine\ORM\QueryBuilder;
 use App\Repository\UtilisateurRepository;
@@ -104,7 +105,7 @@ class UtilisateurController extends AbstractController
     }
 
     #[Route('/new', name: 'app_utilisateur_utilisateur_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $userPasswordHasher, FormError $formError): Response
+    public function new(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $userPasswordHasher, FormError $formError, PersonneRepository $personneRepository): Response
     {
         $utilisateur = new Utilisateur();
         $form = $this->createForm(UtilisateurType::class, $utilisateur, [
@@ -125,12 +126,19 @@ class UtilisateurController extends AbstractController
 
             $username = $form->get('personne')->getData();
 
+            $personne = $personneRepository->find($username->getId());
+
 
 
 
             if ($form->isValid()) {
                 $utilisateur->setPassword($userPasswordHasher->hashPassword($utilisateur, $form->get('plainPassword')->getData()));
                 $utilisateur->setUsername($username->getNom());
+
+                $personne->setEmail($form->get('email')->getData());
+
+
+                $em->persist($personne);
                 $em->persist($utilisateur);
                 $em->flush();
                 $data = true;

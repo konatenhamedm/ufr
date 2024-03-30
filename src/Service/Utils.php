@@ -494,7 +494,7 @@ class Utils
 
         $current = [
             'KPL - Zone industrielle Vridi Côte d’ivoire – Abidjan –', 
-            'Tél. : (+225) 27 21 2 72604 – Adresse Mail : info@kuyopipeline.com'
+            'Tél. : (+225) 27 21 2 72604 – Adresse Mail : ufr@gmail.com'
         ];
 
         

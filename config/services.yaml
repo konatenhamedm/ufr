@@ -75,3 +75,20 @@ services:
         arguments: [ "@knp_menu.factory" ]
         tags:
             - { name: knp_menu.menu_builder, method: createMainMenu, alias: espace }
+
+    App\Menu\ConfigCaissiereMenuBuilder:
+        arguments: [ "@knp_menu.factory" ]
+        tags:
+            - { name: knp_menu.menu_builder, method: createMainMenu, alias: comptable }
+    App\Menu\PreinscriptionMenuBuilder:
+        arguments: [ "@knp_menu.factory" ]
+        tags:
+            - { name: knp_menu.menu_builder, method: createMainMenu, alias: preinscription }
+    App\Menu\ConfirmationMenuBuilder:
+        arguments: [ "@knp_menu.factory" ]
+        tags:
+            - { name: knp_menu.menu_builder, method: createMainMenu, alias: confirmation }
+    App\Menu\ComptabiliteMenuBuilder:
+        arguments: [ "@knp_menu.factory" ]
+        tags:
+            - { name: knp_menu.menu_builder, method: createMainMenu, alias: comptabilite }

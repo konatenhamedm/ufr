@@ -91,15 +91,12 @@ class FichierType extends AbstractType
                     $path = $parts[1] ?? '';
 
 
-
                     $data['path'] = $path ?? null;
                     if (!empty($options['doc_options']['file_prefix'])) {
                         $data['filePrefix'] = $options['doc_options']['file_prefix'];
+                    } else {
+                        $data['filePrefix'] = '';
                     }
-
-
-
-
 
                     $event->setData($data);
                 }

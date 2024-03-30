@@ -1,0 +1,151 @@
+{# {% extends 'base-layout.html.twig' %}
+
+{% block title %}Liste des cours{% endblock %}
+{% block header %}cours{% endblock %}
+{% block breadcrumb %}{% endblock %} #}
+{% block body %}
+<div class="card shadow-sm">
+    <div class="card-header card-header-sm">
+        <h3 class="card-title"> Liste des cours</h3>
+        <div class="card-toolbar">
+            <a href="{{ path('app_parametre_cours_new') }}" class="btn btn-main btn-sm"  
+                data-bs-toggle="modal" data-bs-target="#modal-lg">
+                <i class="bi bi-plus-square text-light"></i>
+                Nouveau
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+     <div class="row">
+        {% form_theme form 'widget/fields-block.html.twig' %}
+            {{ form_start(form)}}
+            <fieldset>
+              <div class="row small" style="position:relative">
+                <div class="col-md-10">{{ form_row(form.niveau) }}</div>
+                <div class="col-md-2 pt-5">
+                  <button class="btn btn-main btn-filter btn-sm" type="button">Rechercher</button>
+                </div>
+             
+              </div>
+            </fieldset>
+            {{ form_end(form, {render_rest: false}) }}
+      </div>
+        <div class="row">
+            <div class="col-sm-12">
+               
+                  <div id="grid_app_parametre_cours_{{ grid_id }}" class="grid-dt-wrapper">Chargement....</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block java %}
+    <script src="{{ asset('assets/js/datatables.js') }}"></script>
+    <script> 
+ 
+    $(function () {
+      const grid_prefix_id = "{{ grid_id }}";
+      const $old_grid = $('#grid_app_parametre_cours_' + grid_prefix_id);
+      init_select2('.has-select2');
+
+
+
+      function loadDataTable($grid, niveau ,options = null, contents = '') {
+        $grid.initDataTables(
+          options
+          ? options
+          : {{ datatable_settings(datatable) }}, {
+          searching: true,
+          ajaxUrl: Routing.generate('app_parametre_cours_index', {
+            niveau: niveau
+            
+          }),
+          language: {
+            url: asset_base_path + "/js/i18n/French.json"
+          },
+          headerCallback: function (tHead, aData, iStart, iEnd, aiDisplay) {},
+          initComplete: function (e, oSettings, json) {},
+        
+          drawCallback: function (row, data) {}
+        });
+      }
+
+      const $niveau = $('#{{ form.niveau.vars.id }}');
+     
+      
+
+      $niveau.on('change', function () {
+        const val = $(this).val();
+      });
+
+      loadDataTable($old_grid, null, {{ datatable_settings(datatable) }});
+
+      $('.btn-filter').on('click', function (e) {
+        e.preventDefault();
+        const $this = $(this);
+        const $form = $this.closest('form');
+
+        //alert($dateDebut.val());
+        load_grid_data($form, $this, $niveau.val());
+      });
+
+
+
+
+      
+
+      function load_grid_data($form, $button, niveau) {
+        const id = $old_grid.find('table').attr('id');
+        const $table = $old_grid.find(`#${id}`);
+        const table = $table.DataTable();
+        $.ajax({
+          url: $form.attr('action'),
+          type: $form.attr('method'),
+          data: {
+            niveau: niveau,
+          },
+          beforeSend: function () {
+            $button.append('<span class="spinner-border spinner-ajax spinner-border-sm" role="status" aria-hidden="true"></span> ');
+            $button.prop('disabled', true);
+          },
+          complete: function () {
+            $button.prop('disabled', false);
+            $button.find('.spinner-ajax').remove();
+          },
+          success: function (html) {
+            table.destroy();
+           
+            if ($table.length) {
+              $table.empty();
+            }
+
+           // let grid_val = `${niveau}_${caissiere}_${dateDebut}_${dateFin}`;
+            let grid_val = `${niveau}`;
+
+        // alert(niveau)
+
+            $old_grid.attr('id', `grid_app_parametre_cours_${grid_val}`).empty().html(`
+                                    <div class="spinner spinner-track spinner-primary mr-15 text-primary">
+                                        <div class="ml-15">Chargement des données de la grille</div>
+                                    </div>
+                            `);
+            var options = {{ datatable_settings(datatable) }};
+            var name = `dt_app_parametre_cours_${grid_val}`;
+
+            options['name'] = name;
+
+           // console.log(name);
+
+            loadDataTable($old_grid, niveau ,options)
+          }
+        });
+      }
+
+    });
+
+
+    
+    </script>
+{% endblock %}
+

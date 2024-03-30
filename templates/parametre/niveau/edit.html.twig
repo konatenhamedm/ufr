@@ -16,8 +16,8 @@
     <div class="modal-body">
         {{ include('_includes/ajax/response.html.twig') }}
         <div class="row">
-            <div class="col-md-4">{{ form_row(form.code) }}</div>
-            <div class="col-md-8">{{ form_row(form.libelle) }}</div>
+            <div class="col-md-2">{{ form_row(form.code) }}</div>
+            <div class="col-md-10">{{ form_row(form.libelle) }}</div>
         </div>
          <div class="row">
             <div class="col-md-4">{{ form_row(form.filiere) }}</div>
@@ -30,7 +30,8 @@
         <button type="button" class="btn btn-default btn-sm" data-bs-dismiss="modal">Annuler</button>
         <button type="submit" class="btn btn-main btn-ajax btn-sm"><span class="spinner-border d-none  spinner-ajax spinner-border-sm" role="status" aria-hidden="true"></span> Valider</button>
     </div>
-    {{ form_end(form) }}
+     {{ form_widget(form._token) }}
+    {{ form_end(form, {render_rest: false}) }}
 {% endblock %}
 
 {% block java %}

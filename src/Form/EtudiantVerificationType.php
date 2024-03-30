@@ -146,6 +146,17 @@ class EtudiantVerificationType extends AbstractType
                     'allow_delete' => true,
                     'prototype' => true,
                 ])
+                ->add('infoEtudiants', CollectionType::class, [
+                    'entry_type' => InfoEtudiantType::class,
+                    'entry_options' => [
+                        'label' => false,
+                    ],
+                    'allow_add' => true,
+                    'label' => false,
+                    'by_reference' => false,
+                    'allow_delete' => true,
+                    'prototype' => true,
+                ])
                 ->add('cursusProfessionnels', CollectionType::class, [
                     'entry_type' => CursusProfessionnelType::class,
                     'entry_options' => [
@@ -172,9 +183,9 @@ class EtudiantVerificationType extends AbstractType
                     'entry_type' => DocumentType::class,
                     'entry_options' => [
                         'label' => false,
-                        'doc_options' => $options['doc_options'],
+                        /*  'doc_options' => $options['doc_options'],
                         'doc_required' => $options['doc_required'],
-                        'validation_groups' => $options['validation_groups'],
+                        'validation_groups' => $options['validation_groups'], */
                     ],
                     'allow_add' => true,
                     'label' => false,

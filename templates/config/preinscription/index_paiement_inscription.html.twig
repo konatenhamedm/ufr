@@ -1,0 +1,352 @@
+
+{% block page_content %}
+    {% form_theme form 'widget/fields-block.html.twig' %}
+    <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">INTERFACE PAIEMENTS   {{inscription.etudiant.getNomComplet| upper ~' | '~ inscription.code }}</h5>
+        <div class="btn btn-icon btn-sm  ms-2" data-bs-dismiss="modal" aria-label="Close">
+            <span class="svg-icon svg-icon-2x text-white">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor"></rect>
+					<rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor"></rect>
+				</svg>
+            </span>
+        </div>
+    </div>
+    {{ form_start(form, {'attr': {'role':'form', 'class': 'form'}}) }}
+    <div class="modal-body corp">
+     <div class="mb-5 hover-scroll-x">
+    <div class="d-grid">
+        <ul class="nav nav-tabs flex-nowrap text-nowrap">
+            <li class="nav-item">
+                <a class="nav-link btn active btn-active-dark btn-color-gray-600 btn-active-color-white rounded-bottom-0"   data-bs-toggle="tab" href="#kt_tab_pane_1" >Point paiements</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link btn btn-active-dark btn-color-gray-600 btn-active-color-white rounded-bottom-0" data-bs-toggle="tab" href="#kt_tab_pane_2">Paiements effectués </a>
+            </li>
+           
+        </ul>
+    </div>
+</div>
+
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="kt_tab_pane_1" role="tabpanel">
+            {{ include('_includes/ajax/response.html.twig') }}
+    <div class="row g-5 g-xl-8">
+
+                    <div class="col-xl-7 col-md-7">
+
+                        <!--begin::Tables Widget 3-->
+                        <div class="card card-xl-stretch mb-xl-8" >
+                            <!--begin::Header-->
+                            <div class="card-header border-0 " style="border-bottom:1px solid white;background: #3a4049;min-height: 50px !important;">
+                                <h3 class="card-title align-items-start flex-column text-white" >
+                                <span class="card-label fw-bold fs-3 mb-1 text-white">
+
+                                        POINT SUR L'ECHEANCIER 
+
+                                </span>
+                                </h3>
+
+                            </div>
+                            <!--end::Header-->
+
+                            <!--begin::Body-->
+                            <div class="card-body py-3 " style="padding: 0px;">
+                                <!--begin::Table container-->
+        
+         
+        {# {% set difference = date(ligne.dateFin| date() ).diff(date( "now" | date())) %} #}
+    
+                                
+                                <table class="table table-bordered table-custom">
+                                        <thead class="thead-dark">
+                                            <tr>
+                                                <th width="40%" class="p-2">Dates buttoir</th>
+                                                <th width="40%" class="p-2">Montant à payer</th>
+                                                <th width="40%" class="p-2">Total payé</th>
+                                                <th width="20%" class="p-2">solde</th>
+                                                <th width="20%" class="p-2">Statut</th>
+                                            </tr>
+                                        </thead>
+{# Statut (on mettra ici la mention et aussi un code de couleur : rouge quand la date prévue est passée et que l’échéancier n’a pas été soldé. Vert quand c’est soldé.)
+ #}
+                                        <tbody  class="row-">
+                                            {% set jour = 0 %}
+                                            {% set somme = 0 %}
+                                        {% for item in echeanciers %}
+                                            {% set difference = date( "now" | date()).diff(date(item.dateCreation| date())) %}
+                                            {% set leftDays = difference.days %}
+
+                                                    <tr class="row-colonne even pointer table-light">
+                                        <td class="p-2">
+                                            {{ item.dateCreation|date("m/d/Y") }}
+                                        
+                                        </td>
+                                        <td class="p-2 text-end">{{ item.montant|number_format(0, '.', '.')}}</td>
+                                        <td class="p-2 text-end">{% if item.etat == 'payer' %}
+                                             {{ item.montant|number_format(0, '.', '.')}}
+                                        {% else %}
+                                             {{ '0'|number_format(0, '.', '.')}}
+                                        {% endif %}  </td>
+                                        <td class="p-2 text-end">{% if item.etat == 'payer' %}
+                                             {{ item.montant|number_format(0, '.', '.')}}
+                                        {% else %}
+                                             {{ '0'|number_format(0, '.', '.')}}
+                                        {% endif %}  </td>
+                                        <td class="p-2 text-center" {% if (jour == 0 or jour < 0) and item.etat !='payer' %}
+                                            style="color: red;font-weight:bolder"
+                                        {% else %}
+                                            style="color: green;font-weight:bolder"
+                                        {% endif %}>{% if item.etat == 'pas_payer' %}
+                                        {{ ' NON SOLDé'|upper }}
+                                        {% elseif item.etat == 'attente_confirmation' %}
+                                         {{ ' Attente confirmation'|upper }}
+
+                                        {% else %}
+                                            {{ ' Payée'|upper }}
+                                        {% endif %}  </td>
+                                    {#  <td class="p-2"></td> #}
+                                    </tr>
+                                    {% set somme = somme + item.montant %}
+                                        {% endfor %}
+                                    
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th class="text-end p-2">TOTAL</th>
+                                                <th class="total text-end p-2 fw-bolder total">{{ somme|number_format(0, '.', '.') }} </td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-end p-2" style="color: red;font-weight:bolder">TOTAL PAYE</th>
+                                                <th class="total-saisi text-end p-2 fw-bolder total" style="color: red;font-weight:bolder">{{ inscription.totalPaye|number_format(0, '.', '.') }} </td>
+                                            </tr>
+                                        </tfoot>
+                                </table>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <!--begin::Col-->
+                    <div class="col-xl-5 col-md-5" >
+
+                        <!--begin::Tables Widget 3-->
+                        <div class="card card-xl-stretch mb-xl-8" >
+                            <!--begin::Header-->
+                            <div class="card-header border-0" style="border-bottom:1px solid white;background: #3a4049;min-height: 50px !important;">
+                                <h3 class="card-title align-items-start flex-column text-white">
+                                <span class="card-label fw-bold fs-3 mb-1 text-white">
+
+                                       NOUVEAU PAIEMENT 
+
+                                </span>
+                                </h3>
+
+                            </div>
+                            <!--end::Header-->
+
+                            <!--begin::Body-->
+                            <div class="card-body py-3 p-0">
+
+                               
+                                     <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="fv-row mb-3">
+                                            {{ form_row(form.datePaiement) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="fv-row mb-3">
+                                            {{ form_row(form.modePaiement, {attr: {class: 'form-control form-control-sm bg-transparent'}}) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="fv-row mb-3">
+                                            {{ form_row(form.montant, {attr: {class: 'form-control form-control-sm bg-transparent'}}) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row cheque">
+                                    <div class="col-md-4">
+                                        <div class="fv-row mb-3">
+                                            {{ form_row(form.banque) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="fv-row mb-3">
+                                            {{ form_row(form.numeroCheque, {attr: {class: 'form-control form-control-sm bg-transparent'}}) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="fv-row mb-3">
+                                            {{ form_row(form.dateCheque) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="fv-row mb-3">
+                                            {{ form_row(form.tireur, {attr: {class: 'form-control form-control-sm bg-transparent'}}) }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="fv-row mb-3">
+                                            {{ form_row(form.contact, {attr: {class: 'form-control form-control-sm bg-transparent'}}) }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                 <div class="col-md-4"></div>
+                                 <div class="col-md-4"></div>
+                                 <div class="col-md-4 text-end">{{ form_widget(form.save) }}</div>
+                                </div>
+                                   
+                            </div>
+
+                            <!--begin::Col-->
+                        </div>
+                    </div>
+                </div>
+        </div>
+        <div class="tab-pane fade" id="kt_tab_pane_2" role="tabpanel">
+            {# ...sss #}
+
+
+            <div class="row">
+            <div class="col-md-12">
+
+
+                <table id="kt_datatable_fixed_columns" class="table table-striped table-bordered table-hover data-table dataTable no-footer dtr-inline">
+                    <thead>
+               
+                    <tr class="fw-semibold fs-6 text-gray-800">
+                        <th class="entete">Code</th>
+                        <th class="entete">Date de paiement</th>
+                        <th class="entete">Montant</th>
+                        <th class="entete">Mode de paiment</th>
+                        <th class="entete">Caissière</th>
+                       {#  <th class="entete" width="130px">Actions</th> #}
+
+                    </tr>
+                    </thead>
+                    <tbody>
+                   {# {{ dump(requete.verifieIfFile(15,1)) }}#}
+                    {% for item in paiements %}
+                        <tr class="active">
+                          
+                            <td>{{ item.code }}</td>
+                            <td>{{ item.datePaiement |date("m/d/Y") }}</td>
+                            <td>{{ item.montant }}</td>
+                            <td>{{ item.modePaiement.libelle }}</td>
+                            <td>{{ item.caissiere.username }}</td>
+                           {#  <td>
+                               
+                                <a    target="_blank" href="{{ path('fichier_index',{'id':requete.verifieIfFile2(doc.id,employe.id)[0].fichier}) }}"  class="btn btn-primary btn-xs " ><span class="bi bi-download"></span></a>
+                              
+
+                                
+                               
+                                <a title="Editer ou ajouter un fichier" href="{{ path('app_infoinscription_info_inscription_edit',{'id':item.id}) }}" class="btn btn-main btn-xs test" data-bs-stacked-toggle="modal" data-bs-stacked-modal="#exampleModalSizeLg2"><i class="bi bi-pen text-light"></i></a>
+                           
+                            </td> #}
+
+                        </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        </div>
+        
+    </div>
+
+
+
+    </div>
+    <div class="modal-footer">
+       
+        <button type="button" class="btn btn-default btn-sm" data-bs-dismiss="modal">Annuler</button>
+        
+    </div>
+    {{ form_widget(form._token) }}
+    {{ form_end(form, {render_rest: false}) }}
+{% endblock %}
+
+{% block java %}
+    <script>
+        $(function () {
+             var elements = Array.from(document.querySelectorAll("[data-bs-stacked-modal]"));
+
+            if (elements && elements.length > 0) {
+                elements.forEach((element) => {
+                    if (element.getAttribute("data-kt-initialized") === "1" ) {
+                        return;
+                    }
+
+                    const url = element.getAttribute('href');
+                    element.setAttribute("data-kt-initialized", "1");
+
+
+                    element.addEventListener("click", function(e) {
+                        e.preventDefault();
+
+                        const modalEl = document.querySelector(this.getAttribute("data-bs-stacked-modal"));
+
+                        if (modalEl) {
+                            const modal = new bootstrap.Modal(modalEl);
+                            modal.show(element);
+                        }
+                    });
+                });
+            }
+               $('.no-auto').each(function () {
+                const $this = $(this);
+                const $id = $('#' + $this.attr('id'));
+                init_date_picker($id,  'down', (start, e) => {
+                    //$this.val(start.format('DD/MM/YYYY'));
+                }, null, null, false);
+
+                $id.on('apply.daterangepicker', function (ev, picker) {
+                    $(this).val(picker.startDate.format('DD/MM/YYYY'));
+                });
+            });
+        }); 
+         $(document).ready(function () {
+
+     
+      //load_tab('parametre-tabs');
+    });
+
+      $(function () {
+
+     $('.cheque').hide()
+
+             $('#inscription_payement_modePaiement').on('change',function(){
+                 const $this = $(this);
+                const current_value = $this.find('option:selected').attr('data-value');
+                if(current_value == 'CHQ'){
+                     $('.cheque').show()
+                }else{
+                     $('.cheque').hide()
+                }
+            })
+            
+
+           
+            init_select2('select');
+           
+            init_select2('select', null, '.corp');
+            $('.no-auto').each(function () {
+                const $this = $(this);
+                const $id = $('#' + $this.attr('id'));
+                init_date_picker($id,  'down', (start, e) => {
+                    //$this.val(start.format('DD/MM/YYYY'));
+                }, null, null, false);
+
+                $id.on('apply.daterangepicker', function (ev, picker) {
+                    $(this).val(picker.startDate.format('DD/MM/YYYY'));
+                });
+            });
+        });
+    </script>
+{% endblock %}

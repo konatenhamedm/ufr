@@ -1,0 +1,45 @@
+{% extends 'base-layout.html.twig' %}
+
+{% block title %}Frais{% endblock %}
+{% block header %}Frais de scolarités{% endblock %}
+{% block breadcrumb %}{% endblock %}
+{% block body %}
+<div class="card shadow-sm">
+    <div class="card-header card-header-sm">
+        <h3 class="card-title"> LISTE DES FRAIS DE SCOLARITES | DOSSIERS NON SOLDES</h3>
+        <div class="card-toolbar">
+           {#  <a href="{{ path('app_inscription_inscription_new') }}" class="btn btn-main btn-sm"  
+                data-bs-toggle="modal" data-bs-target="#modal-lg">
+                <i class="bi bi-plus-square text-light"></i>
+                Nouveau
+            </a> #}
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-12">
+                <div id="grid_app_inscription_inscription_frais" class="grid-dt-wrapper">Chargement....</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block java %}
+    <script src="{{ asset('assets/js/datatables.js') }}"></script>
+    <script> 
+ 
+        $(function() { 
+              $('#grid_app_inscription_inscription_frais').initDataTables({{ datatable_settings(datatable) }}, {
+                  searching: true,
+                  ajaxUrl: "{{ path('app_inscription_inscription_frais_index') }}",
+                  language: {
+                      url: asset_base_path + "/js/i18n/French.json"
+                  }
+              });
+        });
+    
+        
+    </script>
+{% endblock %}

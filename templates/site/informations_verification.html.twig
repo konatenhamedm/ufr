@@ -1,5 +1,6 @@
 {% block page_content %}
    {% from '_macros/macro_document.html.twig' import prototype_ligne_colonne_document %}
+     {% from '_macros/macro_info.html.twig' import prototype_ligne_colonne_info %}
    {% from '_macros/macro_cursus_universitaire.html.twig' import prototype_ligne_colonne %}
    {% from '_macros/macro_cursus_professionnel.html.twig' import prototype_ligne_colonne_professionnel %}
    {% from '_macros/macro_cursus_stage.html.twig' import prototype_ligne_colonne_stage %}
@@ -17,26 +18,32 @@
     </div>
      {{ form_start(form, {'attr': {'role':'form', 'class': 'form'}}) }}
     <div class="modal-body">
-        {{ include('_includes/ajax/response.html.twig') }}
-           <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6">
+            {% form_theme form 'widget/fields-block.html.twig' %}
+            {{ form_start(form, {'attr': {'role':'form', 'class': 'form','enctype':'multipart/form-data'}}) }}
+
+                {{ include('_includes/ajax/response.html.twig') }}
+            <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6">
                 <li class="nav-item">
                     <a class="nav-link active" data-bs-toggle="tab" href="#kt_tab_pane_1">ETAT CIVIL</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_2">MES CONTACTS</a>
+                    <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_2">VOS CONTACTS</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_3">INFORMATIONS PERSONNELLES</a>
                 </li> <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_4">MON PARCOURS</a>
+                    <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_4">VOTRE PARCOURS</a>
                 </li>
                 </li> <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_5">MES DOCUMENTS</a>
                 </li>
+                </li> <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#kt_tab_pane_6">INFORMATIONS SUR LES PARENTS</a>
+                </li>
+                
             </ul>
 
             <div class="tab-content" id="myTabContent">
-
                 <div class="tab-pane fade show active" id="kt_tab_pane_1" role="tabpanel">
                     <div class="row">
                         <div class="form-group col-md-12 mb-2">{{ form_row(form.nom) }}</div>
@@ -53,6 +60,8 @@
                     <div class="col-md-12">{{ form_row(form.pays) }}</div>
                     <div class="col-md-12">{{ form_row(form.boite) }}</div>
                     <div class="col-md-12">{{ form_row(form.contact) }}</div>
+                    <div class="col-md-12">{{ form_row(form.numeroWhatsapp) }}</div>
+                    <div class="col-md-12">{{ form_row(form.email) }}</div>
 
                 </div>
                 <div class="tab-pane fade" id="kt_tab_pane_3" role="tabpanel">
@@ -84,22 +93,39 @@
                         <div class="form-group  col-md-1 mb-2">Autre :</div>
                         <div class="form-group  col-md-3 mb-2">{{ form_row(form.autreExistence,{'attr':{'placeholder':'Saisissez vos informations'}}) }}</div>
                     </div>
-                </div> 
 
+                     <div class="row mb-7">
+                        <h4>AUTRES INFORMATIONS </h4>
+                    </div>
+
+                    <div class="row">
+                    <div class="form-group col-md-2 mb-7">Êtes vous un travailleur ?</div>
+                    <div class="form-group col-md-2 mb-7 text-start">{{ form_row(form.statutTravail) }}</div>
+                    <div class="form-group col-md-4 mb-7">{{ form_row(form.travail,{'attr':{'placeholder':'Précisé le nom de votre structure','style':'margin-top: -15px;
+                }'}}) }}</div>
+                    </div>
+                    <div class="row">
+                    <div class="form-group col-md-2 mb-7">Êtes vous un étudiant ?</div>
+                    <div class="form-group col-md-2 mb-7 text-start">{{ form_row(form.statutEtudiant) }}</div>
+                    
+                    </div>
+                   
+                </div> 
+                
                 <div class="tab-pane fade" id="kt_tab_pane_4" role="tabpanel">
                     <div class="row mb-4">
-                        <h6>Votre cursus universitaire</h6>
+                        <h6>CURSUS UNIVERSITAIRE DEPUIS LE BAC </h6>
                     </div>
                    
 
                         {{ prototype_ligne_colonne(form) }}
 
-                        <br>
+                    <br>
                     <div class="row mb-4">
                         <h6>Votre cursus professionnel</h6>
                     </div>
                     {{ prototype_ligne_colonne_professionnel(form) }}
-                    <br>
+                <br>
                     <div class="row mb-4">
                         <h6>Vos stages éffectués</h6>
                     </div>
@@ -109,24 +135,48 @@
                     <br>
 
                 </div>
-
-                {# fin first #}
-
+                
                 <div class="tab-pane fade" id="kt_tab_pane_5" role="tabpanel">
                      <div class="row mb-4">
                         <h6>Mes documents</h6>
-                    </div>
-                     <br>
+                     </div>
+                    <br>
 
-                    {{ prototype_ligne_colonne_document(form) }}
-                     <br>
+                     {{ prototype_ligne_colonne_document(form) }}
+                    <br>
+                   
+
+    
+
                 </div>
-
-                 {# fin first #}
-            </div>
+                <div class="tab-pane fade" id="kt_tab_pane_6" role="tabpanel">
+                    {{ prototype_ligne_colonne_info(form) }}
                 
+                </div>
+               
 
-    </div>
+
+            </div>
+
+            <div class="row">
+                <div class="col-md-8"><button type="button" class="btn btn-default btn-sm" data-bs-dismiss="modal">Annuler</button>
+                     {{ form_widget(form.save) }}
+                        {% if etudiant.etat =="pas_complet" %}
+                        
+                        {{ form_widget(form.valider) }}
+                        {% endif %}
+                        </div>
+                <div class="col-md-4">
+
+                </div>
+            </div>
+
+            {{ form_widget(form._token) }}
+            {{ form_end(form, {render_rest: false}) }}
+
+
+
+        </div>
 
 
   
@@ -147,11 +197,18 @@
 <script src="{{ asset('assets/parcours/universitaitre.js') }}"></script>
 <script src="{{ asset('assets/parcours/professionnel.js') }}"></script>
 <script src="{{ asset('assets/parcours/stage.js') }}"></script>
+<script src="{{ asset('assets/parcours/info.js') }}"></script>
     <script>
-  $(function () {
-$(function () {
+     const etat = "{{etudiant.etat}}";
+     $('#etudiant_verification_infoEtudiants_0_habiteAvec_placeholder').closest( "label" ).hide()
+     $('.btn-default').hide()
+
+         $(function () {
             init_select2('select');
         }); 
+        
+  $(function () {
+        
            
 
            $('.no-auto').each(function () {
@@ -191,6 +248,22 @@ $(function () {
                 });
             }
 
+
+        });
+
+          if($("#etudiant_statutTravail_0").checked){
+            $('.travail').show()
+        }else{
+            $('.travail').hide()
+        }
+       
+
+          $("#etudiant_statutTravail_0").on('click',function () {
+           $('.travail').show()
+
+        });
+          $("#etudiant_statutTravail_1").on('click',function () {
+           $('.travail').hide()
 
         });
     </script>

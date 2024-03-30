@@ -25,7 +25,9 @@ use App\Controller\FileTrait;
 use App\Entity\NaturePaiement;
 use App\Entity\Niveau;
 use App\Entity\Utilisateur;
+use App\Repository\InfoInscriptionRepository;
 use App\Repository\NiveauRepository;
+use App\Repository\PreinscriptionRepository;
 use App\Service\Omines\Column\NumberFormatColumn;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -40,7 +42,8 @@ class InscriptionController extends AbstractController
     #[Route('/', name: 'app_comptabilite_inscription_index',  methods: ['GET', 'POST'], options: ['expose' => true])]
     public function index(Request $request, DataTableFactory $dataTableFactory, UserInterface $user): Response
     {
-        //dd('juj')
+        //  $isDirecteur = $this->isGranted('ROLE_DIRECTEUR');
+
         $niveau = $request->query->get('niveau');
         $caissiere = $request->query->get('caissiere');
         $dateDebut = $request->query->get('dateDebut');
@@ -111,8 +114,8 @@ class InscriptionController extends AbstractController
             //     'format' => 'd-m-Y'
             // ])
             ->add('nom', TextColumn::class, ['label' => 'Nom et prénoms', 'field' => 'etudiant.getNomComplet'])
-            ->add('sigleNiveauFiliere', TextColumn::class, ['label' => 'Sigle niveau filière', 'field' => 'niveau.getFullLibelleSigle'])
-            ->add('datePaiement', DateTimeColumn::class, ['label' => 'Date paiement', 'format' => 'd-m-Y H:i:s', 'field' => 'info.datePaiement'])
+            ->add('sigleNiveauFiliere', TextColumn::class, ['label' => 'Sigle', 'field' => 'niveau.getSigle'])
+            ->add('datePaiement', DateTimeColumn::class, ['label' => 'Date paiement', 'format' => 'd-m-Y', 'field' => 'info.datePaiement'])
             ->add('montantPaiement', NumberFormatColumn::class, ['label' => 'Montant', 'field' => 'info.montant'])
             /*  ->add('montant', NumberFormatColumn::class, ['label' => 'Montant', 'field' => 'info.montant']) */
             ->add('mode', TextColumn::class, ['label' => 'Mode de paiement', 'render' => function ($value, Preinscription $context) {
@@ -122,16 +125,18 @@ class InscriptionController extends AbstractController
             ->createAdapter(ORMAdapter::class, [
                 'entity' => Preinscription::class,
                 'query' => function (QueryBuilder $qb) use ($user, $niveau, $caissiere, $dateDebut, $dateFin, $mode) {
-                    $qb->select(['p', 'niveau', 'filiere', 'etudiant', 'info,ca'])
+                    $qb->select(['p', 'niveau', 'filiere', 'etudiant', 'info,ca,res'])
                         ->from(Preinscription::class, 'p')
                         ->join('p.niveau', 'niveau')
                         ->leftJoin('p.caissiere', 'ca')
                         ->join('niveau.filiere', 'filiere')
+                        ->join('niveau.responsable', 'res')
                         ->join('p.etudiant', 'etudiant')
                         ->leftJoin('p.infoPreinscription', 'info')
                         ->leftJoin('info.modePaiement', 'mode')
                         ->andWhere('p.etat = :etat')
-                        ->setParameter('etat', 'valide');
+                        ->setParameter('etat', 'valide')
+                        ->orderBy('p.datePreinscription', 'DESC');
 
                     if ($niveau || $caissiere || $dateDebut || $dateFin || $mode) {
                         if ($niveau) {
@@ -147,14 +152,14 @@ class InscriptionController extends AbstractController
                                 ->setParameter('caissiere', $caissiere);
                         }
 
-                        if ($dateDebut) {
+                        if ($dateDebut && $dateFin == null) {
                             $truc = explode('-', str_replace("/", "-", $dateDebut));
                             $new_date_debut = $truc[2] . '-' . $truc[1] . '-' . $truc[0];
 
                             $qb->andWhere('info.datePaiement = :dateDebut')
                                 ->setParameter('dateDebut', $new_date_debut);
                         }
-                        if ($dateFin) {
+                        if ($dateFin && $dateDebut == null) {
 
                             $truc = explode('-', str_replace("/", "-", $dateDebut));
                             $new_date_fin = $truc[2] . '-' . $truc[1] . '-' . $truc[0];
@@ -163,11 +168,13 @@ class InscriptionController extends AbstractController
                                 ->setParameter('dateFin', $new_date_fin);
                         }
                         if ($dateDebut && $dateFin) {
+
                             $truc_debut = explode('-', str_replace("/", "-", $dateDebut));
                             $new_date_debut = $truc_debut[2] . '-' . $truc_debut[1] . '-' . $truc_debut[0];
 
                             $truc = explode('-', str_replace("/", "-", $dateFin));
                             $new_date_fin = $truc[2] . '-' . $truc[1] . '-' . $truc[0];
+                            // dd($new_date_debut, $new_date_fin);
 
                             $qb->andWhere('info.datePaiement BETWEEN :dateDebut AND :dateFin')
                                 ->setParameter('dateDebut', $new_date_debut)
@@ -177,8 +184,13 @@ class InscriptionController extends AbstractController
 
 
                     if ($this->isGranted('ROLE_ETUDIANT')) {
-                        $qb->andWhere('p.etudiant = :etudiant')
+                        $qb->orWhere('p.etudiant = :etudiant')
                             ->setParameter('etudiant', $user->getPersonne());
+                    }
+
+                    if ($this->isGranted('ROLE_DIRECTEUR')) {
+                        $qb->andWhere('res.id = :id')
+                            ->setParameter('id', $user->getPersonne()->getId());
                     }
                 }
             ])
@@ -302,7 +314,7 @@ class InscriptionController extends AbstractController
      * @throws MpdfException
      */
     #[Route('/imprime/all', name: 'app_comptabilite_print_all', methods: ['GET', 'POST'])]
-    public function imprimerAll(Request $request, InfoPreinscriptionRepository $infoPreinscriptionRepository, NiveauRepository $niveauRepository): Response
+    public function imprimerAll(Request $request, InfoPreinscriptionRepository $infoPreinscriptionRepository, NiveauRepository $niveauRepository, PreinscriptionRepository $preinscriptionRepository): Response
     {
 
         $niveau = $request->query->get('niveau');
@@ -337,15 +349,89 @@ class InscriptionController extends AbstractController
         //dd($dateNiveau);
         $imgFiligrame = "uploads/" . 'media_etudiant' . "/" . 'lg.jpeg';
         return $this->renderPdf("site/liste.html.twig", [
-            'data' => $preinscriptions,
             'total_payer' => $totalPayer,
+            'data' => $preinscriptionRepository->findBy(['etat' => 'valide']),
             'total_impaye' => $totalImpaye
             //'data_info'=>$infoPreinscriptionRepository->findOneByPreinscription($preinscription)
         ], [
-            'orientation' => 'L',
+            'orientation' => 'p',
             'protected' => true,
 
-            'format' => 'A5',
+            'format' => 'A4',
+
+            'showWaterkText' => true,
+            'fontDir' => [
+                $this->getParameter('font_dir') . '/arial',
+                $this->getParameter('font_dir') . '/trebuchet',
+            ],
+            'watermarkImg' => $imgFiligrame,
+            'entreprise' => ''
+        ], true);
+        //return $this->renderForm("stock/sortie/imprime.html.twig");
+
+    }
+
+
+    /**
+     * @throws MpdfException
+     */
+    #[Route('/imprime/etat/versement/all/1', name: 'app_affectation_materiel_location_sortie_index', methods: ['GET', 'POST'], options: ['expose' => true], condition: "request.query.has('filters')")]
+    #[Route('/imprime/etat/versement/all', name: 'app_comptabilite_print_etat_versement_alll', methods: ['GET', 'POST'])]
+    public function imprimerEtatVersement(Request $request, InfoPreinscriptionRepository $infoPreinscriptionRepository, InfoInscriptionRepository $infoInscriptionRepository, PreinscriptionRepository $preinscriptionRepository): Response
+    {
+
+        // $niveau = $request->query->get('niveau');
+        $all = $request->query->all();
+        $filters = $all['filters'] ?? [];
+        //dd($all['filters']);
+        $dataAnnees = $infoInscriptionRepository->rangeDate();
+        $annees = range($dataAnnees['min_year'], $dataAnnees['max_year']);
+
+        //dd($infoInscriptionRepository->rangeSommeParAnnneNiveauEtudiant(32, 2023, 1));
+
+        $dataArray = [];
+        $dataArrayListe = [];
+
+        foreach ($infoInscriptionRepository->getListeRecouvrement() as $key => $value) {
+
+
+            foreach ($infoInscriptionRepository->getListeVersement() as $key => $liste) {
+
+                if ($value['_etudiant_id'] == $liste['_etudiant_id'] &&  $value['niveau'] == $liste['niveau'])
+                    $dataArrayListe[] = [
+                        'montant' => $liste['somme'],
+                        'year' => $liste['year'],
+
+                    ];
+            }
+
+            $dataArray[] = [
+                'nom_prenom' => $value['nom'] . ' ' . $value['prenom'],
+                'montant' => $value['montant'],
+                'etudiant' => $value['_etudiant_id'],
+                'niveau' => $value['niveau'],
+                'versements' => $dataArrayListe,
+
+            ];
+        }
+
+        //dd($dataArray);
+
+
+
+        //dd($dateNiveau);
+        $imgFiligrame = "uploads/" . 'media_etudiant' . "/" . 'lg.jpeg';
+        return $this->renderPdf("site/etat_versement.html.twig", [
+
+            'datas' => $dataArray,
+            'dates' => $annees,
+            'titre' => $dataAnnees
+            //'data_info'=>$infoPreinscriptionRepository->findOneByPreinscription($preinscription)
+        ], [
+            'orientation' => 'p',
+            'protected' => true,
+
+            'format' => 'A4',
 
             'showWaterkText' => true,
             'fontDir' => [

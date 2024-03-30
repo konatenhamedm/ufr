@@ -6,6 +6,7 @@ use App\Entity\Employe;
 use App\Entity\Filiere;
 use App\Entity\Frais;
 use App\Entity\Niveau;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -38,7 +39,7 @@ class NiveauType extends AbstractType
                     'allow_add'     => true,
                     'allow_delete'  => true,
                     'by_reference'  => false,
-                    
+
                     'entry_options' => ['label' => false],
                 ]
             )
@@ -52,7 +53,7 @@ class NiveauType extends AbstractType
                     'allow_add'     => true,
                     'allow_delete'  => true,
                     'by_reference'  => false,
-                    
+
                     'entry_options' => ['label' => false],
                 ]
             )
@@ -61,11 +62,31 @@ class NiveauType extends AbstractType
                 'required' => false,
                 'placeholder' => '----',
                 'label_attr' => ['class' => 'label-required'],
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('c')
+                        ->innerJoin('c.fonction', 'f')
+                        ->andWhere('f.code =:code')
+                        ->setParameter('code', 'DR')
+                        ->orderBy('c.id', 'ASC');
+                },
                 'choice_label' => 'nomComplet',
                 'label' => 'Reponsable de niveau',
                 'attr' => ['class' => 'has-select2']
             ])
-        ;
+            /*  ->add(
+                'cours',
+                CollectionType::class,
+                [
+                    'label'         => false,
+                    'entry_type'    => CoursType::class,
+                    //'label'         => false,
+                    'allow_add'     => true,
+                    'allow_delete'  => true,
+                    'by_reference'  => false,
+
+                    'entry_options' => ['label' => false],
+                ]
+            ) */;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

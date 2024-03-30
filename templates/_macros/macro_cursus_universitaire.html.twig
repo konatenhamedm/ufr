@@ -6,7 +6,7 @@
             <div class="col-md-2 ">
                 {{ form_row(colonne.etablissement) }}
             </div>
-            <div class="col-md-1 ">
+            <div class="col-md-2 ">
                 {{ form_row(colonne.annee) }}
             </div>
             <div class="col-md-2 ">
@@ -14,24 +14,69 @@
             </div>
             <div class="col-md-2 ">
                 {{ form_row(colonne.pays) }}
-            </div> <div class="col-md-2 ">
+            </div> 
+            <div class="col-md-2 ">
                 {{ form_row(colonne.diplome) }}
-            </div> <div class="col-md-2 ">
+            </div> 
+            <div class="col-md-2 ">
+                {{ form_row(colonne.numeroDiplome) }}
+            </div> 
+           
+           
+        </div>
+        <div class="row">
+            <div class="col-md-2 ">
+                {{ form_row(colonne.numeroMatricule) }}
+            </div> 
+              <div class="col-md-2 ">
                 {{ form_row(colonne.mention) }}
             </div>
-            <div class="col-md-1 del-col_universitaire" data-parent=".row-colonne_universitaire"></div>
+              {% if colonne.vars.value and colonne.vars.value.bac.alt != null %}
+            <div class="col-md-2 ">
+                {{ form_row(colonne.bac) }}
+            </div> 
+              <div class="col-md-1 ">
+               
+          
+                 <a class="btn btn-dark btn-sm" style="margin-top: 18px;" target="_blank" href="{{ asset('uploads/media_etudiant/' ~ colonne.vars.value.bac.alt) }} " download> <i class="bi bi-upload"></i>
+                </a>
+             
+            </div>
+            {% else %}
+            <div class="col-md-3 ">
+                {{ form_row(colonne.bac) }}
+            </div> 
+            {% endif %}
+            {% if colonne.vars.value and colonne.vars.value.releve.alt != null %}
+            <div class="col-md-2 ">
+                {{ form_row(colonne.releve) }}
+            </div> 
+              <div class="col-md-1 ">
+               
+          
+                 <a class="btn btn-dark btn-sm" style="margin-top: 18px;" target="_blank" href="{{ asset('uploads/media_etudiant/' ~ colonne.vars.value.releve.alt) }} " download> <i class="bi bi-upload"></i>
+                </a>
+             
+            </div>
+            {% else %}
+            <div class="col-md-3 ">
+                {{ form_row(colonne.releve) }}
+            </div> 
+            {% endif %}
+
+            
+             <div class="col-md-1 del-col_universitaire" data-parent=".row-colonne_universitaire"></div>
         </div>
     </div>
 
 {% endmacro  %}
 
-
 {% macro prototype_ligne_colonne(form) %}
     <div class="list-colonne_universitaire"  data-prototype="{{ _self.colonne(form.cursusUniversitaires.vars.prototype)|e }}"></div>
-    <button type="button" data-protoname="__name__" class="btn btn-default add_line_universitaire btn-xs" id="add_ligne_universitaire"  data-protoclass=".list-colonne_universitaire" data-container=".column-container">
+    <button type="button" data-protoname="__name__" class="btn btn-default add_line_universitaire btn-xs" id="add_ligne_universitaire"  data-protoclass=".list-colonne_universitaire" data-container=".column-container_universitaire">
         <i class="fa fa-plus"></i> Ajouter une ligne
     </button>
-    <div class="column-container proto-container" data-childclass="">
+    <div class="column-container_universitaire proto-container_universitaire" data-childclass="">
         {% for item in form.cursusUniversitaires %}
             {{ _self.colonne(item|e) }}
         {% endfor %}

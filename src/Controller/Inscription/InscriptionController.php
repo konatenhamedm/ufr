@@ -4,8 +4,10 @@ namespace App\Controller\Inscription;
 
 use App\Controller\FileTrait;
 use App\Entity\InfoInscription;
+use App\Entity\InfoPreinscription;
 use App\Entity\Inscription;
 use App\Entity\Paiement;
+use App\Entity\Preinscription;
 use App\Form\InscriptionPayementType;
 use App\Form\InscriptionRejeterType;
 use App\Form\InscriptionType;
@@ -14,9 +16,11 @@ use App\Repository\FraisInscriptionRepository;
 use App\Repository\FraisRepository;
 use App\Repository\InfoPreinscriptionRepository;
 use App\Repository\InscriptionRepository;
+use App\Repository\NaturePaiementRepository;
 use App\Service\ActionRender;
 use App\Service\FormError;
 use App\Service\Omines\Column\NumberFormatColumn;
+use DeepCopy\Filter\Filter;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Omines\DataTablesBundle\Adapter\Doctrine\ORMAdapter;
@@ -45,31 +49,59 @@ class InscriptionController extends AbstractController
     }
 
     #[Route('/{id}/imprime', name: 'app_comptabilite_inscription_print', methods: ['GET'])]
-    public function imprimer($id, InfoPreinscriptionRepository $infoPreinscriptionRepository): Response
+    public function imprimer($id, Inscription $inscription, EcheancierRepository $echeancierRepository): Response
     {
 
         $imgFiligrame = "uploads/" . 'media_etudiant' . "/" . 'test.png';
         return $this->renderPdf("inscription/inscription/recu.html.twig", [
-            //'data' => $preinscription,
+            'data' => $inscription,
+            'info' => $echeancierRepository->findAllEcheanceDateFirst($id),
+            'nombre' => count($inscription->getEcheanciers()),
             //'data_info'=>$infoPreinscriptionRepository->findOneByPreinscription($preinscription)
         ], [
-            'orientation' => 'L',
+            'orientation' => 'p',
             'protected' => true,
 
-            'format' => 'A5',
+            'format' => 'A4',
 
             'showWaterkText' => true,
             'fontDir' => [
                 $this->getParameter('font_dir') . '/arial',
                 $this->getParameter('font_dir') . '/trebuchet',
             ],
-            'watermarkImg' => '',
-            'entreprise' => 'UFR SEG'
+            'watermarkImg' =>  $imgFiligrame,
+            'entreprise' => ''
         ], true);
         //return $this->renderForm("stock/sortie/imprime.html.twig");
 
     }
+    #[Route('/{id}/imprime/attente_confirmation', name: 'app_comptabilite_inscription_print_attente_confirmation', methods: ['GET'])]
+    public function imprimeAttenteConfirmation($id, Inscription $inscription, EcheancierRepository $echeancierRepository): Response
+    {
 
+        $imgFiligrame = "uploads/" . 'media_etudiant' . "/" . 'test.png';
+        return $this->renderPdf("inscription/inscription/recu_attente_confirmation.html.twig", [
+            'data' => $inscription,
+            'info' => $echeancierRepository->findAllEcheanceDateFirst($id),
+            'nombre' => count($inscription->getEcheanciers()),
+            //'data_info'=>$infoPreinscriptionRepository->findOneByPreinscription($preinscription)
+        ], [
+            'orientation' => 'P',
+            'protected' => true,
+
+            'format' => 'A4',
+
+            'showWaterkText' => true,
+            'fontDir' => [
+                $this->getParameter('font_dir') . '/arial',
+                $this->getParameter('font_dir') . '/trebuchet',
+            ],
+            'watermarkImg' =>  $imgFiligrame,
+            'entreprise' => ''
+        ], true);
+        //return $this->renderForm("stock/sortie/imprime.html.twig");
+
+    }
 
 
     #[Route('/{etat}/{id}', name: 'app_inscription_inscription_suivi_formation_index', methods: ['GET', 'POST'])]
@@ -165,6 +197,9 @@ class InscriptionController extends AbstractController
             'delete' => new ActionRender(function () {
                 return false;
             }),
+            'confirmation' => new ActionRender(function () use ($etat) {
+                return $etat == 'valide';
+            }),
             'payer' => new ActionRender(fn () => $etat == 'valide' && $isEtudiant == false),
 
         ];
@@ -187,6 +222,15 @@ class InscriptionController extends AbstractController
                         'target' => '#modal-xl2',
 
                         'actions' => [
+                            'confirmation' => [
+                                'target' => '#modal-xl2',
+                                'url' => $this->generateUrl('app_infoinscription_info_inscription_index', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-list',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['payer']
+                            ],
                             'payer' => [
                                 'target' => '#modal-lg',
                                 'url' => $this->generateUrl('app_inscription_inscription_paiement_ok', ['id' => $value]),
@@ -423,6 +467,11 @@ class InscriptionController extends AbstractController
             $table
                 ->add('solde', NumberFormatColumn::class, ['label' => 'Solde', 'render' => function ($value, Inscription $preinscription) {
                     return   abs($preinscription->getMontant() - $preinscription->getTotalPaye());
+                }])
+                ->add('nombre', NumberFormatColumn::class, ['label' => 'Nombre ACF', 'className' => 'text-center', 'render' => function ($value, Inscription $preinscription) {
+                    return abs($preinscription->getInfoInscriptions()->filter(function (InfoInscription $ligne) {
+                        return $ligne->getEtat() == 'attente_confirmation';
+                    })->count());
                 }]);
         } elseif ($etat == 'echeance_soumis') {
             $table = $dataTableFactory->create()->add('code', TextColumn::class, ['label' => 'Code'])
@@ -434,7 +483,7 @@ class InscriptionController extends AbstractController
                 }]);
             }
 
-            $table->add('montant', NumberFormatColumn::class, ['label' => 'Total à payer', 'field' => 'p.montant']);
+            $table->add('montant', NumberFormatColumn::class, ['label' => 'Coût formation', 'field' => 'p.montant']);
             //$table->add('totalPaye', NumberFormatColumn::class, ['label' => 'Total payé', 'field' => 'p.totalPaye']);
             $table
                 ->add('nombre', NumberFormatColumn::class, ['label' => 'Nombre échéances', 'render' => function ($value, Inscription $preinscription) {
@@ -453,6 +502,15 @@ class InscriptionController extends AbstractController
 
                     return $echeancierRepository->findAllEcheanceDateFirst($preinscription->getId())[0]['fin'];
                 }]);
+        } elseif ($etat == 'attente_echeance') {
+            $table = $dataTableFactory->create()->add('code', TextColumn::class, ['label' => 'Code'])
+                ->add('filiere', TextColumn::class, ['field' => 'filiere.libelle', 'label' => 'Filière']);
+            if (!$isEtudiant) {
+                $table->add('nom_prenom', TextColumn::class, ['label' => 'Nom et prénoms', 'render' => function ($value, Inscription $preinscription) {
+                    return $preinscription->getEtudiant()->getNomComplet();
+                }]);
+            }
+            $table->add('montant', NumberFormatColumn::class, ['label' => 'Coût formation', 'field' => 'p.montant']);
         } else {
 
             $table = $dataTableFactory->create()->add('code', TextColumn::class, ['label' => 'Code'])
@@ -468,6 +526,11 @@ class InscriptionController extends AbstractController
                 ->add('solde', NumberFormatColumn::class, ['label' => 'Solde', 'render' => function ($value, Inscription $preinscription) {
                     return    abs($preinscription->getMontant() - $preinscription->getTotalPaye());
                 }]);
+            /* ->add('nombre', TextColumn::class, ['label' => 'Nombre attente confirmation', 'render' => function ($value, Inscription $preinscription) {
+                    return abs($preinscription->getInfoInscriptions()->filter(function (InfoInscription $ligne) {
+                        return $ligne->getEtat() == 'attente_confirmation';
+                    })->count());
+                }]); */
         }
 
 
@@ -511,6 +574,9 @@ class InscriptionController extends AbstractController
             'delete' => new ActionRender(function () {
                 return false;
             }),
+            'confirmation' => new ActionRender(function () use ($etat) {
+                return $etat == 'valide';
+            }),
             'payer' => new ActionRender(fn () => $etat == 'valide' && $isEtudiant == false),
             //'recu' => new ActionRender(fn () => $etat == 'solde'),
 
@@ -547,6 +613,36 @@ class InscriptionController extends AbstractController
                                 'attrs' => ['class' => 'btn-main btn-stack'],
                                 'render' => $renders['recu']
                             ],
+                            'imprime_recu_confirmation' => [
+                                'url' => $this->generateUrl('default_print_iframe', [
+                                    'r' => 'app_comptabilite_inscription_print_attente_confirmation',
+                                    'params' => [
+                                        'id' => $value,
+                                    ]
+                                ]),
+                                'ajax' => true,
+                                'target' =>  '#exampleModalSizeSm2',
+                                'icon' => '%icon% bi bi-printer',
+                                'attrs' => ['class' => 'btn-primary btn-stack'],
+                                'render' => new ActionRender(fn () => $context->getInfoInscriptions()->filter(function (InfoInscription $ligne) {
+                                    return $ligne->getEtat() == 'attente_confirmation';
+                                })->count() >= 1 && $context->getEtat() == 'valide')
+                            ],
+                            'imprime_recu_confirmation_ok' => [
+                                'url' => $this->generateUrl('default_print_iframe', [
+                                    'r' => 'app_comptabilite_inscription_print',
+                                    'params' => [
+                                        'id' => $value,
+                                    ]
+                                ]),
+                                'ajax' => true,
+                                'target' =>  '#exampleModalSizeSm2',
+                                'icon' => '%icon% bi bi-printer',
+                                'attrs' => ['class' => 'btn-main btn-stack'],
+                                'render' => new ActionRender(fn () => $context->getInfoInscriptions()->filter(function (InfoInscription $ligne) {
+                                    return $ligne->getEtat() == 'attente_confirmation';
+                                })->count() == 0 && $context->getEtat() == 'valide')
+                            ],
 
                             /*  'recu' => [
                                 'target' => '#modal-lg',
@@ -555,11 +651,20 @@ class InscriptionController extends AbstractController
                                 'stacked' => false,
                                 'icon' => '%icon% bi bi-cash',
                                 'attrs' => ['class' => 'btn-warning'],
-                                'render' => $renders['recu']
+                                'render' => new ActionRender(fn() => !$context->getSortieCaisse() || $context->getSortieCaisse()->getEtat() == 'demande')
                             ], */
+                            'confirmation' => [
+                                'target' => '#modal-xl2',
+                                'url' => $this->generateUrl('app_infoinscription_info_inscription_index', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-list',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['payer']
+                            ],
                             'payer' => [
-                                'target' => '#modal-lg',
-                                'url' => $this->generateUrl('app_inscription_inscription_paiement_ok', ['id' => $value]),
+                                'target' => '#modal-xl2',
+                                'url' => $this->generateUrl('app_config_paiement_inscription_index', ['id' => $value]),
                                 'ajax' => true,
                                 'stacked' => false,
                                 'icon' => '%icon% bi bi-cash',
@@ -619,13 +724,12 @@ class InscriptionController extends AbstractController
         $isEtudiant = $this->isGranted('ROLE_ETUDIANT');
 
         $table = $dataTableFactory->create()
-            ->add('code', TextColumn::class, ['label' => 'Codejjj'])
+            ->add('code', TextColumn::class, ['label' => 'Code'])
             ->add('filiere', TextColumn::class, ['field' => 'filiere.libelle', 'label' => 'Filière'])
             ->add('niveau', TextColumn::class, ['field' => 'niveau.libelle', 'label' => 'Niveau'])
             ->add('dateInscription', DateTimeColumn::class, ['label' => 'Date création', 'format' => 'd-m-Y']);
 
         if ($etat != 'attente_echeancier') {
-
             $table->add('caissiere', TextColumn::class, ['field' => 'c.getNomComplet', 'label' => 'Caissière ']);
         }
 
@@ -644,10 +748,11 @@ class InscriptionController extends AbstractController
         $table->createAdapter(ORMAdapter::class, [
             'entity' => Inscription::class,
             'query' => function (QueryBuilder $qb) use ($user, $etat) {
-                $qb->select(['p', 'niveau', 'c', 'filiere', 'etudiant'])
+                $qb->select(['p', 'niveau', 'c', 'filiere', 'etudiant,res'])
                     ->from(Inscription::class, 'p')
                     ->join('p.niveau', 'niveau')
                     ->join('niveau.filiere', 'filiere')
+                    ->join('niveau.responsable', 'res')
                     ->join('p.etudiant', 'etudiant')
                     ->leftJoin('p.caissiere', 'c');
                 if ($this->isGranted('ROLE_ETUDIANT')) {
@@ -662,6 +767,10 @@ class InscriptionController extends AbstractController
                 } else {
                     $qb->andWhere('p.etat = :etat')
                         ->setParameter('etat', $etat);
+                }
+                if ($this->isGranted('ROLE_DIRECTEUR')) {
+                    $qb->andWhere('res.id = :id')
+                        ->setParameter('id', $user->getPersonne()->getId());
                 }
             }
         ])
@@ -760,7 +869,6 @@ class InscriptionController extends AbstractController
             return $table->getResponse();
         }
 
-
         return $this->render('inscription/inscription/index.html.twig', [
             'datatable' => $table,
             'etat' => $etat
@@ -831,6 +939,13 @@ class InscriptionController extends AbstractController
             'inscription' => $inscription,
         ]);
     }
+    #[Route('/{id}/show/confirmation', name: 'app_inscription_inscription_paiement_confirmation', methods: ['GET'])]
+    public function showConfirmation(Inscription $inscription): Response
+    {
+        return $this->render('inscription/inscription/show_confirmation.html.twig', [
+            'infoinscription' => $inscription->getInfoInscriptions(),
+        ]);
+    }
 
     #[Route('/{id}/edit/admin', name: 'app_inscription_inscription_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Inscription $inscription, EntityManagerInterface $entityManager, InscriptionRepository $inscriptionRepository, FormError $formError, FraisInscriptionRepository $fraisRepository): Response
@@ -885,9 +1000,11 @@ class InscriptionController extends AbstractController
 
                     $message       = sprintf('Opération effectuée avec succès');
                     $showAlert = false;
+                    $statut = 1;
                     $this->addFlash('success', $message);
                 } else {
                     $showAlert = true;
+                    $statut = 0;
 
                     if ($inscription->getMontant() > $somme) {
                         $message       = sprintf('Désolé votre opération à échoué car le montant total [%s] de votre échéancier est inferieur [%s] mon total à payer', $somme, $inscription->getMontant());
@@ -902,7 +1019,7 @@ class InscriptionController extends AbstractController
                 $data = true;
 
                 //$message       = 'Opération effectuée avec succès';
-                $statut = 1;
+
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
@@ -965,6 +1082,7 @@ class InscriptionController extends AbstractController
                 $data = true;
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
+                $fullRedirect = true;
                 $this->addFlash('success', $message);
             } else {
                 $message = $formError->all($form);
@@ -976,7 +1094,7 @@ class InscriptionController extends AbstractController
             }
 
             if ($isAjax) {
-                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data', 'fullRedirect'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
@@ -990,7 +1108,7 @@ class InscriptionController extends AbstractController
         ]);
     }
     #[Route('/{id}/paiement/admin/ok', name: 'app_inscription_inscription_paiement_ok', methods: ['GET', 'POST'])]
-    public function paiement(Request $request, Inscription $inscription, EntityManagerInterface $entityManager, InscriptionRepository $inscriptionRepository, FormError $formError, FraisInscriptionRepository $fraisRepository, EcheancierRepository $echeancierRepository, UserInterface $user): Response
+    public function paiement(Request $request, Inscription $inscription, EntityManagerInterface $entityManager, InscriptionRepository $inscriptionRepository, FormError $formError, FraisInscriptionRepository $fraisRepository, EcheancierRepository $echeancierRepository, UserInterface $user, NaturePaiementRepository $naturePaiementRepository): Response
     {
 
 
@@ -1019,7 +1137,7 @@ class InscriptionController extends AbstractController
 
             $echeanciers = $echeancierRepository->findAllEcheance($inscription->getId());
             $date = $form->get('datePaiement')->getData();
-            $mode = $form->get('modePaiement')->getData();
+            $mode =   $mode = $naturePaiementRepository->find($form->get('modePaiement')->getData()->getId());
 
             $montant = (int) $form->get('montant')->getData();
 
@@ -1042,49 +1160,85 @@ class InscriptionController extends AbstractController
                         $paiement = new InfoInscription();
 
                         $paiement->setUtilisateur($this->getUser());
+                        $paiement->setCode($inscription->getCode());
+                        $paiement->setDateValidation(new \DateTime());
                         $paiement->setInscription($inscription);
                         $paiement->setDatePaiement($date);
                         $paiement->setCaissiere($this->getUser());
                         $paiement->setModePaiement($mode);
                         $paiement->setMontant($echeancier->getMontant());
                         $paiement->setEchenacier($echeancier);
+                        if ($mode->getCode() == 'CHQ') {
+
+                            $paiement->setNumeroCheque($form->get('numeroCheque')->getData());
+                            $paiement->setBanque($form->get('banque')->getData());
+                            $paiement->setTireur($form->get('tireur')->getData());
+                            $paiement->setContact($form->get('contact')->getData());
+                            $paiement->setDateCheque($form->get('dateCheque')->getData());
+                        }
+
+
+                        if ($mode->isConfirmation()) {
+
+                            $paiement->setEtat('attente_confirmation');
+                        } else {
+
+                            $paiement->setEtat('payer');
+                        }
 
 
                         $entityManager->persist($paiement);
                         $entityManager->flush();
 
-                        $echeancier->setEtat('payer');
+                        if ($mode->isConfirmation()) {
+
+                            $echeancier->setEtat('attente_confirmation');
+                        } else {
+
+                            $echeancier->setEtat('payer');
+                        }
                         $entityManager->persist($echeancier);
                         $entityManager->flush();
 
-                        $montant = $montant - $echeancier->getMontant();
 
-                        $inscription->setTotalPaye($inscription->getTotalPaye() + $echeancier->getMontant());
+
+                        $montant = $montant - $echeancier->getMontant();
+                        if (!$mode->isConfirmation()) {
+
+                            $inscription->setTotalPaye($inscription->getTotalPaye() + $echeancier->getMontant());
+                        }
+
+                        $entityManager->persist($inscription);
+                        $entityManager->flush();
 
                         if ($i == $last_key) {
 
                             if ($montant >= 0) {
-                                $inscription->setEtat('solde');
+
+                                if ($inscription->getMontant() == $inscription->getTotalPaye()) {
+
+                                    $inscription->setEtat('solde');
+                                }
                             }
                         }
 
                         //$message       = sprintf('Opération effectuée avec succès');
                     }
 
-
-
-
                     $i++;
                 }
-
-
-                $entityManager->persist($inscription);
-                $entityManager->flush();
+                $message       = sprintf('Opération effectuée avec succès');
+                if ($inscription->getMontant() == $inscription->getTotalPaye()) {
+                    $statut = 1;
+                } else {
+                    $statut = 0;
+                    $this->addFlash('success', $message);
+                }
 
                 $showAlert = true;
                 $data = true;
-                $message       = sprintf('Opération effectuée avec succès');
-                $statut = 1;
+
+
                 $this->addFlash('success', $message);
             } else {
                 $message = $formError->all($form);
@@ -1096,7 +1250,7 @@ class InscriptionController extends AbstractController
             }
 
             if ($isAjax) {
-                return $this->json(compact('statut', 'message', 'redirect', 'data', 'showAlert'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
@@ -1147,6 +1301,8 @@ class InscriptionController extends AbstractController
                     $somme += $value->getMontant();
                 }
 
+
+
                 if ($inscription->getMontant() == $somme) {
 
                     if ($form->getClickedButton()->getName() === 'resoumettre') {
@@ -1166,6 +1322,7 @@ class InscriptionController extends AbstractController
                     $message       = sprintf('Opération effectuée avec succès');
                     $showAlert = false;
                     $this->addFlash('success', $message);
+                    $statut = 1;
                 } else {
                     $showAlert = true;
 
@@ -1176,13 +1333,14 @@ class InscriptionController extends AbstractController
                     }
 
                     $this->addFlash('danger', $message);
+                    $statut = 0;
                 }
 
 
                 $data = true;
 
                 //$message       = 'Opération effectuée avec succès';
-                $statut = 1;
+
             } else {
                 $message = $formError->all($form);
                 $statut = 0;

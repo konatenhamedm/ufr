@@ -8,12 +8,11 @@
 
           margin-footer: 0.5cm;
 
-          /header: html_headerContent;/
+          /*header: html_headerContent;*/
           footer: html_pageFooter;
           margin-top: 0.5cm;
           margin-header: 0cm;
-          margin-left: 1cm;
-           margin-right: 1cm;
+         
           /*background: ...
   background-image: ...
   background-position ...
@@ -39,71 +38,60 @@
         /*@page :first {
    header: html_headerContent;
 }*/
+caption{
+  margin-bottom: 15px;
+}
+      fieldset 
+	{
+		border: 1px solid #000 !important;
+		margin: 0;
+		xmin-width: 0;
+		padding: 10px;       
+		position: relative;
+		border-radius:4px;
+		background-color:#fff;
+		padding-left:10px!important;
+	}	
+	
+		legend
+		{
+       padding: 0 10px; 
+      margin-left: 100px;
+			font-size:14px;
+			font-weight:bold;
+			margin-bottom: 0px; 
+			width: 35%; 
+			border: 1px solid #ddd;
+			border-radius: 4px; 
+			background-color: #ffffff;
+		}
 
-        .table {
-          width: 100%;
-          max-width: 100%;
-          border-collapse: collapse;
+        table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
 
-        }
-        .table {
-          page-break-before: auto;
-        }
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
 
-        body {
-          font-family: Trebuchet,Arial,Helvetica;
-        }
-
-        .table td,
-        .table th {
-          padding: 2px;
-          vertical-align: top;
-          border-top: 1px solid #191919;
-        }
-
-        .table thead th {
-          vertical-align: bottom;
-          border-bottom: 2px solid #191919;
-        }
-
-        .table tbody + tbody {
-          border-top: 1px solid #191919;
-        }
-
-        .table .table {
-          background-color: #fff;
-        }
-
-        .table-sm td,
-        .table-sm th {
-          padding: 0.3rem;
-        }
-
-        .table-bordered {
-          border: 1px solid #191919;
-        }
-
-        .table-bordered td,
-        .table-bordered th {
-          border: 1px solid #191919;
-        }
-
-        .table-bordered thead td,
-        .table-bordered thead th {
-          border-bottom-width: 1px;
-        }
-
+tr:nth-child(even) {
+  
+}
         @media all {
-          /.content { display: block; page-break-inside: avoid; }/
+          /*.content { display: block; page-break-inside: avoid; }*/
         }
 
         .content {
-          /margin-top: 18cm;/
+          /*margin-top: 18cm;*/
         }
 
-        .table-responsive.table-bordered {
+        {# .table-responsive.table-bordered {
           border: 0;
-        }
+        } #}
 
         .double_underline {
             text-decoration:underline;
@@ -113,53 +101,81 @@
     </style>
   </head>
   <body style="font-size:12px;">
-      <div class="clearfix">
-     <div style="width:50%;text-align:left;float:left;"  class="">
-            {# {% set var = "uploads/" ~ menu.findParametre.logo.path "/" menu.findParametre.logo.alt %}
-        <img src="{{ var |replace({'/': "\\"}) }}" width="200px" height="50px"/> #}
-        <p>
-            {{ "BPV 43 Abidjan"}}<br>
-            TEL: +(225) 01 15 44 44 <br>
-            EMAIL: <a href="mailto:{{ "ufrseg-sf2@gmail.com"}}">{{ "ufrseg-sf2@gmail.com"}}</a>
-        </p>
-      </div>
-   
-       <div style="width:50%;text-align:left;float:right;">
-           <h3 style="font-weight:700;font-size:20px">Etat des recouvrements {{ ''}} <span style="font-size:10px;color:#FF2E2E"> <br>
-         <span style="font-weight:700;font-size:20px;margin-left:45px">à la date {{"now"|date("m/d/Y")}}</span>
-           </span></h3> 
+    <div class="clearfix">
+      <div style="width:10%;text-align:left;float:left;"  class="">
+          {% set var = "uploads/" ~ 'media_etudiant' ~"/"~ 'lg.jpeg' %}
+          <img src="{{ var |replace({'/': "\\"}) }}" width="100px" />
+  
+        </div>
+     
+       <div style="width:65%;text-align:right;float:center;">
+            <div style="text-align:center;"  class="">
+                    <b>UFR-SEG</b><br>
+                  22 BP 1484 Abidjan 2 - Tél : 27 22 49 60 49 - ufrseg@yahoo.com <br>
+                  Abidjan-Cocody
+               <div style="border-top:1px solid #000"></div>
+              </div>
+           
+        </div>
+       <div style="width:25%;text-align:right;float:right;margin-top:0px,padding:8px">
+
+           <div style="text-align:center;margin-top:-45px"  class="">
+                    République de COTE D'IVOIRE <br>
+                <span style="text-decoration: underline;">Union - Discipline - Travail</span> <br>
+               <b style="font-weight: bolder;">Année scolaire : 2021-2022</b>
+              </div>
+          
         </div>
     </div>
+  
+
+    <br>
 
 
-       <table class="table table-bordered" style="margin-top:10px;font-size:10px">
+   
+<br/>
+ <div class="clearfix">
+       
+       <div style="width:100%;text-align:right;float:right;">
+       <table >
+       <caption>
+             
+               <b>{{'POINT DES PAIEMENTS'| upper }}</b><br>
+              </caption> 
       <thead>
         <tr>
           <th style="vertical-align:middle;width:5%">N°</th>
+          <th style="vertical-align:middle;">CODE PREINSCRIPTION</th>
           <th style="vertical-align:middle;">NOM ET PRÉNOMS</th>
-          {# <th style="vertical-align:middle;">STATUT</th> #}
+          <th style="vertical-align:middle;">NIVEAU</th>
+          <th style="vertical-align:middle;">DATE PAIEMENT</th>
           <th style="vertical-align:middle;">COUT DE LA FORMATION</th>
-          <th style="vertical-align:middle;">MONATNT PAYÉ</th>
-          <th style="vertical-align:middle;">MONATNT IMPAYÉ</th>
-          <th style="vertical-align:middle;">{{"Reste à payer" | upper }}</th>
+          <th style="vertical-align:middle;">MODE PAIEMENT</th>
+          <th style="vertical-align:middle;">{{'Caissière' | upper}}</th>
           {# <th style="vertical-align:middle;">TAUX DE PAIEMNET</th> #}
        
         </tr>
       </thead>
+     
+          
       <tbody>
        {% set total=0 %}
          {% for key,ligne in data %}
          
           <tr>
             <td style="vertical-align:middle;text-align:center;">{{key+1}}</td>
-            <td style="vertical-align:middle;text-align:center;" >{{ ligne.nom ~ ' ' ~ ligne.prenom }}</td>
-            {# <td style="vertical-align:middle;text-align:center;" >{% if ligne.etat == "valide" %} {{ 'Payer' }} {% else %} {{ 'Impayer' }} {% endif %}</td> #}
-            <td style="vertical-align:middle;text-align:center;">{{ligne.montant_preinscription |number_format(0, '.', '.') }}</td>
-            <td style="vertical-align:middle;text-align:center;" ><span style="font-size:15px;color:#FF2E2E">{% if ligne.etat == "valide" %} {{ligne.montant_preinscription  |number_format(0, '.', '.') }} {% else %} {{ '0'|number_format(0, '.', '.') }} {% endif %}</span ></td>
+            <td style="vertical-align:middle;text-align:center;" >{{ ligne.code }}</td>
+            <td style="vertical-align:middle;text-align:center;" >{{ ligne.etudiant.nom ~ ' ' ~ ligne.etudiant.prenom }}</td>
+             <td style="vertical-align:middle;text-align:center;" >{{ ligne.niveau.getSigle }}</td>
+             <td style="vertical-align:middle;text-align:center;" >{{ ligne.infoPreinscription.datePaiement | date('d/m/Y') }}</td>
+            <td style="vertical-align:middle;text-align:center;">{{ligne.infoPreinscription.montant |number_format(0, '.', '.') }}</td>
+             <td style="vertical-align:middle;text-align:center;" >{{ ligne.infoPreinscription.modePaiement.libelle }}</td>
+             <td style="vertical-align:middle;text-align:center;" >{{ ligne.caissiere.getNomComplet ? ligne.caissiere.getNomComplet :'' }}</td>
+        {#     <td style="vertical-align:middle;text-align:center;" ><span style="font-size:15px;color:#FF2E2E">{% if ligne.etat == "valide" %} {{ligne.montant_preinscription  |number_format(0, '.', '.') }} {% else %} {{ '0'|number_format(0, '.', '.') }} {% endif %}</span ></td>
             <td style="vertical-align:middle;text-align:center;" >{% if ligne.etat in ["paiement_confirmation","attente_paiement"] %} {{ligne.montant_preinscription  |number_format(0, '.', '.') }} {% else %} {{ '0'|number_format(0, '.', '.') }} {% endif %}</td>
             <td style="vertical-align:middle;text-align:center;" >{% if ligne.etat in ["paiement_confirmation","attente_paiement"]  %} {{ligne.montant_preinscription  |number_format(0, '.', '.') }} {% else %} {{ '0'|number_format(0, '.', '.') }} {% endif %}</td>
-          
-           {% set total = total + ligne.montant_preinscription %}
+           #}
+           {# {% set total = total + ligne.montant_preinscription %} #}
             {# <td style="vertical-align:middle;text-align:center;" >{{ menu.existeContrat(ligne.id) ?  menu.existeContrat(ligne.id).locataire.NPrenoms  : 'Appartement libre'  }}</td>
             <td style="vertical-align:middle;text-align:center;" >{{ menu.existeContrat(ligne.id) ?  (menu.existeContrat(ligne.id).DateEntree)|date("m/d/Y")  : 'Appartement libre' }}</td>
              #}
@@ -168,7 +184,7 @@
           </tr>
          {% endfor %}
 
-         <tr>
+        {#  <tr>
            <td style="vertical-align:middle;text-align:center;font-family:"Gill Sans Extrabold", sans-serif;" colspan="2">
               <h3 class="text-center">Total</h3>
            </td>
@@ -186,12 +202,14 @@
            <td style="vertical-align:middle;text-align:center;font-family:"Gill Sans Extrabold", sans-serif;" > 
            <h3 class="text-center">{{ total_impaye |number_format(0, '.', '.')  }}</h3>
            </td>
-         </tr>
+         </tr> #}
         
     </table>
      
    
       
+    </div>
+    </div>
     </div>
 
 
@@ -208,8 +226,23 @@
     
     
     
-    <htmlpagefooter name="pageFooter">
-      
+     <htmlpagefooter name="pageFooter">
+       {#  <table style="width:100%">
+          <tr>
+            <td style="width:50%;text-align:left;padding-bottom:8px">
+              <i><b>Client</b></i>
+            </td>
+            <td style="width:50%;text-align:right">
+              <i><b>Souche</b></i>
+            </td>
+          </tr>
+        </table> #}
+        <div style="border-top:2px solid #000"></div>
+       <p  align="center" style="align: center;margin-top:-1px">
+        COCODY ECOLE POLICEI - 01 BP 5889 Abidjan 01 - e-mail: 
+        <a href="mailto:ufr@gmail.com">ufr@gmail.com</a><br>
+        Tél: +225 21 27 53 50 FAX.: +225 21 27 53 29 - Fax: (225) 21 27 53 29 - RC: 236319
+       </p>
     </htmlpagefooter>
   </body>
 </html>

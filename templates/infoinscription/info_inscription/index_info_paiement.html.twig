@@ -1,0 +1,86 @@
+
+{% block body %}
+
+  {#   <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Liste paiement en attente de confirmation </h5>
+        <div class="btn btn-icon btn-sm  ms-2" data-bs-dismiss="modal" aria-label="Close">
+            <span class="svg-icon svg-icon-2x text-white">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor"></rect>
+					<rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor"></rect>
+				</svg>
+            </span>
+        </div>
+    </div> #}
+    <div class="modal-body modal-body-certificat p-0">
+   
+        <div class="row">
+            <div class="col-sm-12">
+                <div id="grid_app_infoinscription_info_inscription" class="grid-dt-wrapper" data-bs-reflech="{{ path('app_infoinscription_info_inscription_info_paiement_index', {'id': id}) }}">Chargement....</div>
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default btn-sm" data-bs-dismiss="modal">Annuler</button>
+
+    </div>
+
+
+{% endblock %}
+
+
+{% block java %}
+    <script src="{{ asset('assets/js/datatables.js') }}"></script>
+    <script>
+  
+        $(function() {
+            $('#grid_app_infoinscription_info_inscription').initDataTables({{ datatable_settings(datatable) }}, {
+                searching: true,
+                ajaxUrl: "{{ path('app_infoinscription_info_inscription_info_paiement_index', {'id': id}) }}",
+                language: {
+                    url: asset_base_path + "/js/i18n/French.json"
+                },
+                "fnDrawCallback": function( oSettings )
+                {
+                    var scriptElement = document.createElement('script');
+                    scriptElement.src = "{{ asset('/assets/scripts/admin-stacketd.js') }}";
+                    // Attacher le script à la fin du <body> de la page
+                    document.body.appendChild(scriptElement);
+                }
+            });
+
+            
+        });
+  $(function () {
+	  var elements = Array.from(document.querySelectorAll("[data-bs-stacked-modal]"));
+
+            if (elements && elements.length > 0) {
+                elements.forEach((element) => {
+                    if (element.getAttribute("data-kt-initialized") === "1" ) {
+                        return;
+                    }
+
+                    const url = element.getAttribute('href');
+                    element.setAttribute("data-kt-initialized", "1");
+
+
+                    element.addEventListener("click", function(e) {
+                        e.preventDefault();
+
+                        const modalEl = document.querySelector(this.getAttribute("data-bs-stacked-modal"));
+
+                        if (modalEl) {
+                            const modal = new bootstrap.Modal(modalEl);
+                            modal.show(element);
+                        }
+                    });
+                });
+            }
+
+})
+      
+    </script>
+{% endblock %}
+
+

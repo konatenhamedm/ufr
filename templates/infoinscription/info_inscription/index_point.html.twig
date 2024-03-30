@@ -1,0 +1,214 @@
+{# {% extends 'base-layout.html.twig' %}
+
+{% block title %}Liste des paiments chèque{% endblock %}
+{% block header %}Comptabilité{% endblock %}
+{% block breadcrumb %}{% endblock %}
+ #}
+
+{% block body %}
+  <div class="card shadow-sm">
+    <div class="card-header card-header-sm">
+      <h3 class="card-title">
+        Liste des paiements chèque en attente de confirmation</h3>
+      <div class="card-toolbar"></div>
+    </div>
+    <div class="card-body bb">
+      <div class="row">
+        {% form_theme form 'widget/fields-block.html.twig' %}
+            {{ form_start(form)}}
+            <fieldset>
+              <div class="row small" style="position:relative">
+                <div class="col-md-3">{{ form_row(form.niveau) }}</div>
+                <div class="col-md-3">{{ form_row(form.caissiere) }}</div>
+                <div class="col-md-2">{{ form_row(form.dateDebut) }}</div>
+                <div class="col-md-2">{{ form_row(form.dateFin) }}</div>
+                <div class="col-md-1 pt-5">
+                  <button class="btn btn-main btn-filter btn-sm" type="button">Rechercher</button>
+                </div>
+                <div class="col-md-1 p-5">
+                 {# <button class="btn btn-main btn-filter btn-sm" type="button"> #}
+               {#   <a style="height: 35px;" href="{{ path('default_print_iframe',{
+                    'r':'app_comptabilite_print_all_point_cheque',
+                    'params': {
+                      'id': grid_id
+                    }
+                    
+                    
+                  }) }}"  class="btn btn-warning btn-sm btn-imprimer" 
+                data-bs-toggle="modal" data-bs-target="#exampleModalSizeSm2">
+                <i class="fa fa-print text-light"></i>
+                </a> #}
+                 <a style="height: 35px;" href="{{ path('default_print_iframe',{
+                    'r':'app_comptabilite_print_all_point_cheque',
+                    'params': {
+                      'etat': 'attente_confirmation'
+                    }
+                    
+                  }) }}"  class="btn btn-warning btn-sm btn-imprimer" 
+                data-bs-toggle="modal" data-bs-target="#exampleModalSizeSm2">
+                <i class="fa fa-print text-light"></i>
+                </a>
+                 {# </button> #}
+                
+                </div>
+              </div>
+            </fieldset>
+            {{ form_end(form, {render_rest: false}) }}
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <div id="grid_app_infoinscription_info_inscription_point_cheque_{{ grid_id }}" class="grid-dt-wrapper">Chargement....</div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block java %}
+  <script src="{{ asset('assets/js/datatables.js') }}"></script>
+  <script>
+    
+    $(function () {
+      const grid_prefix_id = "{{ grid_id }}";
+      const $old_grid = $('#grid_app_infoinscription_info_inscription_point_cheque_' + grid_prefix_id);
+      init_select2('.has-select2');
+
+      function loadDataTable($grid, niveau,caissiere,dateDebut,dateFin ,options = null, contents = '') {
+        $grid.initDataTables(
+          options
+          ? options
+          : {{ datatable_settings(datatable) }}, {
+          searching: true,
+          ajaxUrl: Routing.generate('app_infoinscription_info_inscription_point_cheque_index', {
+            niveau: niveau,
+            caissiere: caissiere,
+            dateDebut: dateDebut,
+            dateFin: dateFin
+            
+          }),
+          language: {
+            url: asset_base_path + "/js/i18n/French.json"
+          },
+          headerCallback: function (tHead, aData, iStart, iEnd, aiDisplay) {},
+          initComplete: function (e, oSettings, json) {},
+        
+          drawCallback: function (row, data) {}
+        });
+      }
+
+      const $niveau = $('#{{ form.niveau.vars.id }}');
+      const $caissiere = $('#{{ form.caissiere.vars.id }}');
+      const $dateDebut = $('#{{ form.dateDebut.vars.id }}');
+      const $dateFin = $('#{{ form.dateFin.vars.id }}');
+     
+      
+
+      $niveau.on('change', function () {
+        const val = $(this).val();
+          $caissiere.find('option').each(function () {
+          const $_this = $(this);
+          if ($_this.attr('data-type') == val) {
+           // $_this.prop('disabled', false).prop('hidden', false);
+          } else {
+            //$_this.prop('disabled', true).prop('hidden', true);
+          }
+        });
+     
+      });
+
+      loadDataTable($old_grid, null,null,null,null, {{ datatable_settings(datatable) }});
+
+      $('.btn-filter').on('click', function (e) {
+        e.preventDefault();
+        const $this = $(this);
+        const $form = $this.closest('form');
+
+        //alert($dateDebut.val());
+        load_grid_data($form, $this, $niveau.val(),$caissiere.val(),$dateDebut.val(),$dateFin.val());
+      });
+
+
+      $('.btn-imprimer').on('click', function (e) {
+        e.preventDefault();
+       // alert('fgg')
+        const $this = $(this);
+
+      //  var wpurl = $(this).attr("data-wpurl");
+      $(this).attr('href', 'https://localhost:8000/admin/comptabilite/versement/print-iframe?r=app_comptabilite_print_all_point_cheque&params[id]=2');
+
+        //alert($niveau.val());
+        imprimer(2);
+      });
+
+
+      function imprimer(id){
+        $.ajax({
+          url: "/admin/comptabilite/versement/print-iframe?r=app_comptabilite_print_all_point_cheque&params[id]=5",
+          type: 'GET',
+          async: false,
+          data: {
+            id: id,
+            
+          },
+         
+     
+        });
+      }
+
+      function load_grid_data($form, $button, niveau,caissiere,dateDebut,dateFin) {
+        const id = $old_grid.find('table').attr('id');
+        const $table = $old_grid.find(`#${id}`);
+        const table = $table.DataTable();
+        $.ajax({
+          url: $form.attr('action'),
+          type: $form.attr('method'),
+          data: {
+            niveau: niveau,
+            caissiere: caissiere,
+            dateDebut: dateDebut,
+            dateFin: dateFin
+          },
+          beforeSend: function () {
+            $button.append('<span class="spinner-border spinner-ajax spinner-border-sm" role="status" aria-hidden="true"></span> ');
+            $button.prop('disabled', true);
+            $('.btn-imprimer').append('<span class="spinner-border spinner-ajax spinner-border-sm" role="status" aria-hidden="true"></span> ');
+            $('.btn-imprimer').prop('disabled', true);
+            
+            
+          },
+          complete: function () {
+            $button.prop('disabled', false);
+            $button.find('.spinner-ajax').remove();
+          },
+          success: function (html) {
+            table.destroy();
+            if ($table.length) {
+              $table.empty();
+            }
+
+           // let grid_val = `${niveau}_${caissiere}_${dateDebut}_${dateFin}`;
+            let grid_val = `${niveau}_${caissiere}`;
+
+            //alert(grid_val)
+
+            $old_grid.attr('id', `grid_app_infoinscription_info_inscription_point_cheque_${grid_val}`).empty().html(`
+                                    <div class="spinner spinner-track spinner-primary mr-15 text-primary">
+                                        <div class="ml-15">Chargement des données de la grille</div>
+                                    </div>
+                            `);
+            var options = {{ datatable_settings(datatable) }};
+            var name = `dt_app_infoinscription_info_inscription_point_cheque_${grid_val}`;
+
+            options['name'] = name;
+
+            console.log(name);
+
+            loadDataTable($old_grid, niveau,caissiere,dateDebut,dateFin ,options)
+          }
+        });
+      }
+
+    });
+  </script>
+{% endblock %}
+

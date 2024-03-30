@@ -7,6 +7,7 @@ use App\DTO\InscriptionDTO;
 use App\Entity\Employe;
 use App\Entity\Etudiant;
 use App\Entity\Fonction;
+use App\Entity\InfoEtudiant;
 use App\Entity\Inscription;
 use App\Entity\NiveauEtudiant;
 use App\Entity\Pays;
@@ -33,9 +34,13 @@ use App\Repository\PreinscriptionRepository;
 use App\Repository\UtilisateurGroupeRepository;
 use App\Repository\UtilisateurRepository;
 use App\Security\LoginFormAuthenticator;
+use App\Service\ActionRender;
 use App\Service\FormError;
 use App\Service\SendMailService;
 use Doctrine\ORM\EntityManagerInterface;
+use Omines\DataTablesBundle\Adapter\Doctrine\ORMAdapter;
+use Omines\DataTablesBundle\Column\TextColumn;
+use Omines\DataTablesBundle\DataTableFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -52,6 +57,11 @@ use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
+
+use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory;
+use Symfony\Component\Serializer\Mapping\Loader\XmlFileLoader;
 
 class HomeController extends AbstractController
 {
@@ -249,10 +259,51 @@ class HomeController extends AbstractController
         ]);
     }
 
-    #[Route(path: '/site/information', name: 'site_information', methods: ['GET', 'POST'])]
-    public function information(Request $request, UserInterface $user, EtudiantRepository $etudiantRepository, PersonneRepository $personneRepository, FormError $formError, NiveauRepository $niveauRepository, UtilisateurRepository $utilisateurRepository, PreinscriptionRepository $preinscriptionRepository,): Response
+    protected function serialize($data, $format = 'json')
     {
-        $etudiant = $user->getPersonne();
+        return $this->container['serializer']->serialize($data, $format);
+    }
+
+    #[Route(path: '/site/information', name: 'site_information', methods: ['GET', 'POST'])]
+    public function information(
+        Request $request,
+        UserInterface $user,
+        EtudiantRepository $etudiantRepository,
+        PersonneRepository $personneRepository,
+        FormError $formError,
+        NiveauRepository $niveauRepository,
+        UtilisateurRepository $utilisateurRepository,
+        PreinscriptionRepository $preinscriptionRepository,
+
+    ): Response {
+        $etudiant = $etudiantRepository->find($user->getPersonne()->getId());
+
+        $info = new InfoEtudiant();
+
+
+        //$etudiant->getInf
+
+
+
+
+
+        if (count($etudiant->getInfoEtudiants()) == 0) {
+            $info->setTuteurNomPrenoms('');
+            $info->setTuteurFonction('');
+            $info->setTuteurContact('');
+            $info->setTuteurDomicile('');
+            $info->setTuteurEmail('');
+
+            $info->setCorresNomPrenoms('');
+            $info->setCorresFonction('');
+            $info->setCorresContacts('');
+            $info->setCorresDomicile('');
+            $info->setCorresEmail('');
+
+            $etudiant->addInfoEtudiant($info);
+        }
+
+
 
         $validationGroups = ['Default', 'FileRequired', 'autre'];
         //dd($niveauRepository->findNiveauDisponible(21));
@@ -283,23 +334,24 @@ class HomeController extends AbstractController
 
 
 
+
             if ($form->isValid()) {
 
                 if ($form->getClickedButton()->getName() === 'valider') {
                     $etudiant->setEtat('complete');
                     $message       = 'Votre dossier a bien été transmis pour validation. Vous recevrez une notification après traitement.';
-                    $personneRepository->add($etudiant, true);
+                    $etudiantRepository->add($etudiant, true);
 
                     foreach ($data as $key => $value) {
                         $value->setEtat('attente_validation');
                         $preinscriptionRepository->add($value, true);
                     }
                 } else {
-                    $personneRepository->add($etudiant, true);
+                    $etudiantRepository->add($etudiant, true);
                     $message       = 'Opération effectuée avec succès';
                 }
 
-                //$entityManager->flush();
+
 
                 $data = true;
 
@@ -344,6 +396,9 @@ class HomeController extends AbstractController
         /*  } */
 
         //dd($etudiant);
+
+
+
         $validationGroups = ['Default', 'FileRequired', 'autre'];
         $form = $this->createForm(EtudiantDocumentType::class, $etudiant, [
             'method' => 'POST',
@@ -669,5 +724,356 @@ class HomeController extends AbstractController
         }
 
         return $this->json('success');
+    }
+
+
+    #[Route('/inscription/etudiant/admin', name: 'app_inscription_etudiant_admin_index', methods: ['GET', 'POST'])]
+    public function indexInformationAdmin(Request $request, UserInterface $user, DataTableFactory $dataTableFactory): Response
+    {
+        $table = $dataTableFactory->create()
+            ->add('nom', TextColumn::class, ['label' => 'Nom'])
+            ->add('prenoms', TextColumn::class, ['label' => 'Prénoms'])
+            ->add('email', TextColumn::class, ['label' => 'Email',])
+
+            ->createAdapter(ORMAdapter::class, [
+                'entity' => Etudiant::class,
+            ])
+            ->setName('dt_app_inscription_etudiant_admin');
+
+        $renders = [
+            'edit' =>  new ActionRender(function () {
+                return true;
+            }),
+            'delete' => new ActionRender(function () {
+                return true;
+            }),
+        ];
+
+
+        $hasActions = false;
+
+        foreach ($renders as $_ => $cb) {
+            if ($cb->execute()) {
+                $hasActions = true;
+                break;
+            }
+        }
+
+        if ($hasActions) {
+            $table->add('id', TextColumn::class, [
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Etudiant $context) use ($renders) {
+                    $options = [
+                        'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
+                        'target' => '#modal-lg',
+
+                        'actions' => [
+                            'deliberation' => [
+                                'url' => $this->generateUrl('app_direction_deliberation_new', ['id' => $value]),
+                                'ajax' => false,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-pen',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['edit']
+                            ],
+                        ]
+
+                    ];
+                    return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
+                }
+            ]);
+        }
+
+
+        $table->handleRequest($request);
+
+        if ($table->isCallback()) {
+            return $table->getResponse();
+        }
+
+
+        return $this->render('site/admin/index.html.twig', [
+            'datatable' => $table
+        ]);
+    }
+
+
+
+    #[Route(path: '/site/information/new', name: 'site_information_new', methods: ['GET', 'POST'])]
+    public function informationAdmin(
+        Request $request,
+        UserInterface $user,
+        EtudiantRepository $etudiantRepository,
+        PersonneRepository $personneRepository,
+        FormError $formError,
+        NiveauRepository $niveauRepository,
+        UtilisateurRepository $utilisateurRepository,
+        PreinscriptionRepository $preinscriptionRepository,
+        // Etudiant $etudiant
+    ): Response {
+        $etudiant = new Etudiant();
+
+
+
+        $info = new InfoEtudiant();
+
+
+        //$etudiant->getInf
+
+
+
+
+
+        if (count($etudiant->getInfoEtudiants()) == 0) {
+            $info->setTuteurNomPrenoms('');
+            $info->setTuteurFonction('');
+            $info->setTuteurContact('');
+            $info->setTuteurDomicile('');
+            $info->setTuteurEmail('');
+
+            $info->setCorresNomPrenoms('');
+            $info->setCorresFonction('');
+            $info->setCorresContacts('');
+            $info->setCorresDomicile('');
+            $info->setCorresEmail('');
+
+            $etudiant->addInfoEtudiant($info);
+        }
+
+
+
+        $validationGroups = ['Default', 'FileRequired', 'autre'];
+        //dd($niveauRepository->findNiveauDisponible(21));
+
+        $form = $this->createForm(EtudiantType::class, $etudiant, [
+            'method' => 'POST',
+            'type' => 'info',
+            'doc_options' => [
+                'uploadDir' => $this->getUploadDir(self::UPLOAD_PATH, true),
+                'attrs' => ['class' => 'filestyle'],
+            ],
+            'validation_groups' => $validationGroups,
+            'action' => $this->generateUrl('site_information_new')
+        ]);
+
+        $data = null;
+        $statutCode = Response::HTTP_OK;
+
+        $isAjax = $request->isXmlHttpRequest();
+
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            $response = [];
+            $redirect = $this->generateUrl('site_information_new');
+            $data = $preinscriptionRepository->findBy(array('etudiant' => $etudiant, 'etat' => 'attente_informations'));
+
+
+
+
+            if ($form->isValid()) {
+
+                if ($form->getClickedButton()->getName() === 'valider') {
+                    $etudiant->setEtat('complete');
+                    $message       = 'Votre dossier a bien été transmis pour validation. Vous recevrez une notification après traitement.';
+                    $etudiantRepository->add($etudiant, true);
+
+                    foreach ($data as $key => $value) {
+                        $value->setEtat('attente_validation');
+                        $preinscriptionRepository->add($value, true);
+                    }
+                } else {
+                    $etudiantRepository->add($etudiant, true);
+                    $message       = 'Opération effectuée avec succès';
+                }
+
+
+
+                $data = true;
+
+                $statut = 1;
+                $this->addFlash('success', $message);
+            } else {
+                $message = $formError->all($form);
+                $statut = 0;
+                $statutCode = 500;
+                if (!$isAjax) {
+                    $this->addFlash('warning', $message);
+                }
+            }
+
+            if ($isAjax) {
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
+            } else {
+                if ($statut == 1) {
+                    return $this->redirect($redirect, Response::HTTP_OK);
+                }
+            }
+        }
+
+        return $this->render('site/admin/informations_admin.html.twig', [
+            'etudiant' => $etudiant,
+            'etat' => 'ok',
+            'form' => $form->createView(),
+        ]);
+
+        //return $this->render('site/admin/pages/informations.html.twig');
+    }
+
+
+    #[Route('/site/admin/paiement/admin/ok', name: 'app_inscription_inscription_site_admin_paiement_ok', methods: ['GET', 'POST'])]
+    public function paiement(Request $request, Inscription $inscription, EntityManagerInterface $entityManager, InscriptionRepository $inscriptionRepository, FormError $formError, FraisInscriptionRepository $fraisRepository, EcheancierRepository $echeancierRepository, UserInterface $user, NaturePaiementRepository $naturePaiementRepository): Response
+    {
+
+
+
+        $form = $this->createForm(InscriptionPayementType::class, $inscription, [
+            'method' => 'POST',
+            'action' => $this->generateUrl('app_inscription_inscription_site_admin_paiement_ok')
+        ]);
+
+        $data = null;
+        $statutCode = Response::HTTP_OK;
+
+        $isAjax = $request->isXmlHttpRequest();
+
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            $response = [];
+            $redirect = $this->generateUrl('app_inscription_etudiant_admin_index');
+            //$ligne = $form->get('echeanciers')->getData();
+
+            // $workflow_data = $this->workflow->get($inscription, 'inscription');
+
+            $echeanciers = $echeancierRepository->findAllEcheance($inscription->getId());
+            $date = $form->get('datePaiement')->getData();
+            $mode =   $mode = $naturePaiementRepository->find($form->get('modePaiement')->getData()->getId());
+
+            $montant = (int) $form->get('montant')->getData();
+
+            //dd($inscription->getId());
+
+
+
+            if ($form->isValid()) {
+
+                $last_key = count($echeanciers);
+                $i = 1;
+
+
+
+                foreach ($echeanciers as $key => $echeancier) {
+
+                    //  dd($montant, $echeancier->getMontant());
+                    if ($montant >= (int)$echeancier->getMontant()) {
+
+                        $paiement = new InfoInscription();
+
+                        $paiement->setUtilisateur($this->getUser());
+                        $paiement->setCode($inscription->getCode());
+                        $paiement->setDateValidation(new \DateTime());
+                        $paiement->setInscription($inscription);
+                        $paiement->setDatePaiement($date);
+                        $paiement->setCaissiere($this->getUser());
+                        $paiement->setModePaiement($mode);
+                        $paiement->setMontant($echeancier->getMontant());
+                        $paiement->setEchenacier($echeancier);
+                        if ($mode->getCode() == 'CHQ') {
+
+                            $paiement->setNumeroCheque($form->get('numeroCheque')->getData());
+                            $paiement->setBanque($form->get('banque')->getData());
+                            $paiement->setTireur($form->get('tireur')->getData());
+                            $paiement->setContact($form->get('contact')->getData());
+                            $paiement->setDateCheque($form->get('dateCheque')->getData());
+                        }
+
+
+                        if ($mode->isConfirmation()) {
+
+                            $paiement->setEtat('attente_confirmation');
+                        } else {
+
+                            $paiement->setEtat('payer');
+                        }
+
+
+                        $entityManager->persist($paiement);
+                        $entityManager->flush();
+
+                        if ($mode->isConfirmation()) {
+
+                            $echeancier->setEtat('attente_confirmation');
+                        } else {
+
+                            $echeancier->setEtat('payer');
+                        }
+                        $entityManager->persist($echeancier);
+                        $entityManager->flush();
+
+
+
+                        $montant = $montant - $echeancier->getMontant();
+                        if (!$mode->isConfirmation()) {
+
+                            $inscription->setTotalPaye($inscription->getTotalPaye() + $echeancier->getMontant());
+                        }
+
+                        $entityManager->persist($inscription);
+                        $entityManager->flush();
+
+                        if ($i == $last_key) {
+
+                            if ($montant >= 0) {
+
+                                if ($inscription->getMontant() == $inscription->getTotalPaye()) {
+
+                                    $inscription->setEtat('solde');
+                                }
+                            }
+                        }
+
+                        //$message       = sprintf('Opération effectuée avec succès');
+                    }
+
+                    $i++;
+                }
+                $message       = sprintf('Opération effectuée avec succès');
+                if ($inscription->getMontant() == $inscription->getTotalPaye()) {
+                    $statut = 1;
+                } else {
+                    $statut = 0;
+                    $this->addFlash('success', $message);
+                }
+
+                $showAlert = true;
+                $data = true;
+
+
+                $this->addFlash('success', $message);
+            } else {
+                $message = $formError->all($form);
+                $statut = 0;
+                $statutCode = 500;
+                if (!$isAjax) {
+                    $this->addFlash('warning', $message);
+                }
+            }
+
+            if ($isAjax) {
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
+            } else {
+                if ($statut == 1) {
+                    return $this->redirect($redirect, Response::HTTP_OK);
+                }
+            }
+        }
+
+        return $this->render('inscription/inscription/edit_paiement.html.twig', [
+            'inscription' => $inscription,
+            'form' => $form->createView(),
+            'echeanciers' => $echeancierRepository->findBy(array('inscription' => $inscription->getId())),
+        ]);
     }
 }

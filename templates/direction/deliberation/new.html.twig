@@ -14,9 +14,9 @@
                 <h3 class="card-label">FICHE INDIVIDUELLE DE DELIBERATION - {{ examen.libelle }} <span class="d-block text-muted pt-0 font-size-sm"></h3>
             </div>
             <div class="card-toolbar">
-                <a href="{{ path('app_direction_deliberation_index') }}" class="btn btn-light-main btn-sm font-weight-bolder" >
+                <a href="{{ path('app_direction_deliberation_historique',{'id': examen.id }) }}" class="btn btn-light-main btn-sm font-weight-bolder" >
                     <span class="svg-icon svg-icon-md"><i class="ki ki-solid-plus"></i></span>
-                    Retours à la liste des examens
+                    Retours à l'historique des délibérations
                 </a>
                 <button name="sticky-submit" id="sticky-submit" class="btn btn-main btn-sm btn-ajax">
                     <span class="spinner-border d-none  spinner-ajax spinner-border-sm" role="status" aria-hidden="true"></span>

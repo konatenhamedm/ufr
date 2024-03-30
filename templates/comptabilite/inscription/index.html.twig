@@ -1,8 +1,8 @@
-{% extends 'base-layout.html.twig' %}
+{# {% extends 'base-layout.html.twig' %}
 
 {% block title %}Liste des inscriptions{% endblock %}
 {% block header %}Comptabilité{% endblock %}
-{% block breadcrumb %}{% endblock %}
+{% block breadcrumb %}{% endblock %} #}
 
 
 {% block body %}
@@ -17,24 +17,36 @@
         {% form_theme form 'widget/fields-block.html.twig' %}
             {{ form_start(form)}}
             <fieldset>
+
+             <div class="row small" style="position:relative">
+               
+             </div>
               <div class="row small" style="position:relative">
-                <div class="col-md-2">{{ form_row(form.mode) }}</div>
+               <div class="col-md-2">{{ form_row(form.mode) }}</div>
                 <div class="col-md-2">{{ form_row(form.niveau) }}</div>
                 <div class="col-md-2">{{ form_row(form.caissiere) }}</div>
+           
                 <div class="col-md-2">{{ form_row(form.dateDebut) }}</div>
                 <div class="col-md-2">{{ form_row(form.dateFin) }}</div>
                 <div class="col-md-1 pt-5">
                   <button class="btn btn-main btn-filter btn-sm" type="button">Rechercher</button>
                 </div>
-                <div class="col-md-1 pt-5">
-                <a style="height: 35px;" href="{{ path('default_print_iframe',{
+                <div class="col-md-1 p-5">
+                <a style="height: 35px;" title="Point des paiements" href="{{ path('default_print_iframe',{
                     'r':'app_comptabilite_print_all'
                   }) }}" class="btn btn-warning btn-sm btn-imprimer" 
                 data-bs-toggle="modal" data-bs-target="#exampleModalSizeSm2">
                 <i class="fa fa-print text-light"></i>
                 
-            </a>
+                 </a>
+                <a style="height: 35px;" title="Etat des versements" href="{{ path('default_print_iframe',{
+                                'r':'app_comptabilite_print_etat_versement_alll'
+                              }) }}" class="btn btn-primary btn-sm btn-imprimer" 
+                            data-bs-toggle="modal" data-bs-target="#exampleModalSizeSm2">
+                            <i class="fa fa-print text-light"></i>
+                </a>
                 </div>
+                
               </div>
             </fieldset>
             {{ form_end(form, {render_rest: false}) }}
@@ -119,22 +131,17 @@
         const $form = $this.closest('form');
 
         //alert($niveau.val());
-        imprimer($niveau.val());
+        imprimer({id:1});
       });
 
 
-      function imprimer(niveau){
-        $.ajax({
-          url: "/admin/comptabilite/inscription/imprime/all",
-          type: 'GET',
-          async: false,
-          data: {
-            niveau: niveau,
-            
-          },
-         
-     
-        });
+      function imprimer(filters = []){
+$.getJSON("{{ path('app_affectation_materiel_location_sortie_index') }}", {filters: filters}, function (data) {
+                 
+                
+
+                                });
+
       }
 
       function load_grid_data($form, $button, niveau,caissiere,dateDebut,dateFin,mode) {

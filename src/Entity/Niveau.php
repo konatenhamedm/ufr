@@ -50,6 +50,13 @@ class Niveau
     #[ORM\OneToMany(mappedBy: 'niveau', targetEntity: Inscription::class)]
     private Collection $inscriptions;
 
+    #[ORM\OneToMany(mappedBy: 'niveau', targetEntity: UniteEnseignement::class)]
+    private Collection $uniteEnseignements;
+
+    #[ORM\OneToMany(mappedBy: 'niveau', targetEntity: Classe::class)]
+    private Collection $classes;
+
+
 
 
     public function __construct()
@@ -57,6 +64,8 @@ class Niveau
         $this->frais = new ArrayCollection();
         $this->infoNiveaux = new ArrayCollection();
         $this->inscriptions = new ArrayCollection();
+        $this->uniteEnseignements = new ArrayCollection();
+        $this->classes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -194,5 +203,69 @@ class Niveau
     public function getNom()
     {
         return $this->libelle . ' ' . $this->getFiliere()->getLibelle();
+    }
+    public function getSigle()
+    {
+        return $this->code;
+    }
+
+    /**
+     * @return Collection<int, UniteEnseignement>
+     */
+    public function getUniteEnseignements(): Collection
+    {
+        return $this->uniteEnseignements;
+    }
+
+    public function addUniteEnseignement(UniteEnseignement $uniteEnseignement): static
+    {
+        if (!$this->uniteEnseignements->contains($uniteEnseignement)) {
+            $this->uniteEnseignements->add($uniteEnseignement);
+            $uniteEnseignement->setNiveau($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUniteEnseignement(UniteEnseignement $uniteEnseignement): static
+    {
+        if ($this->uniteEnseignements->removeElement($uniteEnseignement)) {
+            // set the owning side to null (unless already changed)
+            if ($uniteEnseignement->getNiveau() === $this) {
+                $uniteEnseignement->setNiveau(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Classe>
+     */
+    public function getClasses(): Collection
+    {
+        return $this->classes;
+    }
+
+    public function addClass(Classe $class): static
+    {
+        if (!$this->classes->contains($class)) {
+            $this->classes->add($class);
+            $class->setNiveau($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClass(Classe $class): static
+    {
+        if ($this->classes->removeElement($class)) {
+            // set the owning side to null (unless already changed)
+            if ($class->getNiveau() === $this) {
+                $class->setNiveau(null);
+            }
+        }
+
+        return $this;
     }
 }

@@ -17,6 +17,7 @@ use App\Repository\UtilisateurRepository;
 use App\Service\ActionRender;
 use App\Service\FormError;
 use App\Service\Omines\Adapter\ORMAdapter;
+use App\Service\Omines\Column\NumberFormatColumn;
 use Doctrine\ORM\QueryBuilder;
 use Omines\DataTablesBundle\Column\DateTimeColumn;
 use Omines\DataTablesBundle\Column\TextColumn;
@@ -42,7 +43,7 @@ class HomeController extends AbstractController
                 'label' => 'Etude de dossier',
                 'icon' => 'bi bi-list',
                 'module' => 'general',
-                'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_preinscription_index', ['etat' => 'attente_validation'])
+                'href' => $this->generateUrl('app_config_preinscription_etude_dossier_index')
             ],
             [
                 'label' => 'Paiement de préinscriptions',
@@ -201,32 +202,14 @@ class HomeController extends AbstractController
                 'module' => 'gestion',
                 'etat' => $inscription->getEtat() == 'valide' ? true : false,
                 'href' => $this->generateUrl('app_deliberation_preinscription_formation_index', ['id' => $inscription->getId()])
-            ], /* [
-                'label' => 'Traitement après examen',
-                'icon' => 'bi bi-list',
-                'module' => 'gestion',
-                'etat' => $inscription->getEtat() == 'valided' ? true : false,
-                'href' => $this->generateUrl('app_deliberation_preinscription_formation_index', ['id' => $inscription->getId()])
-            ] */
-            /* ,
-            [
-                'label' => 'En attente échéancier de paiement',
-                'icon' => 'bi bi-list',
-                'module' => 'gestion',
-                'href' => $this->generateUrl('app_inscription_inscription_list_ls', ['etat' => 'attente_echeance'])
             ],
-            [
-                'label' => 'En cours de paiement ',
+            /* [
+                'label' => 'Préinscriptions payées',
                 'icon' => 'bi bi-list',
                 'module' => 'gestion',
-                'href' => $this->generateUrl('app_inscription_inscription_list_ls', ['etat' => 'valide'])
-            ],
-            [
-                'label' => 'Dossiers soldés',
-                'icon' => 'bi bi-list',
-                'module' => 'gestion',
-                'href' => $this->generateUrl('app_inscription_inscription_list_ls', ['etat' => 'solde'])
-            ] */
+                'etat' => $inscription->getEtat() == 'valide' ? true : false,
+                'href' => $this->generateUrl('app_comptabilite_niveau_etudiant_preinscription_solde_index', ['id' => $inscription->getId()])
+            ],  */
         ];
 
         return $this->render('home/time_formation_preinscription_index.html.twig', [
@@ -365,6 +348,7 @@ class HomeController extends AbstractController
                 $data = true;
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
+                $fullRedirect = true;
                 $this->addFlash('success', $message);
                 //$this->redirectToRoute("app_config_workflow_index");
             } else {
@@ -378,7 +362,7 @@ class HomeController extends AbstractController
 
 
             if ($isAjax) {
-                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data', 'fullRedirect'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
@@ -502,6 +486,167 @@ class HomeController extends AbstractController
 
         return $this->render('comptabilite/niveau_etudiant/index_solde.html.twig', [
             'datatable' => $table
+        ]);
+    }
+
+
+
+    #[Route('/admin/frais', name: 'app_inscription_inscription_frais_index', methods: ['GET', 'POST'])]
+    public function indexListe(Request $request, UserInterface $user, DataTableFactory $dataTableFactory): Response
+    {
+        $isEtudiant = $this->isGranted('ROLE_ETUDIANT');
+        $isRoleFind = $this->isGranted('ROLE_SECRETAIRE');
+        $isRoleAdminFind = $this->isGranted('ROLE_ADMIN');
+        $etat = 'valide';
+
+        $table = $dataTableFactory->create()
+            ->add('code', TextColumn::class, ['label' => 'Code'])
+            ->add('filiere', TextColumn::class, ['field' => 'filiere.libelle', 'label' => 'Filière'])
+            ->add('niveau', TextColumn::class, ['field' => 'niveau.libelle', 'label' => 'Niveau'])
+            ->add('dateInscription', DateTimeColumn::class, ['label' => 'Date création', 'format' => 'd-m-Y']);
+
+        if ($etat != 'attente_echeancier') {
+
+            $table->add('caissiere', TextColumn::class, ['field' => 'c.getNomComplet', 'label' => 'Caissière ']);
+        }
+
+
+        if (!$isEtudiant) {
+            $table->add('nom', TextColumn::class, ['field' => 'etudiant.nom', 'visible' => false])
+                ->add('prenom', TextColumn::class, ['field' => 'etudiant.prenom', 'visible' => false])
+                ->add('nom_prenom', TextColumn::class, ['label' => 'Demandeur', 'render' => function ($value, Inscription $preinscription) {
+                    return $preinscription->getEtudiant()->getNomComplet();
+                }]);
+        }
+        if ($etat == 'valide') {
+            $table->add('montant', NumberFormatColumn::class, ['label' => 'Montant', 'field' => 'p.montant']);
+            $table->add('datePaiement', DateTimeColumn::class, ['label' => 'Date de paiement', 'field' => 'p.datePaiement', 'format' => 'd-m-Y']);
+        }
+        $table->createAdapter(ORMAdapter::class, [
+            'entity' => Inscription::class,
+            'query' => function (QueryBuilder $qb) use ($user, $etat) {
+                $qb->select(['p', 'niveau', 'c', 'filiere', 'etudiant'])
+                    ->from(Inscription::class, 'p')
+                    ->join('p.niveau', 'niveau')
+                    ->join('niveau.filiere', 'filiere')
+                    ->join('p.etudiant', 'etudiant')
+                    ->leftJoin('p.caissiere', 'c');
+                if ($this->isGranted('ROLE_ETUDIANT')) {
+                    $qb->andWhere('p.etudiant = :etudiant')
+                        ->setParameter('etudiant', $user->getPersonne());
+                }
+                if ($etat == 'attente_echeance') {
+                    $qb->orWhere('p.etat = :etat')
+                        ->orWhere('p.etat = :etat2')
+                        ->setParameter('etat', 'attente_echeancier')
+                        ->setParameter('etat2', 'rejete');
+                } else {
+                    $qb->andWhere('p.etat = :etat')
+                        ->setParameter('etat', 'valide');
+                }
+            }
+        ])
+            ->setName('dt_app_inscription_inscription_frais');
+
+        $renders = [
+            /* 'edit' =>  new ActionRender(function () {
+                return true;
+            }), */
+            'edit_etudiant' => new ActionRender(fn () => $etat == 'attente_echeancier' || $etat == 'rejete'),
+            'edit' => new ActionRender(fn () => $etat == 'echeance_soumis'),
+            'payer' => new ActionRender(fn () => $etat == 'valide'),
+            'delete' => new ActionRender(fn () =>  $isRoleFind == true || $isRoleAdminFind == true),
+            /*  'delete' => new ActionRender(function () {
+                return ;
+            }), */
+            // 'recu' => new ActionRender(fn () => $etat == 'solde'),
+        ];
+
+
+        $hasActions = false;
+
+        foreach ($renders as $_ => $cb) {
+            if ($cb->execute()) {
+                $hasActions = true;
+                break;
+            }
+        }
+
+        if ($hasActions) {
+            $table->add('id', TextColumn::class, [
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Inscription $context) use ($renders) {
+                    $options = [
+                        'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
+                        'target' => '#modal-lg',
+
+                        'actions' => [
+                            'recu' => [
+                                'url' => $this->generateUrl('default_print_iframe', [
+                                    'r' => 'app_comptabilite_inscription_print',
+                                    'params' => [
+                                        'id' => $value,
+                                    ]
+                                ]),
+                                'ajax' => true,
+                                'target' =>  '#exampleModalSizeSm2',
+                                'icon' => '%icon% bi bi-printer',
+                                'attrs' => ['class' => 'btn-main btn-stack']
+                                //, 'render' => new ActionRender(fn() => $source || $etat != 'cree')
+                            ],
+                            'payer' => [
+                                'target' => '#exampleModalSizeSm2',
+                                'url' => $this->generateUrl('app_inscription_inscription_paiement_ok', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-cash',
+                                'attrs' => ['class' => 'btn-warning'],
+                                'render' => $renders['payer']
+                            ],
+
+                            'edit_etudiant' => [
+                                'url' => $this->generateUrl('app_inscription_inscription_etudiant_edit', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-pen',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['edit_etudiant']
+                            ],
+                            'edit' => [
+                                'url' => $this->generateUrl('app_inscription_inscription_edit', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-pen',
+                                'attrs' => ['class' => 'btn-main'],
+                                'render' => $renders['edit']
+                            ],
+                            'delete' => [
+                                'target' => '#modal-small',
+                                'url' => $this->generateUrl('app_inscription_inscription_delete', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-trash',
+                                'attrs' => ['class' => 'btn-danger'],
+                                'render' => $renders['delete']
+                            ]
+                        ]
+
+                    ];
+                    return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
+                }
+            ]);
+        }
+
+
+        $table->handleRequest($request);
+
+        if ($table->isCallback()) {
+            return $table->getResponse();
+        }
+
+
+        return $this->render('inscription/inscription/index_frais.html.twig', [
+            'datatable' => $table,
+            'etat' => $etat
         ]);
     }
 }
