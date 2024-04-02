@@ -64,7 +64,13 @@ class HomeController extends AbstractController
                 'href' => $this->generateUrl('app_inscription_inscription_list_ls', ['etat' => 'echeance_soumis'])
             ],
             [
-                'label' => 'Dossiers en cours de paiement',
+                'label' => 'Affectation classe',
+                'icon' => 'bi bi-list',
+                'module' => 'classe',
+                'href' => $this->generateUrl('app_inscription_inscription_list_ls', ['etat' => 'valide_classe'])
+            ],
+            [
+                'label' => 'Liste étudiants inscrits',
                 'icon' => 'bi bi-list',
                 'module' => 'gestion',
                 'href' => $this->generateUrl('app_inscription_inscription_list_ls', ['etat' => 'valide'])

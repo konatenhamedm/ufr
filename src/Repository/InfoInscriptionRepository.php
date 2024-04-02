@@ -38,6 +38,19 @@ class InfoInscriptionRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    public function getMontantInfoInscription($inscription)
+    {
+        return $this->createQueryBuilder('p')
+            ->select("SUM(p.montant)")
+            ->innerJoin('p.modePaiement', 'u')
+            ->innerJoin('p.inscription', 'i')
+            ->andWhere('i = :inscription')
+            ->andWhere('p.etat = :etat')
+            ->setParameter('etat', 'payer')
+            ->setParameter('inscription', $inscription)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
     public function getDataPaiementEffectue($id)
     {
         return $this->createQueryBuilder('e')

@@ -50,8 +50,7 @@ class InfoInscription
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $code = null;
 
-    #[ORM\ManyToOne(inversedBy: 'infoInscriptions')]
-    private ?Echeancier $echenacier = null;
+
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $etat = null;
@@ -168,17 +167,7 @@ class InfoInscription
         return $this;
     }
 
-    public function getEchenacier(): ?Echeancier
-    {
-        return $this->echenacier;
-    }
 
-    public function setEchenacier(?Echeancier $echenacier): static
-    {
-        $this->echenacier = $echenacier;
-
-        return $this;
-    }
 
     public function getEtat(): ?string
     {

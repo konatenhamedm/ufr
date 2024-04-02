@@ -47,7 +47,7 @@ $(function () {
 
             $select.each(function() {
                 const $this = $(this);
-                init_select2($this, null, '#exampleModalSizeSm2');
+                init_select2($this, null, '#edocument');
                 if ($this.hasClass('select-type')) {
                     let field_str = $this.find('option:selected').attr('data-require-fields');
                     const $parent = $this.closest('.row-colonne_document');
@@ -78,7 +78,7 @@ $(function () {
             .replace(new RegExp(name, 'g'), index));
 
 
-        init_select2($prototype.find('select'), null, '#exampleModalSizeSm2');
+        init_select2($prototype.find('select'), null);
 
 
         // On ajoute au prototype un lien pour pouvoir supprimer la prestation
@@ -87,6 +87,12 @@ $(function () {
         $container.prepend($prototype);
 
         index++;
+        $prototype.find("select").each(function () {
+            const $this = $(this);
+                /* init_select2('select2', null, '#edocument'); */
+                init_select2('select', null);
+            });
+
     }
 
 

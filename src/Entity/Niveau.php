@@ -26,7 +26,7 @@ class Niveau
     #[Assert\NotBlank(message: 'Veuillez renseigner un code')]
     private ?string $code = null;
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 150)]
     #[Assert\NotBlank(message: 'Veuillez renseigner un libellé')]
     private ?string $libelle = null;
 

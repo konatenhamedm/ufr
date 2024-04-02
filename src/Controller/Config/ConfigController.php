@@ -4,6 +4,7 @@
 namespace App\Controller\Config;
 
 use App\Attribute\RoleMethod;
+use App\Entity\Echeancier;
 use App\Entity\InfoInscription;
 use App\Entity\Inscription;
 use App\Form\InscriptionPayementType;
@@ -14,6 +15,7 @@ use App\Repository\InscriptionRepository;
 use App\Repository\NaturePaiementRepository;
 use App\Service\Breadcrumb;
 use App\Service\FormError;
+use App\Service\Service;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -171,7 +173,8 @@ class ConfigController extends AbstractController
         EcheancierRepository $echeancierRepository,
         UserInterface $user,
         NaturePaiementRepository $naturePaiementRepository,
-        InfoInscriptionRepository $infoInscriptionRepository
+        InfoInscriptionRepository $infoInscriptionRepository,
+        Service $service
     ): Response {
         /* $module = $request->query->get('module');
         $modules = [
@@ -211,98 +214,57 @@ class ConfigController extends AbstractController
 
             $workflow_data = $this->workflow->get($inscription, 'inscription');
 
-            $echeanciers = $echeancierRepository->findAllEcheance($inscription->getId());
+            $echeanciers  = $echeancierRepository->findAllEcheance($inscription->getId());
             $date = $form->get('datePaiement')->getData();
             $mode =   $mode = $naturePaiementRepository->find($form->get('modePaiement')->getData()->getId());
-
             $montant = (int) $form->get('montant')->getData();
+            $sommeTotal = (int) $infoInscriptionRepository->getMontantInfoInscription($inscription);
 
-            //dd($inscription->getId());
+            $all_data = [
 
+                'echeanciers' => $echeanciers,
+                'date' => $date,
+                'modePaiement' => $mode,
+                'montant' => $montant,
+                'numeroCheque' => $form->get('numeroCheque')->getData(),
+                'banque' => $form->get('banque')->getData(),
+                'contact' => $form->get('contact')->getData(),
+                'dateCheque' => $form->get('dateCheque')->getData()
+            ];
 
 
             if ($form->isValid()) {
 
-                $last_key = count($echeanciers);
-                $i = 1;
-
-
-
-                foreach ($echeanciers as $key => $echeancier) {
-
-                    //  dd($montant, $echeancier->getMontant());
-                    if ($montant >= (int)$echeancier->getMontant()) {
-
-                        $paiement = new InfoInscription();
-
-                        $paiement->setUtilisateur($this->getUser());
-                        $paiement->setCode($inscription->getCode());
-                        $paiement->setDateValidation(new \DateTime());
-                        $paiement->setInscription($inscription);
-                        $paiement->setDatePaiement($date);
-                        $paiement->setCaissiere($this->getUser());
-                        $paiement->setModePaiement($mode);
-                        $paiement->setMontant($echeancier->getMontant());
-                        $paiement->setEchenacier($echeancier);
-                        if ($mode->getCode() == 'CHQ') {
-
-                            $paiement->setNumeroCheque($form->get('numeroCheque')->getData());
-                            $paiement->setBanque($form->get('banque')->getData());
-                            $paiement->setTireur($form->get('tireur')->getData());
-                            $paiement->setContact($form->get('contact')->getData());
-                            $paiement->setDateCheque($form->get('dateCheque')->getData());
-                        }
-
-
-                        if ($mode->isConfirmation()) {
-
-                            $paiement->setEtat('attente_confirmation');
-                        } else {
-
-                            $paiement->setEtat('payer');
-                        }
-
-
-                        $entityManager->persist($paiement);
-                        $entityManager->flush();
-
-                        if ($mode->isConfirmation()) {
-
-                            $echeancier->setEtat('attente_confirmation');
-                        } else {
-
-                            $echeancier->setEtat('payer');
-                        }
-                        $entityManager->persist($echeancier);
-                        $entityManager->flush();
-
-
-
-                        $montant = $montant - $echeancier->getMontant();
-                        if (!$mode->isConfirmation()) {
-
-                            $inscription->setTotalPaye($inscription->getTotalPaye() + $echeancier->getMontant());
-                        }
-
-                        $entityManager->persist($inscription);
-                        $entityManager->flush();
-
-                        if ($i == $last_key) {
-
-                            if ($montant >= 0) {
-
-                                if ($inscription->getMontant() == $inscription->getTotalPaye()) {
-
-                                    $inscription->setEtat('solde');
-                                }
-                            }
-                        }
-
-                        //$message       = sprintf('Opération effectuée avec succès');
-                    }
-
-                    $i++;
+                $paiement = new InfoInscription();
+                $paiement->setUtilisateur($this->getUser());
+                $paiement->setCode($inscription->getCode());
+                $paiement->setDateValidation(new \DateTime());
+                $paiement->setInscription($inscription);
+                $paiement->setDatePaiement($all_data['date']);
+                $paiement->setCaissiere($this->getUser());
+                $paiement->setModePaiement($all_data['modePaiement']);
+                $paiement->setMontant($all_data['montant']);
+                // $paiement->setEchenacier($echeancier);
+                if ($all_data['modePaiement']->getCode() == 'CHQ') {
+                    $paiement->setNumeroCheque($all_data['numeroCheque']);
+                    $paiement->setBanque($all_data['banque']);
+                    $paiement->setTireur($all_data['tireur']);
+                    $paiement->setContact($all_data['contact']);
+                    $paiement->setDateCheque($all_data['dateCheque']);
                 }
+                if ($all_data['modePaiement']->isConfirmation()) {
+                    $paiement->setEtat('attente_confirmation');
+                } else {
+                    $paiement->setEtat('payer');
+                }
+
+                $entityManager->persist($paiement);
+                $entityManager->flush();
+
+                $sommeTotal = (int) $infoInscriptionRepository->getMontantInfoInscription($inscription);
+
+                $service->paiementInscriptionNew($inscription, $sommeTotal, $all_data);
+
                 $message       = sprintf('Opération effectuée avec succès');
                 if ($inscription->getMontant() == $inscription->getTotalPaye()) {
                     $statut = 1;

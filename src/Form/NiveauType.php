@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -19,7 +20,7 @@ class NiveauType extends AbstractType
     {
         $builder
             ->add('code', null, ['label' => 'Code'])
-            ->add('libelle', null, ['label' => 'Libellé'])
+            ->add('libelle', TextType::class, ['label' => 'Libellé'])
             ->add('filiere', EntityType::class, [
                 'class' => Filiere::class,
                 'required' => false,

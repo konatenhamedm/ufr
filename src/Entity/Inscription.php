@@ -62,6 +62,9 @@ class Inscription
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $totalPaye = null;
 
+    #[ORM\ManyToOne(inversedBy: 'inscriptions')]
+    private ?Classe $classe = null;
+
     public function __construct()
     {
         $this->fraisInscriptions = new ArrayCollection();
@@ -308,6 +311,18 @@ class Inscription
     public function setTotalPaye(?string $totalPaye): static
     {
         $this->totalPaye = $totalPaye;
+
+        return $this;
+    }
+
+    public function getClasse(): ?Classe
+    {
+        return $this->classe;
+    }
+
+    public function setClasse(?Classe $classe): static
+    {
+        $this->classe = $classe;
 
         return $this;
     }

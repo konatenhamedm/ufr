@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\Annotation\Groups as Group;
 #[ORM\Entity(repositoryClass: FichierRepository::class)]
 #[Table(name: 'param_fichier')]
 #[ORM\HasLifecycleCallbacks]
-class Fichier
+class Fichier implements \Serializable
 {
 
     const DEFAULT_MIME_TYPES = [
@@ -54,6 +54,18 @@ class Fichier
 
 
     private ?string $verifieIfeditEmployeDocument = null;
+
+    public function serialize()
+    {
+        // return serialize([/* Toutes les propriétés de la classe sauf file */$this->id, $this->url, $this->size etc...]);
+        return serialize([$this->id, $this->url, $this->size, $this->alt, $this->dateCreation, $this->path]);
+    }
+
+    public function unserialize(string $data)
+    {
+        //[/* Toutes les propriétés de la classe sauf $this->file */$this->id, $this->url, $this->size etc..] = unserialize($data);
+        [$this->id, $this->url, $this->size, $this->alt, $this->dateCreation, $this->path] = unserialize($data);
+    }
 
     /**
      * @return string|null

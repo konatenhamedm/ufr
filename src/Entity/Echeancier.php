@@ -28,13 +28,12 @@ class Echeancier
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $etat = null;
 
-    #[ORM\OneToMany(mappedBy: 'echenacier', targetEntity: InfoInscription::class)]
-    private Collection $infoInscriptions;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $totaPayer = null;
 
     public function __construct()
     {
         $this->etat = "pas_payer";
-        $this->infoInscriptions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -90,32 +89,16 @@ class Echeancier
         return $this;
     }
 
-    /**
-     * @return Collection<int, InfoInscription>
-     */
-    public function getInfoInscriptions(): Collection
+
+
+    public function getTotaPayer(): ?string
     {
-        return $this->infoInscriptions;
+        return $this->totaPayer;
     }
 
-    public function addInfoInscription(InfoInscription $infoInscription): static
+    public function setTotaPayer(?string $totaPayer): static
     {
-        if (!$this->infoInscriptions->contains($infoInscription)) {
-            $this->infoInscriptions->add($infoInscription);
-            $infoInscription->setEchenacier($this);
-        }
-
-        return $this;
-    }
-
-    public function removeInfoInscription(InfoInscription $infoInscription): static
-    {
-        if ($this->infoInscriptions->removeElement($infoInscription)) {
-            // set the owning side to null (unless already changed)
-            if ($infoInscription->getEchenacier() === $this) {
-                $infoInscription->setEchenacier(null);
-            }
-        }
+        $this->totaPayer = $totaPayer;
 
         return $this;
     }

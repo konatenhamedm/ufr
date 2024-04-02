@@ -39,7 +39,7 @@ class ConfigMenuBuilder
             $menu->addChild('parametre.index', ['route' => 'app_parametre_dashboard_index', 'label' => 'Paramètres'])->setExtra('icon', 'bi bi-gear')->setExtra('role', 'ROLE_SECRETAIRE');
             $menu->addChild('personne.index', ['route' => 'app_utilisateur_personne_index', 'label' => 'Personnels'])->setExtra('icon', 'bi bi-person')->setExtra('role', 'ROLE_SECRETAIRE');
             $menu->addChild('groupe.index', ['route' => 'app_utilisateur_groupe_index', 'label' => 'Groupes'])->setExtra('icon', 'bi bi-people-fill')->setExtra('role', 'ROLE_SECRETAIRE');
-            $menu->addChild('utilisateur.index', ['route' => 'app_utilisateur_utilisateur_index', 'label' => 'Utilisateurs'])->setExtra('icon', 'bi bi-person-fill')->setExtra('role', 'ROLE_SECRETAIRE');
+            $menu->addChild('utilisateur.index', ['route' => 'app_config_utilisateur_index', 'label' => 'Utilisateurs'])->setExtra('icon', 'bi bi-person-fill')->setExtra('role', 'ROLE_SECRETAIRE');
         }
 
         return $menu;

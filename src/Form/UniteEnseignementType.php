@@ -48,7 +48,7 @@ class UniteEnseignementType extends AbstractType
             ])
             ->add('niveau', EntityType::class, [
                 'class' => Niveau::class,
-                'choice_label' => 'libelle',
+                'choice_label' => 'code',
                 'label_attr' => ['class' => 'label-required'],
                 'attr' => ['class' => 'niveau has-select2 '],
                 'query_builder' => function (EntityRepository $er) {

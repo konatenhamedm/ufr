@@ -133,11 +133,11 @@ class DashboardController extends AbstractController
                     'href' => $this->generateUrl('app_parametre_matiere_index')
                 ],
 
-                [
+                /*  [
                     'label' => 'Enseignants par matière',
                     'id' => 'param_em',
                     'href' => $this->generateUrl('app_parametre_cours_index')
-                ],
+                ], */
                 [
                     'label' => "Unité d'enseigenement",
                     'id' => 'param_ue',

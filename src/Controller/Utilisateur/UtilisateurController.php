@@ -24,14 +24,17 @@ use Omines\DataTablesBundle\Column\DateTimeColumn;
 use Omines\DataTablesBundle\Adapter\Doctrine\ORMAdapter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[Route('/admin/utilisateur/utilisateur')]
 #[Module(name: 'config')]
 class UtilisateurController extends AbstractController
 {
-    #[Route('/', name: 'app_utilisateur_utilisateur_index', methods: ['GET', 'POST'])]
-    public function index(Request $request, DataTableFactory $dataTableFactory): Response
+    #[Route('/{role}', name: 'app_utilisateur_utilisateur_index', methods: ['GET', 'POST'])]
+    public function index(Request $request, DataTableFactory $dataTableFactory, $role, UserInterface $user): Response
     {
+
+        $isEtudiant = $this->isGranted($role);
         $table = $dataTableFactory->create()
             ->add('username', TextColumn::class, ['label' => 'Pseudo'])
             //->add('email', TextColumn::class, ['label' => 'Email', 'field' => 'e.adresseMail'])
@@ -40,14 +43,23 @@ class UtilisateurController extends AbstractController
             ->add('fonction', TextColumn::class, ['label' => 'Fonction', 'field' => 'f.libelle'])
             ->createAdapter(ORMAdapter::class, [
                 'entity' => Utilisateur::class,
-                'query' => function (QueryBuilder $qb) {
-                    $qb->select('u, e, f')
+                'query' => function (QueryBuilder $qb) use ($role) {
+                    $qb->select('u, e, f,fonction')
                         ->from(Utilisateur::class, 'u')
                         ->join('u.personne', 'e')
+                        ->join('e.fonction', 'fonction')
                         ->join('e.fonction', 'f');
+
+                    if ($role == 'etudiant') {
+                        $qb->where('fonction.code = :etudiant');
+                        $qb->setParameter('etudiant', 'ETD');
+                    } else {
+                        $qb->where('fonction.code != :etudiant');
+                        $qb->setParameter('etudiant', 'ETD');
+                    }
                 }
             ])
-            ->setName('dt_app_utilisateur_utilisateur');
+            ->setName('dt_app_utilisateur_utilisateur' . $role);
 
         $renders = [
             'edit' =>  new ActionRender(function () {
@@ -100,7 +112,8 @@ class UtilisateurController extends AbstractController
 
 
         return $this->render('utilisateur/utilisateur/index.html.twig', [
-            'datatable' => $table
+            'datatable' => $table,
+            'role' => $role
         ]);
     }
 
