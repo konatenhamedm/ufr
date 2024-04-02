@@ -132,6 +132,11 @@ class Etudiant extends Personne
     #[ORM\Column(length: 255)]
     private ?string $statutEtudiant = null;
 
+    public function getNoms()
+    {
+        return $this->getNom();
+    }
+
 
     public function __construct()
     {

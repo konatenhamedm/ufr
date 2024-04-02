@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\NoteRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: NoteRepository::class)]
@@ -24,6 +26,14 @@ class Note
 
     #[ORM\Column(length: 255)]
     private ?string $MoyenneMatiere = null;
+
+    #[ORM\OneToMany(mappedBy: 'noteEntity', targetEntity: ValeurNote::class)]
+    private Collection $valeurNotes;
+
+    public function __construct()
+    {
+        $this->valeurNotes = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -74,6 +84,36 @@ class Note
     public function setMoyenneMatiere(string $MoyenneMatiere): static
     {
         $this->MoyenneMatiere = $MoyenneMatiere;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ValeurNote>
+     */
+    public function getValeurNotes(): Collection
+    {
+        return $this->valeurNotes;
+    }
+
+    public function addValeurNote(ValeurNote $valeurNote): static
+    {
+        if (!$this->valeurNotes->contains($valeurNote)) {
+            $this->valeurNotes->add($valeurNote);
+            $valeurNote->setNoteEntity($this);
+        }
+
+        return $this;
+    }
+
+    public function removeValeurNote(ValeurNote $valeurNote): static
+    {
+        if ($this->valeurNotes->removeElement($valeurNote)) {
+            // set the owning side to null (unless already changed)
+            if ($valeurNote->getNoteEntity() === $this) {
+                $valeurNote->setNoteEntity(null);
+            }
+        }
 
         return $this;
     }

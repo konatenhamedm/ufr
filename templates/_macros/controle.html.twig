@@ -1,0 +1,62 @@
+
+
+{% macro prototype_ligne_controle(form) %}
+    <div class="proto-container" data-prototype="{{ _self.ligne_controle(form.notes.vars.prototype)|e }}"></div>
+    <button type="button" data-protoname="__name__" class="btn btn-default add-collection add-ligne btn-xs" id="add_ligne" data-protoclass=".proto-container" data-container=".row-container">
+        <i class="fa fa-plus"></i>
+        Ajouter une ligne
+    </button>
+    <table class="table table-bordered table-custom">
+        <thead class="thead-dark">
+              <tr>
+                <th width="20%" class="p-2">Etudiant</th>
+                <th width="" class="p-2"></th>
+                <th width="5%" class="p-2">Moy</th>
+                <th width="5%" class="p-2">Rang</th>
+            </tr>
+        </thead>
+        <tbody  class="row-container">
+            {% for item in form.notes %}
+                {{ _self.ligne_controle(item|e) }}
+
+                {# {% for item2 in form.notes.valeurNotes %}
+                    dd
+                {% endfor %} #}
+            {% endfor %}
+        </tbody>
+    </table>
+    
+{% endmacro %}
+
+{% macro ligne_controle(data) %}
+   
+    <tr class="row-colonne even pointer table-light">
+         <td class="p-2">{# {{ form_widget(data.etudiant) }} #}
+
+       {#   {{ dump(data.etudiant.vars.data)}} #}
+         {# {{ data.etudiant.vars.data.etudiant.nom }} #}
+         {{ data.etudiant.vars.data.adresse }}
+            <div style="display:none">{{ form_widget(data.etudiant) }}</div>
+         </td>
+         
+          <td class="p-2">
+         
+           
+           {# {% for item in data.valeurNotes %}
+               ddd
+            {% endfor %} #}
+
+
+          
+          </td>
+           <td class="p-2">
+            {# {{ data.MoyenneMatiere }} #}
+            <div style="display:none">{{ form_widget(data.MoyenneMatiere) }}</div>
+          {#  {{ form_widget(data.MoyenneMatiere) }}
+            #}
+           </td>
+           <td class="p-2"></td>
+        
+    </tr>
+{% endmacro %}
+

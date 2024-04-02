@@ -152,6 +152,8 @@ class Controle
         return $this;
     }
 
+
+
     public function removeNote(Note $note): static
     {
         if ($this->notes->removeElement($note)) {
