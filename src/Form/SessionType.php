@@ -14,12 +14,11 @@ class SessionType extends AbstractType
     {
         $builder
             ->add('libelle')
-            ->add('dateSession', DateType::class, [
-                'required' => true,
-                'mapped' => false,
+            ->add('dateSession',  DateType::class, [
                 'widget' => 'single_text',
-                'label'   => 'Date de paiement',
+                'label'   => 'Date session',
                 'format'  => 'dd/MM/yyyy',
+                'empty_data' => '',
                 'html5' => false,
                 'attr'    => ['autocomplete' => 'off', 'class' => 'datepicker no-auto'],
             ]);

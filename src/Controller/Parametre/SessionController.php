@@ -26,7 +26,7 @@ class SessionController extends AbstractController
     {
         $table = $dataTableFactory->create()
             ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
-            ->add('dateSession', DateTimeColumn::class, ['label' => 'Date session'])
+            ->add('dateSession', DateTimeColumn::class, ['label' => 'Date session', 'format' => 'd-m-Y'])
             ->createAdapter(ORMAdapter::class, [
                 'entity' => Session::class,
             ])
