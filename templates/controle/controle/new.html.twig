@@ -12,15 +12,20 @@
         </div>
     </div>
     {{ form_start(form, {'attr': {'role':'form', 'class': 'form'}}) }}
-    {% from '_macros/controle.html.twig' import prototype_ligne_controle %}
+    {% from '_macros/controle_new.html.twig' import prototype_ligne_controle %}
     <div class="modal-body">
         {{ include('_includes/ajax/response.html.twig') }}
           <div class="row">
-            <div class="col-md-3">{{ form_row(form.semestre) }}</div>
-            <div class="col-md-9">{{ form_row(form.type) }}</div>
+            <div class="col-md-4">{{ form_row(form.semestre) }}</div>
+            <div class="col-md-4">{{ form_row(form.classe) }}</div>
+            <div class="col-md-4">{{ form_row(form.session) }}</div>
+            <div class="col-md-4">{{ form_row(form.matiere) }}</div>
+           {#  <div class="col-md-9">{{ form_row(form.type) }}</div> #}
         </div> 
         <br>
-         {{ prototype_ligne_controle(form) }}
+        <div id="form-content">
+          {{ prototype_ligne_controle(form,nombre) }}
+        </div>
     </div>
     <div class="modal-footer">
         {# {{ include('_includes/ajax/loader.html.twig') }} #}
@@ -35,10 +40,30 @@
     <script>
         $(function () {
             init_select2('select',null,'#exampleModalSizeSm2');
+            
         });
+
+        function refresh() {
+        let index = 0
+        $('.row-colonne-row').each(function () {
+            index++;
+            $(this).attr('data-numberKey', index)
+            $(this).find('.numero:first').val(index);
+        })
+    }
+        function refreshColone() {
+        let index = 0
+        $('.row-type').each(function () {
+            index++;
+            $(this).attr('data-numberKey', index)
+            $(this).find('.numero:first').val(index);
+        })
+    }
 
 
          $(function () {
+            refresh();
+            refreshColone();
             //init_select2('select');
              $('.no-auto').each(function () {
                 const $this = $(this);
@@ -58,15 +83,17 @@
             const $container = $('.row-container');
 
             var index = $container.find('.row-colonne').length;
+            var nombre_note = 1;
+            var nombre_note_groupe = 1;
 
             const $addLink = $('.add-ligne');
 
         
             $addLink.click(function (e) {
-
+            
                 addLine($container);
-
                 e.preventDefault(); // évite qu'un # apparaisse dans l'URL
+                refreshColone();
             });
         // On ajoute un premier champ automatiquement s'il n'en existe pas déjà un (cas d'une nouvelle annonce par exemple).
         /*if (index == 0) {
@@ -78,11 +105,11 @@
                     addDeleteLink($this);
                     $this.find("select").each(function () {
                         const $this = $(this);
-                        init_select2($this, null, '#modal-lg');
+                        init_select2($this, null, '#exampleModalSizeSm2');
                     });
                 });
             }
-
+       
         // La fonction qui ajoute un formulaire Categorie
             function addLine($container) {
             // Dans le contenu de l'attribut « data-prototype », on remplace :
@@ -93,14 +120,94 @@
                 // On ajoute au prototype un lien pour pouvoir supprimer la prestation
                 addDeleteLink($prototype);
                 // On ajoute le prototype modifié à la fin de la balise <div>
-                $container.append($prototype);
+               // $container.append($prototype);
+             //alert(__name__)
+
+                nombre_note++;
+                nombre_note_groupe++;
+
+                
+                $('#tutorial').find('.ligne').each(function(){ 
+                     // const $this = $(this);
+                        
+                    var index_note = $(this).find('.numero').val()-1;
+                    var index_note_value = $(this).find('.numero').val();
+
+                   // $(this).find('.source').eq(-3).after('<td width="10%" class="p-2">ffff</td>'); 
+                    $(this).find('th').eq(-3).after('<th width="10%" class="p-2">Note '+nombre_note+'</th>'); 
+                    $(this).find('td').eq(-3).after('<td class="p-2 row-colonne"><input class="form-control form-control-sm " type="text" id="controle_notes_'+index_note+'_valeurNotes_'+index_note_value+'_note" name="controle[notes]['+index_note+'][valeurNotes]['+index_note_value+'][note]" required="required" maxlength="255" value="0"></td>');
+                });
+                $('#tutorial').find('.ligne_head').each(function(){ 
+                   
+                    var index_note = $(this).find('.numero').val()-1;
+                    var index_note_value = $(this).find('.numero').val();
+
+                   // $(this).find('.source').eq(-3).after('<td width="10%" class="p-2">ffff</td>'); 
+                    //$(this).find('th').eq(-3).after('<th width="10%" class="p-2">Note '+nombre_note+'</th>'); 
+                    $(this).find('th').eq(-3).after(`<th class="p-2  row-colonne" style="background-color:white !important" data-select2-id="select2-data-${nombre_note_groupe}-ebse"> 
+						   <table width="100%">
+							<tbody>
+                            <tr>
+                                <td>
+                            <div class="input-group">
+                                <input class="form-control form-control-sm  datepicker no-auto" type="text" id="controle_groupeTypes_${nombre_note_groupe}_dateNote" name="controle[groupeTypes][${nombre_note_groupe}][dateNote]" required="required" autocomplete="off">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">
+                                        <span class="far fa-calendar"></span>
+                                    </span>
+                                </div>
+                            </div>
+                                </td>
+                            </tr>
+                             <tr>
+                                <td>
+                               <select  class="form-control form-control-sm has-select2 select2-hidden-accessible" id="controle_groupeTypes_${nombre_note_groupe}_type" name="controle[groupeTypes][${nombre_note_groupe}][type]" required="required" tabindex="-1" aria-hidden="true" >
+                               <option value="1" selected="selected"  data-select2-id="select2-data-16283-qrxgdd">DS</option>
+                               <option value="2" data-select2-id="select2-data-16283-qrxgsx">TP</option>
+                               <option value="3" data-select2-id="select2-data-16283-qrxg88">TD</option>
+                               <option value="4" data-select2-id="select2-data-16283-qrxg22">ORAL</option>
+                               <option value="5" data-select2-id="select2-data-16283-qrxgll">EXPOSE</option>
+                               </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td >
+                                   <select class="form-control form-control-sm has-select2 select2-hidden-accessible" id="controle_groupeTypes_${nombre_note_groupe}_coef" name="controle[groupeTypes][${nombre_note_groupe}][coef]" required="required" tabindex="-1" aria-hidden="true" >
+                                   <option value="20" data-select2-id="select2-data-20008-yq4g55">20</option>
+                                   <option value="10" selected="selected" data-select2-id="select2-data-20009-wthh00">10</option>
+                                   </select>
+                                 </td>
+							</tr>
+							
+						</tbody>
+                    </table>
+					
+					 </th>`);
+                    
+
+                     $('.no-auto').each(function () {
+                            const $this = $(this);
+                            const $id = $('#' + $this.attr('id'));
+                            init_date_picker($id,  'down', (start, e) => {
+                                //$this.val(start.format('DD/MM/YYYY'));
+                            }, null, null, false);
+
+                            $id.on('apply.daterangepicker', function (ev, picker) {
+                                $(this).val(picker.startDate.format('DD/MM/YYYY'));
+                            });
+                     });
+                });
+
+               init_select2('select', null, '#exampleModalSizeSm2');
 
                 $prototype.find("select").each(function () {
                 const $this = $(this);
-                    init_select2($this, null, '#modal-lg');
+                    init_select2($this, null, '#exampleModalSizeSm2');
+                     
                 });
 
-                $prototype.find('.field-matiere').css('display', 'block');
+      
+                //$prototype.find('.field-matiere').css('display', 'block');
 
             
                 index++;
@@ -129,6 +236,41 @@
                     e.preventDefault(); // évite qu'un # apparaisse dans l'URL
                 });
             }
+ const $semestre = $('#{{ form.semestre.vars.id }}');
+
+             function load_content(url) {
+                //alert('');
+                const $form_content = $(`#form-content`);
+                //const $form_content1 = $(`#${key-1}`);
+               
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    dataType: 'html',
+                    beforeSend: function () {
+                        
+                        $form_content.html(`<div class="d-flex align-items-center">
+                                    <strong>Chargement des données de l'étape</strong>
+                                    <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+                                    </div>`);
+                    },
+                    success: function (html) {
+                        
+                        $form_content.html(html);
+                    },
+                   
+                    error: function () {
+                        $form_content.html('<div class="text-center text-danger">Une erreur est survenue...</div>');
+                    }
+                })
+            }
+
+              $semestre.on('change', function () {
+                url = "/admin/controle/controle/new/load";
+                   load_content(url)
+
+               
+              });
 
         });
        

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Controle;
+use App\Entity\Cours;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -21,28 +22,43 @@ class ControleRepository extends ServiceEntityRepository
         parent::__construct($registry, Controle::class);
     }
 
-//    /**
-//     * @return Controle[] Returns an array of Controle objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('c.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function getMatiere($cours, $annee): ?Controle
+    {
+        return $this->createQueryBuilder('c')
+            ->join('c.cour', 'cours')
+            ->join('cours.anneeScolaire', 'a')
+            ->leftJoin('c.semestre', 's')
+            ->join('s.anneeScolaire', 'sa')
+            ->andWhere('cours.id = :cours')
+            ->andWhere('sa = :annee')
+            ->setParameter('cours', 3)
+            ->setParameter('annee', 1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 
-//    public function findOneBySomeField($value): ?Controle
-//    {
-//        return $this->createQueryBuilder('c')
-//            ->andWhere('c.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    //    /**
+    //     * @return Controle[] Returns an array of Controle objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('c')
+    //            ->andWhere('c.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('c.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
+
+    //    public function findOneBySomeField($value): ?Controle
+    //    {
+    //        return $this->createQueryBuilder('c')
+    //            ->andWhere('c.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
 }

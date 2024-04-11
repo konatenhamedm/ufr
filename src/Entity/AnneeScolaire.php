@@ -42,12 +42,16 @@ class AnneeScolaire
     #[ORM\OneToMany(mappedBy: 'anneeScolaire', targetEntity: Classe::class)]
     private Collection $classes;
 
+    #[ORM\OneToMany(mappedBy: 'anneeScolaire', targetEntity: Controle::class)]
+    private Collection $controles;
+
 
     public function __construct()
     {
         $this->semestres = new ArrayCollection();
         $this->cours = new ArrayCollection();
         $this->classes = new ArrayCollection();
+        $this->controles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -201,6 +205,36 @@ class AnneeScolaire
             // set the owning side to null (unless already changed)
             if ($class->getAnneeScolaire() === $this) {
                 $class->setAnneeScolaire(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Controle>
+     */
+    public function getControles(): Collection
+    {
+        return $this->controles;
+    }
+
+    public function addControle(Controle $controle): static
+    {
+        if (!$this->controles->contains($controle)) {
+            $this->controles->add($controle);
+            $controle->setAnneeScolaire($this);
+        }
+
+        return $this;
+    }
+
+    public function removeControle(Controle $controle): static
+    {
+        if ($this->controles->removeElement($controle)) {
+            // set the owning side to null (unless already changed)
+            if ($controle->getAnneeScolaire() === $this) {
+                $controle->setAnneeScolaire(null);
             }
         }
 

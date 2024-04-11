@@ -47,11 +47,15 @@ class Matiere
     #[ORM\OneToMany(mappedBy: 'matiere', targetEntity: MoyenneMatiere::class)]
     private Collection $moyenneMatieres;
 
+    #[ORM\OneToMany(mappedBy: 'matiere', targetEntity: Controle::class)]
+    private Collection $controles;
+
     public function __construct()
     {
         $this->cours = new ArrayCollection();
         $this->matiereUes = new ArrayCollection();
         $this->moyenneMatieres = new ArrayCollection();
+        $this->controles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -191,6 +195,36 @@ class Matiere
             // set the owning side to null (unless already changed)
             if ($moyenneMatiere->getMatiere() === $this) {
                 $moyenneMatiere->setMatiere(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Controle>
+     */
+    public function getControles(): Collection
+    {
+        return $this->controles;
+    }
+
+    public function addControle(Controle $controle): static
+    {
+        if (!$this->controles->contains($controle)) {
+            $this->controles->add($controle);
+            $controle->setMatiere($this);
+        }
+
+        return $this;
+    }
+
+    public function removeControle(Controle $controle): static
+    {
+        if ($this->controles->removeElement($controle)) {
+            // set the owning side to null (unless already changed)
+            if ($controle->getMatiere() === $this) {
+                $controle->setMatiere(null);
             }
         }
 

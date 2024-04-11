@@ -36,7 +36,11 @@ class EvaluationMenuBuilder
         }
 
         if (isset($menu[self::MODULE_NAME])) {
-            $menu->addChild('controle.index', ['route' => 'app_controle_controle_index', 'label' => 'Saisie des notes'])->setExtra('icon', 'bi bi-gear')->setExtra('role', 'ROLE_SECRETAIRE');
+            $menu->addChild('saisie.index', ['route' => 'app_controle_controle_new_saisie_simple', 'label' => 'Saisie des notes'])->setExtra('icon', 'bi bi-gear')->setExtra('role', 'ROLE_SECRETAIRE');
+            $menu->addChild('session.index', ['route' => 'app_parametre_session_index', 'label' => 'Sessions'])->setExtra('icon', 'bi bi-gear')->setExtra('role', 'ROLE_SECRETAIRE');
+            $menu->addChild('type.index', ['route' => 'app_controle_type_controle_index', 'label' => 'Type de Controles'])->setExtra('icon', 'bi bi-gear')->setExtra('role', 'ROLE_SECRETAIRE');
+            //$menu->addChild('controle.index', ['route' => 'app_controle_controle_index', 'label' => 'Saisie des notes'])->setExtra('icon', 'bi bi-gear')->setExtra('role', 'ROLE_SECRETAIRE');
+            $menu->addChild('cours.index', ['route' => 'app_controle_cours_index', 'label' => 'Cours'])->setExtra('icon', 'bi bi-gear')->setExtra('role', 'ROLE_SECRETAIRE');
             // $menu->addChild('deliberation.index', ['route' => 'app_direction_deliberation_index', 'label' => 'GESTION DE EXAMENS'])->setExtra('icon', 'bi bi-gear');
         }
 

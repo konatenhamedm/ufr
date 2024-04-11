@@ -6,7 +6,9 @@ use App\Repository\CoursRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
+#[UniqueEntity(fields: ['matiere', 'classe', 'anneeScolaire'], errorPath: 'matiere', message: 'Cette occurence existe deja.')]
 #[ORM\Entity(repositoryClass: CoursRepository::class)]
 class Cours
 {

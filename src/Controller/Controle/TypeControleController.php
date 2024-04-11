@@ -21,14 +21,91 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/admin/controle/type/controle')]
 class TypeControleController extends AbstractController
 {
+
+    function Rangeleve($case, $tab, $Nbr)
+    {
+        $rang = 1;
+        /* for ($i = 1; $i < $Nbr; $i++) {
+            if ($tab[$i] > $tab[$case]) {
+                $rang = $rang + 1;
+            }
+        } */
+
+        foreach ($tab as $key => $value) {
+            if ($value > $tab[$case]) {
+                $rang = $rang + 1;
+            }
+        }
+        return $rang;
+    }
+
+    #[Route('/liste/type/controle', name: 'get_type_controle', methods: ['GET'])]
+    public function getmatiere(Request $request, TypeControleRepository $typeControleRepository)
+    {
+        $response = new Response();
+        $tabTypeContrrole = array();
+
+        $n[1] = 15;
+        $n[2] = 10;
+        $n[3] = 8;
+        $n[4] = 18;
+        $n[5] = 4;
+        $n[6] = 8;
+
+        $array = [
+            6 => 16,
+            3 => 12,
+            26 => 18,
+            31 => 14
+        ];
+
+
+
+        dd($array, $this->Rangeleve(6, $array, count($array)));
+
+        $k = 1;
+
+        /*  while ($k < count($n) + 1) {
+            $ele = $this->Rangeleve($k, $n, count($n) + 1);
+
+            $k++;
+
+            echo $ele . '-' . $n[$k] . '<br>';
+        }
+ */
+
+
+        $typeControles = $typeControleRepository->findAll();
+
+        $i = 0;
+
+        foreach ($typeControles as $e) {
+            // transformer la réponse de la requete en tableau qui remplira le select pour ensembles
+            $tabTypeContrrole[$i]['id'] = $e->getId();
+            $tabTypeContrrole[$i]['libelle'] = $e->getCode();
+
+            $i++;
+        }
+
+        $dataService = json_encode($tabTypeContrrole); // formater le résultat de la requête en json
+
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setContent($dataService);
+
+        return $response;
+    }
+
     #[Route('/', name: 'app_controle_type_controle_index', methods: ['GET', 'POST'])]
     public function index(Request $request, DataTableFactory $dataTableFactory): Response
     {
         $table = $dataTableFactory->create()
-        ->createAdapter(ORMAdapter::class, [
-            'entity' => TypeControle::class,
-        ])
-        ->setName('dt_app_controle_type_controle');
+            ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
+            ->add('code', TextColumn::class, ['label' => 'Code'])
+            ->add('coef', TextColumn::class, ['label' => 'Coefficent'])
+            ->createAdapter(ORMAdapter::class, [
+                'entity' => TypeControle::class,
+            ])
+            ->setName('dt_app_controle_type_controle');
 
         $renders = [
             'edit' =>  new ActionRender(function () {
@@ -51,11 +128,7 @@ class TypeControleController extends AbstractController
 
         if ($hasActions) {
             $table->add('id', TextColumn::class, [
-                'label' => 'Actions'
-                , 'orderable' => false
-                ,'globalSearchable' => false
-                ,'className' => 'grid_row_actions'
-                , 'render' => function ($value, TypeControle $context) use ($renders) {
+                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, TypeControle $context) use ($renders) {
                     $options = [
                         'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
                         'target' => '#modal-lg',
@@ -68,17 +141,17 @@ class TypeControleController extends AbstractController
                                 'icon' => '%icon% bi bi-pen',
                                 'attrs' => ['class' => 'btn-main'],
                                 'render' => $renders['edit']
-                        ],
-                        'delete' => [
-                            'target' => '#modal-small',
-                            'url' => $this->generateUrl('app_controle_type_controle_delete', ['id' => $value]),
-                            'ajax' => true,
-                            'stacked' => false,
-                            'icon' => '%icon% bi bi-trash',
-                            'attrs' => ['class' => 'btn-danger'],
-                            'render' => $renders['delete']
+                            ],
+                            'delete' => [
+                                'target' => '#modal-small',
+                                'url' => $this->generateUrl('app_controle_type_controle_delete', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-trash',
+                                'attrs' => ['class' => 'btn-danger'],
+                                'render' => $renders['delete']
+                            ]
                         ]
-                    ]
 
                     ];
                     return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
@@ -131,28 +204,23 @@ class TypeControleController extends AbstractController
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-
             }
 
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
-
         }
 
         return $this->render('controle/type_controle/new.html.twig', [
@@ -176,7 +244,7 @@ class TypeControleController extends AbstractController
         $form = $this->createForm(TypeControleType::class, $typeControle, [
             'method' => 'POST',
             'action' => $this->generateUrl('app_controle_type_controle_edit', [
-                    'id' =>  $typeControle->getId()
+                'id' =>  $typeControle->getId()
             ])
         ]);
 
@@ -188,7 +256,7 @@ class TypeControleController extends AbstractController
 
         $form->handleRequest($request);
 
-       if ($form->isSubmitted()) {
+        if ($form->isSubmitted()) {
             $response = [];
             $redirect = $this->generateUrl('app_controle_type_controle_index');
 
@@ -204,26 +272,22 @@ class TypeControleController extends AbstractController
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
-
-
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                  $this->addFlash('warning', $message);
+                    $this->addFlash('warning', $message);
                 }
-
             }
 
             if ($isAjax) {
-                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
-
         }
 
         return $this->render('controle/type_controle/edit.html.twig', [
@@ -238,14 +302,14 @@ class TypeControleController extends AbstractController
         $form = $this->createFormBuilder()
             ->setAction(
                 $this->generateUrl(
-                'app_controle_type_controle_delete'
-                ,   [
+                    'app_controle_type_controle_delete',
+                    [
                         'id' => $typeControle->getId()
                     ]
                 )
             )
             ->setMethod('DELETE')
-        ->getForm();
+            ->getForm();
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $data = true;

@@ -30,6 +30,18 @@ class CoursRepository extends ServiceEntityRepository
         }
     }
 
+    public function getMatiere($classe)
+    {
+        return $this->createQueryBuilder('c')
+            ->select('distinct(m.id), m.id,m.libelle')
+            ->join('c.classe', 'classe')
+            ->join('c.matiere', 'm')
+            ->where('classe.id = :classe')
+            ->setParameter('classe', $classe)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Cours[] Returns an array of Cours objects
     //     */

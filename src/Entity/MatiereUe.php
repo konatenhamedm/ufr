@@ -4,8 +4,10 @@ namespace App\Entity;
 
 use App\Repository\MatiereUeRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: MatiereUeRepository::class)]
+#[UniqueEntity(fields: 'matiere', message: 'cette ligne existe deja pour cette matiere')]
 class MatiereUe
 {
     #[ORM\Id]

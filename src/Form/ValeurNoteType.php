@@ -15,11 +15,10 @@ class ValeurNoteType extends AbstractType
     {
         $builder
             ->add('note')
-            ->add('noteEntity', EntityType::class, [
+            /*  ->add('noteEntity', EntityType::class, [
                 'class' => Note::class,
 'choice_label' => 'id',
-            ])
-        ;
+            ]) */;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

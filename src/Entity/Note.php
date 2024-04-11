@@ -22,13 +22,13 @@ class Note
     private ?Etudiant $etudiant = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $note = null;
+    private ?string $moyenneMatiere = null;
+
+    #[ORM\OneToMany(mappedBy: 'noteEntity', targetEntity: ValeurNote::class, orphanRemoval: true, cascade: ['persist'])]
+    private Collection $valeurNotes;
 
     #[ORM\Column(length: 255)]
-    private ?string $MoyenneMatiere = null;
-
-    #[ORM\OneToMany(mappedBy: 'noteEntity', targetEntity: ValeurNote::class)]
-    private Collection $valeurNotes;
+    private ?string $rang = null;
 
     public function __construct()
     {
@@ -64,26 +64,15 @@ class Note
         return $this;
     }
 
-    public function getNote(): ?string
-    {
-        return $this->note;
-    }
-
-    public function setNote(string $note): static
-    {
-        $this->note = $note;
-
-        return $this;
-    }
 
     public function getMoyenneMatiere(): ?string
     {
-        return $this->MoyenneMatiere;
+        return $this->moyenneMatiere;
     }
 
-    public function setMoyenneMatiere(string $MoyenneMatiere): static
+    public function setMoyenneMatiere(string $moyenneMatiere): static
     {
-        $this->MoyenneMatiere = $MoyenneMatiere;
+        $this->moyenneMatiere = $moyenneMatiere;
 
         return $this;
     }
@@ -95,6 +84,13 @@ class Note
     {
         return $this->valeurNotes;
     }
+
+    public function getNombre(): ?int
+    {
+
+        return $this->valeurNotes->count();
+    }
+
 
     public function addValeurNote(ValeurNote $valeurNote): static
     {
@@ -114,6 +110,18 @@ class Note
                 $valeurNote->setNoteEntity(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getRang(): ?string
+    {
+        return $this->rang;
+    }
+
+    public function setRang(string $rang): static
+    {
+        $this->rang = $rang;
 
         return $this;
     }

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Controller\Parametre;
+namespace App\Controller\Controle;
 
-use App\Entity\Session;
-use App\Form\SessionType;
-use App\Repository\SessionRepository;
+use App\Entity\GroupeType;
+use App\Form\GroupeTypeType;
+use App\Repository\GroupeTypeRepository;
 use App\Service\ActionRender;
 use App\Service\FormError;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,19 +18,17 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/admin/parametre/session')]
-class SessionController extends AbstractController
+#[Route('/admin/controle/groupe/type')]
+class GroupeTypeController extends AbstractController
 {
-    #[Route('/', name: 'app_parametre_session_index', methods: ['GET', 'POST'])]
+    #[Route('/', name: 'app_controle_groupe_type_index', methods: ['GET', 'POST'])]
     public function index(Request $request, DataTableFactory $dataTableFactory): Response
     {
         $table = $dataTableFactory->create()
-            ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
-            ->add('dateSession', DateTimeColumn::class, ['label' => 'Date session'])
-            ->createAdapter(ORMAdapter::class, [
-                'entity' => Session::class,
-            ])
-            ->setName('dt_app_parametre_session');
+        ->createAdapter(ORMAdapter::class, [
+            'entity' => GroupeType::class,
+        ])
+        ->setName('dt_app_controle_groupe_type');
 
         $renders = [
             'edit' =>  new ActionRender(function () {
@@ -53,30 +51,34 @@ class SessionController extends AbstractController
 
         if ($hasActions) {
             $table->add('id', TextColumn::class, [
-                'label' => 'Actions', 'orderable' => false, 'globalSearchable' => false, 'className' => 'grid_row_actions', 'render' => function ($value, Session $context) use ($renders) {
+                'label' => 'Actions'
+                , 'orderable' => false
+                ,'globalSearchable' => false
+                ,'className' => 'grid_row_actions'
+                , 'render' => function ($value, GroupeType $context) use ($renders) {
                     $options = [
                         'default_class' => 'btn btn-sm btn-clean btn-icon mr-2 ',
                         'target' => '#modal-lg',
 
                         'actions' => [
                             'edit' => [
-                                'url' => $this->generateUrl('app_parametre_session_edit', ['id' => $value]),
+                                'url' => $this->generateUrl('app_controle_groupe_type_edit', ['id' => $value]),
                                 'ajax' => true,
                                 'stacked' => false,
                                 'icon' => '%icon% bi bi-pen',
                                 'attrs' => ['class' => 'btn-main'],
                                 'render' => $renders['edit']
-                            ],
-                            'delete' => [
-                                'target' => '#modal-small',
-                                'url' => $this->generateUrl('app_parametre_session_delete', ['id' => $value]),
-                                'ajax' => true,
-                                'stacked' => false,
-                                'icon' => '%icon% bi bi-trash',
-                                'attrs' => ['class' => 'btn-danger'],
-                                'render' => $renders['delete']
-                            ]
+                        ],
+                        'delete' => [
+                            'target' => '#modal-small',
+                            'url' => $this->generateUrl('app_controle_groupe_type_delete', ['id' => $value]),
+                            'ajax' => true,
+                            'stacked' => false,
+                            'icon' => '%icon% bi bi-trash',
+                            'attrs' => ['class' => 'btn-danger'],
+                            'render' => $renders['delete']
                         ]
+                    ]
 
                     ];
                     return $this->renderView('_includes/default_actions.html.twig', compact('options', 'context'));
@@ -92,19 +94,19 @@ class SessionController extends AbstractController
         }
 
 
-        return $this->render('parametre/session/index.html.twig', [
+        return $this->render('controle/groupe_type/index.html.twig', [
             'datatable' => $table
         ]);
     }
 
 
-    #[Route('/new', name: 'app_parametre_session_new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'app_controle_groupe_type_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, FormError $formError): Response
     {
-        $session = new Session();
-        $form = $this->createForm(SessionType::class, $session, [
+        $groupeType = new GroupeType();
+        $form = $this->createForm(GroupeTypeType::class, $groupeType, [
             'method' => 'POST',
-            'action' => $this->generateUrl('app_parametre_session_new')
+            'action' => $this->generateUrl('app_controle_groupe_type_new')
         ]);
         $form->handleRequest($request);
 
@@ -115,61 +117,66 @@ class SessionController extends AbstractController
 
         if ($form->isSubmitted()) {
             $response = [];
-            $redirect = $this->generateUrl('app_parametre_session_index');
+            $redirect = $this->generateUrl('app_controle_groupe_type_index');
 
 
 
 
             if ($form->isValid()) {
 
-                $entityManager->persist($session);
+                $entityManager->persist($groupeType);
                 $entityManager->flush();
 
                 $data = true;
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
+
+
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                    $this->addFlash('warning', $message);
+                  $this->addFlash('warning', $message);
                 }
+
             }
 
 
             if ($isAjax) {
-                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
+
+
         }
 
-        return $this->render('parametre/session/new.html.twig', [
-            'session' => $session,
+        return $this->render('controle/groupe_type/new.html.twig', [
+            'groupe_type' => $groupeType,
             'form' => $form->createView(),
         ]);
     }
 
-    #[Route('/{id}/show', name: 'app_parametre_session_show', methods: ['GET'])]
-    public function show(Session $session): Response
+    #[Route('/{id}/show', name: 'app_controle_groupe_type_show', methods: ['GET'])]
+    public function show(GroupeType $groupeType): Response
     {
-        return $this->render('parametre/session/show.html.twig', [
-            'session' => $session,
+        return $this->render('controle/groupe_type/show.html.twig', [
+            'groupe_type' => $groupeType,
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_parametre_session_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Session $session, EntityManagerInterface $entityManager, FormError $formError): Response
+    #[Route('/{id}/edit', name: 'app_controle_groupe_type_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, GroupeType $groupeType, EntityManagerInterface $entityManager, FormError $formError): Response
     {
 
-        $form = $this->createForm(SessionType::class, $session, [
+        $form = $this->createForm(GroupeTypeType::class, $groupeType, [
             'method' => 'POST',
-            'action' => $this->generateUrl('app_parametre_session_edit', [
-                'id' =>  $session->getId()
+            'action' => $this->generateUrl('app_controle_groupe_type_edit', [
+                    'id' =>  $groupeType->getId()
             ])
         ]);
 
@@ -181,67 +188,71 @@ class SessionController extends AbstractController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
+       if ($form->isSubmitted()) {
             $response = [];
-            $redirect = $this->generateUrl('app_parametre_session_index');
+            $redirect = $this->generateUrl('app_controle_groupe_type_index');
 
 
 
 
             if ($form->isValid()) {
 
-                $entityManager->persist($session);
+                $entityManager->persist($groupeType);
                 $entityManager->flush();
 
                 $data = true;
                 $message       = 'Opération effectuée avec succès';
                 $statut = 1;
                 $this->addFlash('success', $message);
+
+
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
                 $statutCode = 500;
                 if (!$isAjax) {
-                    $this->addFlash('warning', $message);
+                  $this->addFlash('warning', $message);
                 }
+
             }
 
             if ($isAjax) {
-                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
+                return $this->json( compact('statut', 'message', 'redirect', 'data'), $statutCode);
             } else {
                 if ($statut == 1) {
                     return $this->redirect($redirect, Response::HTTP_OK);
                 }
             }
+
         }
 
-        return $this->render('parametre/session/edit.html.twig', [
-            'session' => $session,
+        return $this->render('controle/groupe_type/edit.html.twig', [
+            'groupe_type' => $groupeType,
             'form' => $form->createView(),
         ]);
     }
 
-    #[Route('/{id}/delete', name: 'app_parametre_session_delete', methods: ['DELETE', 'GET'])]
-    public function delete(Request $request, Session $session, EntityManagerInterface $entityManager): Response
+    #[Route('/{id}/delete', name: 'app_controle_groupe_type_delete', methods: ['DELETE', 'GET'])]
+    public function delete(Request $request, GroupeType $groupeType, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createFormBuilder()
             ->setAction(
                 $this->generateUrl(
-                    'app_parametre_session_delete',
-                    [
-                        'id' => $session->getId()
+                'app_controle_groupe_type_delete'
+                ,   [
+                        'id' => $groupeType->getId()
                     ]
                 )
             )
             ->setMethod('DELETE')
-            ->getForm();
+        ->getForm();
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $data = true;
-            $entityManager->remove($session);
+            $entityManager->remove($groupeType);
             $entityManager->flush();
 
-            $redirect = $this->generateUrl('app_parametre_session_index');
+            $redirect = $this->generateUrl('app_controle_groupe_type_index');
 
             $message = 'Opération effectuée avec succès';
 
@@ -261,8 +272,8 @@ class SessionController extends AbstractController
             }
         }
 
-        return $this->render('parametre/session/delete.html.twig', [
-            'session' => $session,
+        return $this->render('controle/groupe_type/delete.html.twig', [
+            'groupe_type' => $groupeType,
             'form' => $form,
         ]);
     }

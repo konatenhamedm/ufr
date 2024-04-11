@@ -127,12 +127,12 @@
                 index++;
 
                  $.ajax({
-            url:        '/admin/parametre/unite/enseignement/liste/matiere/niveau',
-            type:       'get',
-             async: false,
-            data:     {niveau:$('.niveau').val()},
-            dataType:   'json',
-            success: function(json){
+                    url:        '/admin/parametre/unite/enseignement/liste/matiere/niveau',
+                    type:       'get',
+                    async: false,
+                    data:     {niveau:$('.niveau').val()},
+                    dataType:   'json',
+                    success: function(json){
             
                 $container.find(".row-colonne").each(function(){ 
                     const $thismatiere = $(this);

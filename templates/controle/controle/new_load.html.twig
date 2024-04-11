@@ -1,0 +1,137 @@
+{% block page_content %}
+    {% form_theme form 'widget/fields-block.html.twig' %}
+    {{ form_start(form, {'attr': {'role':'form', 'class': 'form'}}) }}
+    {% from '_macros/controle_new.html.twig' import prototype_ligne_controle %}
+    <div class="p-0">
+        {{ include('_includes/ajax/response.html.twig') }}
+    <div class="row">
+        <div class="col-md-8"></div>
+        <div class="col-md-4 text-end">
+           
+        <button type="submit" class="btn btn-main btn-ajax btn-sm"><span class="spinner-border d-none  spinner-ajax spinner-border-sm" role="status" aria-hidden="true"></span> Valider saisie</button>
+    
+        </div>
+    </div>
+          {{ prototype_ligne_controle(form,nombre) }}
+   
+    </div>
+    <div class="row">
+        <div class="col-md-8"></div>
+        <div class="col-md-4 text-end">
+            {# <button type="button" class="btn btn-default btn-sm" data-bs-dismiss="modal">Annuler</button> #}
+        <button type="submit" class="btn btn-main btn-ajax btn-sm"><span class="spinner-border d-none  spinner-ajax spinner-border-sm" role="status" aria-hidden="true"></span> Valider saisie</button>
+    
+        </div>
+    </div>
+
+      {{ form_widget(form._token) }}
+    {{ form_end(form, {render_rest: false}) }}
+{% endblock %}
+
+{% block java %}
+<script src="{{ asset('assets/evaluations/index.js')}}"></script>
+    <script>
+        $(function () {
+            init_select2('select');
+            
+        });
+
+         const $semestre = $('#{{ form.semestre.vars.id }}');
+         const $classe = $('#{{ form.classe.vars.id }}');
+         const $matiere = $('#{{ form.matiere.vars.id }}');
+         const $session = $('#{{ form.session.vars.id }}');
+
+        function load_content(url,filters = []) {
+            const $form_content = $(`#form-content`);
+           
+            $.ajax({
+                url: url,
+                method: 'GET',
+                dataType: 'html',
+                data:filters,
+                beforeSend: function () {
+                    
+                    $form_content.html(`<div class="align-items-center">
+                                <strong>Chargement des données de l'étape</strong>
+                                <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+                                </div>`);
+                },
+                success: function (html) {
+                    $form_content.html(html);
+                },
+               
+                error: function () {
+                    $form_content.html('<div class="text-center text-danger">Une erreur est survenue...</div>');
+                }
+            })
+
+              
+        
+        }
+
+        
+         function load_principal(semestre,classe,matiere,session){
+             
+            $.ajax({
+                url: '/admin/controle/controle/new/saisie/simple',
+                method: 'GET',
+                dataType: 'html',
+                data: {
+                        semestre: semestre,
+                        classe: classe,
+                        matiere: matiere,
+                        session: session
+                    },
+              
+                success: function (html) {
+                  
+                },
+            
+            })
+
+        }
+
+           function load_matiere(classe){
+            $.ajax({
+                    url:  '/admin/controle/cours/liste/matiere',
+                    type:  'get',
+                    async: false,
+                    data:     {id:classe},
+                    dataType:   'json',
+                    success: function(json){
+
+                      $('#'+ $('.matiere').attr("id")).html(''); //je vide la 2ème list
+                      //$('#'+ $('.matiere').attr("id")).append('<option value selected="default" >Choisissez</option>');
+
+                        $.each(json, function(index, value) { // et une boucle sur la réponse contenu dans la variable passé à la function du success "json"       
+                              
+                            $("#"+ $('.matiere').attr("id")).append('<option value="'+ value.id +'"  >' + value.libelle +'</option>');
+                      
+                          });
+                    }
+                });
+            }
+
+      
+        $classe.on('change', function () {
+              const $this = $(this);
+              const val = $(this).val();
+              load_content(`/admin/controle/controle/new/load/${$semestre.val()}/${val}/${$matiere.val()}/${$session.val()}`,{semestre: $semestre.val(),classe:val,matiere: $matiere.val(),session: $session.val()})
+              load_matiere(val)
+              load_principal({semestre: $semestre.val(),classe:val,matiere: $matiere.val(),session: $session.val()})
+        });
+
+          
+        $matiere.on('change', function () {
+  
+              const $this = $(this);
+              const val = $(this).val();
+              load_content(`/admin/controle/controle/new/load/${$semestre.val()}/${$classe.val()}/${val}/${$session.val()}`,{semestre: $semestre.val(),classe:$classe.val(),matiere: val,session: $session.val()})
+              load_principal({semestre: $semestre.val(),classe:$classe.val(),matiere: val,session: $session.val()})
+          });
+
+             load_content(`/admin/controle/controle/new/load/${$semestre.val()}/${$classe.val()}/${$matiere.val()}/${$session.val()}`,{semestre: $semestre.val(),classe:$classe.val(),matiere: $matiere.val(),session: $session.val()})
+             load_principal({semestre: $semestre.val(),classe:$classe.val(),matiere: $matiere.val(),session: $session.val()})
+
+    </script>
+{% endblock %}

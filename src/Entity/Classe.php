@@ -30,10 +30,14 @@ class Classe
     #[ORM\OneToMany(mappedBy: 'classe', targetEntity: Inscription::class)]
     private Collection $inscriptions;
 
+    #[ORM\OneToMany(mappedBy: 'classe', targetEntity: Controle::class)]
+    private Collection $controles;
+
     public function __construct()
     {
         $this->cours = new ArrayCollection();
         $this->inscriptions = new ArrayCollection();
+        $this->controles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -131,6 +135,36 @@ class Classe
             // set the owning side to null (unless already changed)
             if ($inscription->getClasse() === $this) {
                 $inscription->setClasse(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Controle>
+     */
+    public function getControles(): Collection
+    {
+        return $this->controles;
+    }
+
+    public function addControle(Controle $controle): static
+    {
+        if (!$this->controles->contains($controle)) {
+            $this->controles->add($controle);
+            $controle->setClasse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeControle(Controle $controle): static
+    {
+        if ($this->controles->removeElement($controle)) {
+            // set the owning side to null (unless already changed)
+            if ($controle->getClasse() === $this) {
+                $controle->setClasse(null);
             }
         }
 
