@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Session;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -13,8 +14,15 @@ class SessionType extends AbstractType
     {
         $builder
             ->add('libelle')
-            ->add('dateSession')
-        ;
+            ->add('dateSession', DateType::class, [
+                'required' => true,
+                'mapped' => false,
+                'widget' => 'single_text',
+                'label'   => 'Date de paiement',
+                'format'  => 'dd/MM/yyyy',
+                'html5' => false,
+                'attr'    => ['autocomplete' => 'off', 'class' => 'datepicker no-auto'],
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

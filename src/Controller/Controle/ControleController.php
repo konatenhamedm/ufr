@@ -225,11 +225,6 @@ class ControleController extends AbstractController
 
 
             if ($form->isValid()) {
-
-
-
-
-
                 //dd($this->Rangeleve(1, $tableau, 1));
 
 
@@ -356,8 +351,6 @@ class ControleController extends AbstractController
                     $this->addFlash('warning', $message);
                 }
             }
-
-
             if ($isAjax) {
                 return $this->json(compact('statut', 'message', 'redirect', 'data', 'showAlert', 'fullRedirect'), $statutCode);
             } else {
