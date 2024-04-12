@@ -101,24 +101,17 @@
              </td>
             
          {% endfor %}
-           <td class="p-2 text-end">
-             {{ form_widget(data.moyenneMatiere) }}
-             {# <div style="display:none">{{ form_widget(data.moyenneMatiere) }}</div> #} 
-           {# {{ form_widget(data.moyenneMatiere) }} #}
-          {#  {{ form_widget(data.MoyenneMatiere) }}
-            #}
+           <td class="p-2 text-center">
+           
+           {{ data.moyenneMatiere.vars.value  }} 
+              
+           
+            <div style="display:none">{{ form_widget(data.moyenneMatiere) }}</div>
            </td>
            <td class="p-2 text-center">
             {#  {{ form_widget(data.rang) }} #}
-              {{ data.rang.vars.value  }}
-              
-              {% if data.rang.vars.value == 1 %}
-                 er
-              {% elseif data.rang.vars.value == "NC" %}
-                NC
-              {% else %}
-                e
-              {% endif %}
+              {{ data.rang.vars.value  }} {{ data.exposant.vars.value }}
+            <div style="display:none">{{ form_widget(data.exposant) }}</div>
             <div style="display:none">{{ form_widget(data.rang) }}</div>
            </td>
         

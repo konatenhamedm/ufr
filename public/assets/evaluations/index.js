@@ -17,6 +17,7 @@ function refresh() {
 
 
      $(function () {
+       // alert('ok');
         refresh();
         refreshColone();
         //init_select2('select');
@@ -39,13 +40,17 @@ function refresh() {
 
         var index = $container.find('.row-colonne').length;
         var nombre_note = 1;
-        var nombre_note_groupe = 1;
+     
+        var nombre_note_groupe = 10;
+
+        ///alert(nombre_note_groupe);
+        //let grid_val = `${etat}`;
 
         const $addLink = $('.add-ligne');
 
     
         $addLink.click(function (e) {
-        
+       
             addLine($container);
             e.preventDefault(); // évite qu'un # apparaisse dans l'URL
             refreshColone();
@@ -78,6 +83,8 @@ function refresh() {
            // $container.append($prototype);
          //alert(__name__)
 
+        
+
             nombre_note++;
             nombre_note_groupe++;
 
@@ -90,7 +97,7 @@ function refresh() {
 
                // $(this).find('.source').eq(-3).after('<td width="10%" class="p-2">ffff</td>'); 
                 $(this).find('th').eq(-3).after('<th width="10%" class="p-2">Note '+nombre_note+'</th>'); 
-                $(this).find('td').eq(-3).after('<td class="p-2 row-colonne"><input class="form-control form-control-sm " type="text" id="controle_notes_'+index_note+'_valeurNotes_'+index_note_value+'_note" name="controle[notes]['+index_note+'][valeurNotes]['+index_note_value+'][note]" required="required" maxlength="255" value="0"></td>');
+                $(this).find('td').eq(-3).after('<td class="p-2 row-colonne"><input class="form-control form-control-sm " type="text" id="controle_notes_'+index_note+'_valeurNotes_'+nombre_note_groupe+'_note" name="controle[notes]['+index_note+'][valeurNotes]['+nombre_note_groupe+'][note]" required="required" maxlength="255" value="0"></td>');
             });
             $('#tutorial').find('.ligne_head').each(function(){ 
                
@@ -218,5 +225,11 @@ function refresh() {
                 e.preventDefault(); // évite qu'un # apparaisse dans l'URL
             });
         }
+
+        $(".del-col").on("click", function(){
+           // alert('ok');
+            $("table tbody tr").find("td:eq(-3)").remove();
+            $("table thead tr").find("th:eq(-3)").remove();
+          });
 
     });

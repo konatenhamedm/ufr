@@ -30,6 +30,9 @@ class Note
     #[ORM\Column(length: 255)]
     private ?string $rang = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $exposant = null;
+
     public function __construct()
     {
         $this->valeurNotes = new ArrayCollection();
@@ -122,6 +125,18 @@ class Note
     public function setRang(string $rang): static
     {
         $this->rang = $rang;
+
+        return $this;
+    }
+
+    public function getExposant(): ?string
+    {
+        return $this->exposant;
+    }
+
+    public function setExposant(string $exposant): static
+    {
+        $this->exposant = $exposant;
 
         return $this;
     }

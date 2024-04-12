@@ -11,6 +11,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -41,6 +42,7 @@ class NoteType extends AbstractType
             ->add('rang', NumberType::class, [
                 'empty_data' => '0'
             ])
+            ->add('exposant', TextType::class, [])
             /*    ->add('controle', EntityType::class, [
                 'class' => Controle::class,
 'choice_label' => 'id',

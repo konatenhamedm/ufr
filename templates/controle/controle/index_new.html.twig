@@ -54,6 +54,8 @@
     <script>
         $(function () {
             init_select2('select');
+
+         
             
         });
 
@@ -65,6 +67,7 @@
          //function load_content(url,semestre,classe,matiere,session) {
         function load_content(url,filters = []) {
             const $form_content = $(`#form-content`);
+         
            
             $.ajax({
                 url: url,

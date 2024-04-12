@@ -33,6 +33,7 @@
     <script>
         $(function () {
             init_select2('select');
+           
             
         });
 
@@ -42,6 +43,7 @@
          const $session = $('#{{ form.session.vars.id }}');
 
         function load_content(url,filters = []) {
+                //alert(nombre);
             const $form_content = $(`#form-content`);
            
             $.ajax({

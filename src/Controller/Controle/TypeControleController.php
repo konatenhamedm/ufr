@@ -45,36 +45,6 @@ class TypeControleController extends AbstractController
         $response = new Response();
         $tabTypeContrrole = array();
 
-        $n[1] = 15;
-        $n[2] = 10;
-        $n[3] = 8;
-        $n[4] = 18;
-        $n[5] = 4;
-        $n[6] = 8;
-
-        $array = [
-            6 => 16,
-            3 => 12,
-            26 => 18,
-            31 => 14
-        ];
-
-
-
-        dd($array, $this->Rangeleve(6, $array, count($array)));
-
-        $k = 1;
-
-        /*  while ($k < count($n) + 1) {
-            $ele = $this->Rangeleve($k, $n, count($n) + 1);
-
-            $k++;
-
-            echo $ele . '-' . $n[$k] . '<br>';
-        }
- */
-
-
         $typeControles = $typeControleRepository->findAll();
 
         $i = 0;

@@ -24,6 +24,7 @@ use App\Repository\SessionRepository;
 use App\Repository\TypeControleRepository;
 use App\Service\ActionRender;
 use App\Service\FormError;
+use App\Service\Service;
 use Doctrine\ORM\EntityManagerInterface;
 use Omines\DataTablesBundle\Adapter\Doctrine\ORMAdapter;
 use Omines\DataTablesBundle\Column\BoolColumn;
@@ -115,22 +116,7 @@ class ControleController extends AbstractController
         ]);
     }
 
-    function Rangeleve($case, $tab, $Nbr)
-    {
-        $rang = 1;
 
-        foreach ($tab as $key => $value) {
-            if ($value > $tab[$case]) {
-                $rang = $rang + 1;
-            }
-        }
-        /*   for ($i = 1; $i < $Nbr; $i++) {
-            if ($tab[$i] > $tab[$case]) {
-                $rang = $rang + 1;
-            }
-        } */
-        return $rang;
-    }
 
     #[Route('/new/load/{semestre}/{classe}/{matiere}/{session}', name: 'app_controle_controle_new_load', methods: ['GET', 'POST'], options: ['expose' => true])]
     public function new_load(
@@ -141,25 +127,18 @@ class ControleController extends AbstractController
         FormError $formError,
         EtudiantRepository $etudiantRepository,
         ControleRepository $controleRepository,
-        CoursRepository $coursRepository,
-        MatiereRepository $matiereRepository,
-        ClasseRepository $classeRepository,
-        SemestreRepository $semestreRepository,
-        SessionRepository $sessionRepository,
         $semestre = null,
         $classe = null,
         $matiere = null,
         $session = null,
-        MoyenneMatiereRepository $moyenneMatiereRepository,
-        MatiereUeRepository $matiereUeRepository,
-        NoteRepository $noteRepository,
+        Service $service
     ): Response {
 
         $all = $request->query->all();
 
-
         $controleVefication = $controleRepository->findOneBy(['classe' => $classe, 'matiere' => $matiere, 'semestre' => $semestre, 'session' => $session]);
         //dd($controleVefication);
+        // dd($controleVefication->getGroupeTypes()->count());
 
 
         if ($controleVefication) {
@@ -228,106 +207,9 @@ class ControleController extends AbstractController
                 //dd($this->Rangeleve(1, $tableau, 1));
 
 
-                $compteIfNoteSuperieurMax = 0;
-                foreach ($dataNotes as $key => $row) {
-                    $somme = 0;
-                    $coef = 0;
-                    foreach ($row->getValeurNotes() as $key1 => $value) {
-                        $nbreTour = 0;
-                        foreach ($groupeTypes as $key => $groupe) {
-                            //$note = 0;
-                            if ($key1 == $key) {
+                $compteIfNoteSuperieurMax = $service->gestionNotes($dataNotes, $groupeTypes, ['classe' => $classe, 'matiere' => $matiere, 'semestre' => $semestre, 'session' => $session], $controleVefication ?? null, !$controleVefication ? $controle : null);
 
-                                $note = (int)$groupe->getCoef() == 10 ? $value->getNote() * 2 * (int)$groupe->getType()->getCoef() : $value->getNote() * (int)$groupe->getType()->getCoef();
-
-                                if ($value->getNote() > 10 && $groupe->getCoef() == 10) {
-                                    $compteIfNoteSuperieurMax++;
-                                }
-                            }
-                            if ($groupe->getType())
-                                $coef = $coef + (int)$groupe->getType()->getCoef();
-                            $nbreTour++;
-                        }
-
-                        $somme = $somme + $note;
-                        // dd()
-
-                    }
-                    //dd($somme / ($coef / 2), $note, $coef);
-                    $moyenneEtudiant = $somme / ($nbreTour == 1 ? $coef : $coef / $nbreTour);
-                    $row->setMoyenneMatiere($moyenneEtudiant);
-
-                    $moyenneMatiere = $moyenneMatiereRepository->findOneBy(['matiere' => $matiere, 'etudiant' => $row->getEtudiant()]);
-                    if ($moyenneMatiere) {
-                        $moyenneMatiere->setMoyenne($moyenneEtudiant);
-                        $matiereUeValide = $matiereUeRepository->findOneBy(['matiere' => $matiere]);
-                        $moyenneMatiere->setValide($moyenneEtudiant  >= $matiereUeValide->getMoyenneValidation() ? 'Oui' : 'Non');
-                        $entityManager->persist($moyenneMatiere);
-                        $entityManager->flush();
-                    } else {
-                        $newMoyenneMatiere = new MoyenneMatiere();
-
-                        $newMoyenneMatiere->setEtudiant($row->getEtudiant());
-                        $newMoyenneMatiere->setMatiere($matiereRepository->find($matiere));
-                        $newMoyenneMatiere->setMoyenne($moyenneEtudiant);
-
-                        $matiereUeValide = $matiereUeRepository->findOneBy(['matiere' => $matiere]);
-
-                        $newMoyenneMatiere->setValide($moyenneEtudiant  >= $matiereUeValide->getMoyenneValidation() ? 'Oui' : 'Non');
-                        $newMoyenneMatiere->setSession($sessionRepository->find($session));
-                        $entityManager->persist($newMoyenneMatiere);
-                        $entityManager->flush();
-                    }
-                }
-
-
-                if ($controleVefication) {
-
-                    //dd($controleVefication);
-                    $controleVefication->setCour($coursRepository->findOneBy(['classe' => $classe, 'matiere' => $matiere, 'anneeScolaire' => $semestreRepository->find($semestre)->getAnneeScolaire()->getId()]));
-                    $controleVefication->setAnneeScolaire($semestreRepository->find($semestre)->getAnneeScolaire());
-                    $controleVefication->setMatiere($matiereRepository->find($matiere));
-                    $controleVefication->setClasse($classeRepository->find($classe));
-                    $controleVefication->setSession($sessionRepository->find($session));
-                    $controleVefication->setSemestre($semestreRepository->find($semestre));
-                    $entityManager->persist($controleVefication);
-                } else {
-                    $controle->setCour($coursRepository->findOneBy(['classe' => $classe, 'matiere' => $matiere, 'anneeScolaire' => $semestreRepository->find($semestre)->getAnneeScolaire()->getId()]));
-                    $controle->setAnneeScolaire($semestreRepository->find($semestre)->getAnneeScolaire());
-                    $controle->setMatiere($matiereRepository->find($matiere));
-                    $controle->setClasse($classeRepository->find($classe));
-                    $controle->setSession($sessionRepository->find($session));
-                    $controle->setSemestre($semestreRepository->find($semestre));
-                    $entityManager->persist($controle);
-                }
-                $entityManager->flush();
-
-                $tableau = [];
-
-                foreach ($dataNotes as $allNotes) {
-
-                    $tableau[$allNotes->getEtudiant()->getId()] = (int)$allNotes->getMoyenneMatiere();
-                }
-
-                foreach ($dataNotes as  $allNotes) {
-
-                    foreach ($tableau as $key => $value) {
-
-                        // dd($key, $tableau[$allNotes->getEtudiant()->getId()] ==);
-                        if ($tableau[$allNotes->getEtudiant()->getId()] == $tableau[$key]) {
-                            $rang = $this->Rangeleve($key, $tableau, count($tableau));
-                            $note = $noteRepository->find($allNotes->getId());
-
-                            if ($note) {
-                                $note->setRang($rang);
-                                $entityManager->persist($note);
-                                $entityManager->flush();
-                            }
-                        }
-                    }
-                }
-
-                // dd($tableau);
+                $service->rangExposant($dataNotes);
 
                 if ($compteIfNoteSuperieurMax > 0) {
                     $showAlert = true;
@@ -340,8 +222,6 @@ class ControleController extends AbstractController
                 }
 
                 $data = true;
-                /*    $message       = 'Opération effectuée avec succès';
-                $statut = 1; */
                 $this->addFlash('success', $message);
             } else {
                 $message = $formError->all($form);
@@ -556,68 +436,11 @@ class ControleController extends AbstractController
             $response = [];
             $redirect = $this->generateUrl('app_controle_controle_new_saisie_simple');
 
-
-            $dataNotes = $form->get('notes')->getData();
-            $groupeTypes = $form->get('groupeTypes')->getData();
-
-
             if ($form->isValid()) {
-
-                $compteIfNoteSuperieurMax = 0;
-                foreach ($dataNotes as $key => $row) {
-                    $somme = 0;
-                    $coef = 0;
-                    foreach ($row->getValeurNotes() as $key1 => $value) {
-                        $nbreTour = 0;
-                        foreach ($groupeTypes as $key => $groupe) {
-                            //$note = 0;
-                            if ($key1 == $key) {
-
-                                $note = (int)$groupe->getCoef() == 10 ? $value->getNote() * 2 * (int)$groupe->getType()->getCoef() : $value->getNote() * (int)$groupe->getType()->getCoef();
-
-                                if ($value->getNote() > 10 && $groupe->getCoef() == 10) {
-                                    $compteIfNoteSuperieurMax++;
-                                }
-                            }
-                            if ($groupe->getType())
-                                $coef = $coef + (int)$groupe->getType()->getCoef();
-                            $nbreTour++;
-                        }
-
-                        $somme = $somme + $note;
-                        // dd()
-
-                    }
-                    //dd($somme / ($coef / 2), $note, $coef);
-                    $row->setMoyenneMatiere($somme / ($nbreTour == 1 ? $coef : $coef / 2));
-                }
-                if ($controleVefication) {
-                    $controleVefication->setMatiere($matiereRepository->find(1));
-                    $controleVefication->setClasse($classeRepository->find(1));
-                    $controleVefication->setSession($sessionRepository->find(1));
-                    $controleVefication->setSemestre($semestreRepository->find(1));
-                    $entityManager->persist($controleVefication);
-                } else {
-                    $controle->setMatiere($matiereRepository->find(1));
-                    $controle->setClasse($classeRepository->find(1));
-                    $controle->setSession($sessionRepository->find(1));
-                    $controle->setSemestre($semestreRepository->find(1));
-                    $entityManager->persist($controle);
-                }
-                $entityManager->flush();
-
-                if ($compteIfNoteSuperieurMax > 0) {
-                    $showAlert = true;
-                    $statut = 0;
-                    $message       = sprintf('Désolé votre opération à échoué car le montant total  de votre échéancier est inferieur mon total à payer');
-                } else {
-                    $message       = 'Opération effectuée avec succès2';
-                    $statut = 1;
-                }
 
                 $data = true;
 
-                $this->addFlash('success', $message);
+                //$this->addFlash('success', $message);
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
