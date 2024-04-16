@@ -17,6 +17,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Form\Extension\Core\Type\BirthdayType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 
 class RegisterType extends AbstractType
 {
@@ -29,17 +31,18 @@ class RegisterType extends AbstractType
                 'required' => false,
                 'placeholder' => '----',
                 'label_attr' => ['class' => 'label-required'],
-                'choice_label' => 'getFullLibelle',
+                'choice_label' => 'getFullLibelleSigle',
                 'label' => 'Niveau',
                 'attr' => ['class' => 'has-select2']
             ])
-            ->add('dateNaissance',  DateType::class,  [
+            /* ->add('dateNaissance',  DateType::class,  [
                 'mapped' => true,
                 //'placeholder'=>"Entrez votre date de naissance s'il vous plaît",
-                'attr' => ['class' => 'datepicker no-auto skip-init'], 'widget' => 'single_text',   'format' => 'yyyy-MM-dd',
+                'attr' => ['class' => 'datepicker '], 'widget' => 'single_text4',   'format' => 'yyyy-MM-dd',
+                //'attr' => ['class' => 'datepicker no-auto skip-init'], 'widget' => 'single_text',   'format' => 'yyyy-MM-dd',
                 'label' => 'Date de naissance', 'empty_data' => date('d/m/Y'), 'required' => false
-            ])
-           /* ->add('username', TextType::class, ['label' => 'Nom utilisateur', 'attr' => ['placeholder' => '']])*/
+            ]) */
+            /* ->add('username', TextType::class, ['label' => 'Nom utilisateur', 'attr' => ['placeholder' => '']])*/
 
             ->add('email', EmailType::class, [
                 'label' => 'Email (Login)', 'attr' => ['placeholder' => '']
@@ -62,9 +65,9 @@ class RegisterType extends AbstractType
             ->add('dateNaissance', DateType::class, [
                 'widget' => 'single_text',
                 'label'   => 'Date de naissance',
-                'format'  => 'dd/MM/yyyy',
-                'html5' => false,
-                'attr'    => ['autocomplete' => 'off', 'class' => 'datepicker no-auto'],
+                // 'format'  => 'dd/MM/yyyy',
+                'html5' => true,
+                //  'attr'    => ['autocomplete' => 'off', 'class' => 'datepicker no-auto'],
             ])
             ->add('genre', EntityType::class, [
                 'class' => Genre::class,
@@ -74,8 +77,8 @@ class RegisterType extends AbstractType
                 'choice_label' => 'libelle',
                 'label' => 'Sexe',
                 'attr' => ['class' => 'has-select2']
-            ])
-            ->add('civilite', EntityType::class, [
+            ]);
+        /*  ->add('civilite', EntityType::class, [
                 'class' => Civilite::class,
                 'required' => false,
                 'placeholder' => '----',
@@ -83,7 +86,7 @@ class RegisterType extends AbstractType
                 'choice_label' => 'libelle',
                 'label' => 'Civilité',
                 'attr' => ['class' => 'has-select2']
-            ]);
+            ]); */
     }
 
     public function configureOptions(OptionsResolver $resolver): void

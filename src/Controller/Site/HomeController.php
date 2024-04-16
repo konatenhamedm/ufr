@@ -37,6 +37,7 @@ use App\Security\LoginFormAuthenticator;
 use App\Service\ActionRender;
 use App\Service\FormError;
 use App\Service\SendMailService;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Omines\DataTablesBundle\Adapter\Doctrine\ORMAdapter;
 use Omines\DataTablesBundle\Column\TextColumn;
@@ -116,6 +117,11 @@ class HomeController extends AbstractController
         //PreinscriptionRepository $preinscriptionRepository
     ): Response {
         $inscriptionDTO = new InscriptionDTO();
+        $value = new DateTime();
+        $value->setDate(1900, 1, 1);
+
+        //$inscriptionDTO->setDateNaissance(new \DateTime('01/01/1993'));
+        //$inscriptionDTO->setDateNaissance($value());
         $form = $this->createForm(RegisterType::class, $inscriptionDTO, [
             'method' => 'POST',
             //'type'=>'autre',
@@ -131,6 +137,8 @@ class HomeController extends AbstractController
         $redirect = $this->generateUrl($loginFormAuthenticator::DEFAULT_INFORMATION);
         $fullRedirect = false;
         if ($form->isSubmitted()) {
+
+            //dd($inscriptionDTO->getDateNaissance());
             $response = [];
             $fonction = $entityManager->getRepository(Fonction::class)->findOneByCode('ETD');
             $user = $utilisateurRepository->findOneByEmail($inscriptionDTO->getEmail());
@@ -141,7 +149,7 @@ class HomeController extends AbstractController
                     $etudiant->setNom(strtoupper($inscriptionDTO->getNom()));
                     $etudiant->setPrenom(ucwords($inscriptionDTO->getPrenom()));
                     $etudiant->setDateNaissance($inscriptionDTO->getDateNaissance());
-                    $etudiant->setCivilite($inscriptionDTO->getCivilite());
+                    // $etudiant->setCivilite($inscriptionDTO->getCivilite());
                     $etudiant->setGenre($inscriptionDTO->getGenre());
                     $etudiant->setFonction($fonctionRepository->findOneBy(['code' => 'ETD']));
                     $etudiant->setLieuNaissance('');

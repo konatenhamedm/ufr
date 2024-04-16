@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Entity\InfoInscription;
+use App\Repository\AnneeScolaireRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -22,9 +23,10 @@ class Menu
 
     private $resp;
     private $tableau = [];
+    private $anneeScolaireRepository;
 
 
-    public function __construct(EntityManagerInterface $em, RequestStack $requestStack, RouterInterface $router, Security $security)
+    public function __construct(EntityManagerInterface $em, AnneeScolaireRepository $anneeScolaireRepository, RequestStack $requestStack, RouterInterface $router, Security $security)
     {
         $this->em = $em;
         if ($requestStack->getCurrentRequest()) {
@@ -32,10 +34,15 @@ class Menu
             $this->container = $router->getRouteCollection()->all();
             $this->security = $security;
         }
+        $this->anneeScolaireRepository = $anneeScolaireRepository;
     }
     public function getRoute()
     {
         return $this->route;
+    }
+    public function getListeAnnees()
+    {
+        return $this->anneeScolaireRepository->findAll();
     }
 
     public function getSomme($etudiant, $year, $niveau)

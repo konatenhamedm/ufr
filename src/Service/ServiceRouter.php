@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-
+use App\Repository\AnneeScolaireRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -17,21 +17,25 @@ class ServiceRouter
 
 
     private mixed $route;
-
     private $security;
 
 
-    public function __construct(EntityManagerInterface $em, RequestStack $requestStack, RouterInterface $router, Security $security)
-    {
+
+    public function __construct(
+        EntityManagerInterface $em,
+
+        RequestStack $requestStack,
+        RouterInterface $router,
+        Security $security
+    ) {
 
         if ($requestStack->getCurrentRequest()) {
             $this->route = $requestStack->getCurrentRequest()->attributes->get('_route');
-
         }
-
     }
 
-    public  function  getUser(){
+    public  function  getUser()
+    {
         return $this->security->getUser();
     }
 

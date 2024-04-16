@@ -19,8 +19,8 @@ class InscriptionDTO
     #[Assert\NotBlank(message: 'Veuillez renseigner votre genre')]
     private ?Genre $genre;
 
-    #[Assert\NotBlank(message: 'Veuillez renseigner votre civilité')]
-    private ?Civilite $civilite;
+    /* #[Assert\NotBlank(message: 'Veuillez renseigner votre civilité')]
+    private ?Civilite $civilite; */
 
     #[Assert\NotBlank(message: 'Veuillez sélectionner un niveau')]
     private ?Niveau $niveau;
@@ -149,23 +149,7 @@ class InscriptionDTO
     }
 
 
-    /**
-     * Get the value of civilite
-     */
-    public function getCivilite(): ?Civilite
-    {
-        return $this->civilite;
-    }
 
-    /**
-     * Set the value of civilite
-     */
-    public function setCivilite(?Civilite $civilite): self
-    {
-        $this->civilite = $civilite;
-
-        return $this;
-    }
 
     /**
      * Get the value of genre

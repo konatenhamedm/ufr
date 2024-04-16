@@ -53,7 +53,7 @@ class Personne
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true)]
-    #[Assert\NotBlank(message: 'Veuillez sélectionner la civilité')]
+    /* #[Assert\NotBlank(message: 'Veuillez sélectionner la civilité')] */
     private ?Civilite $civilite = null;
 
     #[ORM\ManyToOne]

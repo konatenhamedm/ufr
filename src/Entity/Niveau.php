@@ -92,7 +92,7 @@ class Niveau
 
     public function getFullLibelleSigle()
     {
-        return sprintf('%s %s', $this->getFiliere()->getCode(), $this->getLibelle());
+        return sprintf('%s %s', $this->getFiliere()->getLibelle(), $this->getCode());
     }
 
     public function getLibelle(): ?string

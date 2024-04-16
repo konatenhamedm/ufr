@@ -3,7 +3,7 @@
 
 namespace App\Service;
 
-
+use App\Entity\AnneeScolaire;
 use App\Entity\ArticleMagasin;
 use App\Entity\Document;
 use App\Entity\InfoInscription;
@@ -13,6 +13,7 @@ use App\Entity\Mouvement;
 use App\Entity\MoyenneMatiere;
 use App\Entity\Sens;
 use App\Entity\Sortie;
+use App\Repository\AnneeScolaireRepository;
 use App\Repository\ArticleMagasinRepository;
 use App\Repository\ClasseRepository;
 use App\Repository\CoursRepository;
@@ -46,6 +47,7 @@ class Service
     protected $noteRepository;
     protected $coursRepository;
     private $security;
+    private $anneeScolaireRepository;
 
 
     public function __construct(
@@ -62,6 +64,7 @@ class Service
         SessionRepository $sessionRepository,
         NoteRepository $noteRepository,
         CoursRepository $coursRepository,
+        AnneeScolaireRepository $anneeScolaireRepository,
     ) {
         $this->em = $em;
         $this->security = $security;
@@ -76,6 +79,7 @@ class Service
         $this->sessionRepository = $sessionRepository;
         $this->noteRepository = $noteRepository;
         $this->coursRepository = $coursRepository;
+        $this->anneeScolaireRepository = $anneeScolaireRepository;
 
         //$this->verifieIfFile2(15,2);
     }
@@ -97,6 +101,8 @@ class Service
         //dd($repo);
         return $repo;
     }
+
+
 
     /*     public function numero()
     {
