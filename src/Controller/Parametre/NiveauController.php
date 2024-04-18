@@ -127,19 +127,17 @@ class NiveauController extends AbstractController
             ->add('code', TextColumn::class, ['label' => 'Code'])
             ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
             ->add('filiere', TextColumn::class, ['label' => 'Filière', 'field' => 'filiere.libelle'])
-            ->add('nom', TextColumn::class, ['field' => 'emp.nom', 'visible' => false])
-            ->add('prenom', TextColumn::class, ['field' => 'emp.prenom', 'visible' => false])
-            ->add('responsable', TextColumn::class, ['label' => 'Responsable', 'render' => fn ($value, Niveau $niveau) => $niveau->getResponsable()->getNomComplet()])
+            ->add('responsable', TextColumn::class, ['label' => 'Responsable', 'field' => 'res.getNomComplet'])
+            /* ->add('responsable', TextColumn::class, ['label' => 'Responsable', 'render' => fn ($value, Niveau $niveau) => $niveau->getResponsable()->getNomComplet()]) */
             ->createAdapter(ORMAdapter::class, [
                 'entity' => Niveau::class,
                 'query' => function (QueryBuilder $qb) use ($user) {
                     $$qb->resetDQLPart('join');
                     $qb
-                        ->select('niveau,filiere,emp,res')
+                        ->select('niveau,filiere,res')
                         ->from(Niveau::class, 'niveau')
                         ->join('niveau.filiere', 'filiere')
-                        ->join('niveau.responsable', 'res')
-                        ->join('niveau.responsable', 'emp');
+                        ->join('niveau.responsable', 'res');
 
                     if ($this->isGranted('ROLE_DIRECTEUR')) {
                         $qb->andWhere('res.id = :id')
