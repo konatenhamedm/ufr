@@ -36,16 +36,14 @@ class NiveauController extends AbstractController
             ->add('code', TextColumn::class, ['label' => 'Code'])
             ->add('libelle', TextColumn::class, ['label' => 'Libellé'])
             ->add('filiere', TextColumn::class, ['label' => 'Filière', 'field' => 'filiere.libelle'])
-            ->add('nom', TextColumn::class, ['field' => 'emp.nom', 'visible' => false])
-            ->add('prenom', TextColumn::class, ['field' => 'emp.prenom', 'visible' => false])
-            ->add('responsable', TextColumn::class, ['label' => 'Responsable', 'render' => fn ($value, Niveau $niveau) => $niveau->getResponsable()->getNomComplet()])
+            ->add('responsable', TextColumn::class, ['label' => 'Responsable', 'field' => 'res.getNomComplet'])
             ->createAdapter(ORMAdapter::class, [
                 'entity' => Niveau::class,
                 'query' => function (QueryBuilder $qb) {
-                    $qb->select('niveau,filiere,emp')
+                    $qb->select('niveau,filiere,res')
                         ->from(Niveau::class, 'niveau')
                         ->leftJoin('niveau.filiere', 'filiere')
-                        ->leftJoin('niveau.responsable', 'emp');
+                        ->leftJoin('niveau.responsable', 'res');
                 },
             ])
             ->setName('dt_app_parametre_niveau');
