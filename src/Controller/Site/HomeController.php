@@ -776,7 +776,7 @@ class HomeController extends AbstractController
 
                         'actions' => [
                             'deliberation' => [
-                                'url' => $this->generateUrl('app_direction_deliberation_new', ['id' => $value]),
+                                'url' => $this->generateUrl('site_information_edit', ['id' => $value]),
                                 'ajax' => false,
                                 'stacked' => false,
                                 'icon' => '%icon% bi bi-pen',
@@ -819,17 +819,7 @@ class HomeController extends AbstractController
         // Etudiant $etudiant
     ): Response {
         $etudiant = new Etudiant();
-
-
-
         $info = new InfoEtudiant();
-
-
-        //$etudiant->getInf
-
-
-
-
 
         if (count($etudiant->getInfoEtudiants()) == 0) {
             $info->setTuteurNomPrenoms('');
@@ -861,6 +851,120 @@ class HomeController extends AbstractController
             ],
             'validation_groups' => $validationGroups,
             'action' => $this->generateUrl('site_information_new')
+        ]);
+
+        $data = null;
+        $statutCode = Response::HTTP_OK;
+
+        $isAjax = $request->isXmlHttpRequest();
+
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            $response = [];
+            $redirect = $this->generateUrl('site_information_new');
+            $data = $preinscriptionRepository->findBy(array('etudiant' => $etudiant, 'etat' => 'attente_informations'));
+
+
+
+
+            if ($form->isValid()) {
+
+                if ($form->getClickedButton()->getName() === 'valider') {
+                    $etudiant->setEtat('complete');
+                    $message       = 'Votre dossier a bien été transmis pour validation. Vous recevrez une notification après traitement.';
+                    $etudiantRepository->add($etudiant, true);
+
+                    foreach ($data as $key => $value) {
+                        $value->setEtat('attente_validation');
+                        $preinscriptionRepository->add($value, true);
+                    }
+                } else {
+                    $etudiantRepository->add($etudiant, true);
+                    $message       = 'Opération effectuée avec succès';
+                }
+
+
+
+                $data = true;
+
+                $statut = 1;
+                $this->addFlash('success', $message);
+            } else {
+                $message = $formError->all($form);
+                $statut = 0;
+                $statutCode = 500;
+                if (!$isAjax) {
+                    $this->addFlash('warning', $message);
+                }
+            }
+
+            if ($isAjax) {
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
+            } else {
+                if ($statut == 1) {
+                    return $this->redirect($redirect, Response::HTTP_OK);
+                }
+            }
+        }
+
+        return $this->render('site/admin/informations_admin.html.twig', [
+            'etudiant' => $etudiant,
+            'etat' => 'ok',
+            'form' => $form->createView(),
+        ]);
+
+        //return $this->render('site/admin/pages/informations.html.twig');
+    }
+
+    #[Route(path: '/site/information/edit{id}', name: 'site_information_edit', methods: ['GET', 'POST'])]
+    public function informationAdminEdit(
+        Request $request,
+        UserInterface $user,
+        EtudiantRepository $etudiantRepository,
+        PersonneRepository $personneRepository,
+        FormError $formError,
+        NiveauRepository $niveauRepository,
+        UtilisateurRepository $utilisateurRepository,
+        PreinscriptionRepository $preinscriptionRepository,
+        Etudiant $etudiant
+    ): Response {
+
+        $info = new InfoEtudiant();
+
+        if (count($etudiant->getInfoEtudiants()) == 0) {
+            $info->setTuteurNomPrenoms('');
+            $info->setTuteurFonction('');
+            $info->setTuteurContact('');
+            $info->setTuteurDomicile('');
+            $info->setTuteurEmail('');
+
+            $info->setCorresNomPrenoms('');
+            $info->setCorresFonction('');
+            $info->setCorresContacts('');
+            $info->setCorresDomicile('');
+            $info->setCorresEmail('');
+
+            $etudiant->addInfoEtudiant($info);
+        }
+
+
+
+        $validationGroups = ['Default', 'FileRequired', 'autre'];
+        //dd($niveauRepository->findNiveauDisponible(21));
+
+        $form = $this->createForm(EtudiantType::class, $etudiant, [
+            'method' => 'POST',
+            'type' => 'info',
+            'doc_options' => [
+                'uploadDir' => $this->getUploadDir(self::UPLOAD_PATH, true),
+                'attrs' => ['class' => 'filestyle'],
+            ],
+            'validation_groups' => $validationGroups,
+            'action' => $this->generateUrl('site_information_edit', [
+                'id' =>  $etudiant->getId()
+            ])
         ]);
 
         $data = null;
