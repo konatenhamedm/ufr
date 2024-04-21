@@ -117,9 +117,9 @@
 
 {% macro prototype_ligne_colonne_info_echeancier_echenacier(form,frais) %}
     <div class="list-colonne_info_echeancier"  data-prototype="{{ _self.colonne(form.blocEcheanciers.vars.prototype)|e }}"></div>
-    {# <button type="button" data-protoname="__name__" class="btn btn-default add_line_info_echeancier btn-xs" id="add_ligne_info_echeancier"  data-protoclass=".list-colonne_info_echeancier" data-container=".column-container_info_echeancier">
+    <button type="button" data-protoname="__name__" class="btn btn-default add_line_info_echeancier btn-xs" id="add_ligne_info_echeancier"  data-protoclass=".list-colonne_info_echeancier" data-container=".column-container_info_echeancier">
         <i class="fa fa-plus"></i> Ajouter une ligne
-    </button> #}
+    </button>
     <div class="column-container_info_echeancier proto-container_info_echeancier" data-childclass="">
         {% for item in form.blocEcheanciers %}
             {{ _self.colonne(item|e) }}

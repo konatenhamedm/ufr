@@ -235,7 +235,7 @@ const etat = "{{etudiant.etat}}";
                         
 
                           }); 
-                         $('#etudiant_admin_blocEcheanciers_0_total').val(somme)
+                         $('.total').val(somme)
                           
                       
 
@@ -247,9 +247,9 @@ const etat = "{{etudiant.etat}}";
          
         }
 
-        load_content($('#etudiant_admin_blocEcheanciers_0_classe').val());
+        load_content($('.classe').val());
      
-        $('#etudiant_admin_blocEcheanciers_0_classe').on('change',function(){
+        $('.classe').on('change',function(){
             const $this = $(this);
 
             load_content($this.val());
