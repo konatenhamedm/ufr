@@ -6,11 +6,13 @@ namespace App\Service;
 use App\Entity\AnneeScolaire;
 use App\Entity\ArticleMagasin;
 use App\Entity\Document;
+use App\Entity\Echeancier;
 use App\Entity\InfoInscription;
 use App\Entity\Inscription;
 use App\Entity\LigneDocument;
 use App\Entity\Mouvement;
 use App\Entity\MoyenneMatiere;
+use App\Entity\Preinscription;
 use App\Entity\Sens;
 use App\Entity\Sortie;
 use App\Repository\AnneeScolaireRepository;
@@ -20,6 +22,7 @@ use App\Repository\CoursRepository;
 use App\Repository\DocumentRepository;
 use App\Repository\EcheancierRepository;
 use App\Repository\InfoInscriptionRepository;
+use App\Repository\InscriptionRepository;
 use App\Repository\LigneDocumentRepository;
 use App\Repository\MatiereRepository;
 use App\Repository\MatiereUeRepository;
@@ -27,6 +30,7 @@ use App\Repository\MoyenneMatiereRepository;
 use App\Repository\NoteRepository;
 use App\Repository\SemestreRepository;
 use App\Repository\SessionRepository;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -48,6 +52,7 @@ class Service
     protected $coursRepository;
     private $security;
     private $anneeScolaireRepository;
+    private $inscriptionRepository;
 
 
     public function __construct(
@@ -65,6 +70,7 @@ class Service
         NoteRepository $noteRepository,
         CoursRepository $coursRepository,
         AnneeScolaireRepository $anneeScolaireRepository,
+        InscriptionRepository $inscriptionRepository
     ) {
         $this->em = $em;
         $this->security = $security;
@@ -80,6 +86,7 @@ class Service
         $this->noteRepository = $noteRepository;
         $this->coursRepository = $coursRepository;
         $this->anneeScolaireRepository = $anneeScolaireRepository;
+        $this->inscriptionRepository = $inscriptionRepository;
 
         //$this->verifieIfFile2(15,2);
     }
@@ -287,6 +294,67 @@ class Service
 
         $this->em->persist($paiement);
         $this->em->flush();
+    }
+    private function numero($code)
+    {
+
+        $query = $this->em->createQueryBuilder();
+        $query->select("count(a.id)")
+            ->from(Preinscription::class, 'a');
+
+        $nb = $query->getQuery()->getSingleScalarResult();
+        if ($nb == 0) {
+            $nb = 1;
+        } else {
+            $nb = $nb + 1;
+        }
+        return ($code . '-' . date("y") . '-' . str_pad($nb, 3, '0', STR_PAD_LEFT));
+    }
+    public function registerEcheancierAdmin($blocEcheanciers, $etudiant): bool
+    {
+        $somme = 0;
+        $response = true;
+        foreach ($blocEcheanciers as $key => $value) {
+
+            foreach ($value->getEcheancierProvisoires() as $key => $echeancier) {
+                $somme += $echeancier->getMontant();
+            }
+            $verifExistenceInscription = $this->inscriptionRepository->findOneBy(['classe' => $value->getClasse(), 'etudiant' => $etudiant]);
+
+            if ($verifExistenceInscription == null) {
+                if ($somme == (int)$value->getTotal()) {
+
+                    $inscription = new Inscription();
+
+                    $inscription->setCaissiere($this->getUser());
+                    $inscription->setMontant($value->getTotal());
+                    $inscription->setNiveau($this->classeRepository->find($value->getClasse())->getNiveau());
+                    $inscription->setCode($this->numero($this->classeRepository->find($value->getClasse())->getNiveau()->getFiliere()->getCode()));
+                    $inscription->setClasse($value->getClasse());
+                    $inscription->setCodeUtilisateur($this->getUser()->getEmail());
+                    $inscription->setEtudiant($etudiant);
+                    $inscription->setEtat('valide');
+                    $inscription->setDateInscription($value->getDateInscription());
+                    $inscription->setTotalPaye('0');
+                    $this->inscriptionRepository->save($inscription, true);
+
+                    foreach ($value->getEcheancierProvisoires() as $key => $echeancier) {
+                        $echeancierReel = new Echeancier();
+                        $echeancierReel->setDateCreation(new DateTime());
+                        $echeancierReel->setEtat('pas_payer');
+                        $echeancierReel->setInscription($inscription);
+                        $echeancierReel->setMontant($echeancier->getMontant());
+                        $echeancierReel->setTotaPayer('0');
+                        $this->echeancierRepository->save($echeancierReel, true);
+                    }
+                    $response;
+                } else {
+                    $response = false;
+                }
+            }
+        }
+
+        return $response;
     }
 
 

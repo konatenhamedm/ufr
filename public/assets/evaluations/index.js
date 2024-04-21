@@ -221,7 +221,7 @@ function refresh() {
                 if (index > 0) {
                     index -= 1;
                 }
-
+                refreshColone();
                 e.preventDefault(); // évite qu'un # apparaisse dans l'URL
             });
         }

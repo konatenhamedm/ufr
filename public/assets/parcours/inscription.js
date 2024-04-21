@@ -1,13 +1,13 @@
 $(function () {
-    const $container = $('.proto-container_universitaire');
+    const $container = $('.proto-container_info_echeancier');
 
-    var index = $container.find('.row-colonne_universitaire').length;
+    var index = $container.find('.row-colonne_info_echeancier').length;
 
 
     $(document).on('select2:select', '.select-type', function (e) {
         const $this = $(this);
         let field_str = $this.find('option:selected').attr('data-require-fields');
-        const $parent = $this.closest('.row-colonne_universitaire');
+        const $parent = $this.closest('.row-colonne_info_echeancier');
         let fields = [];
         if (typeof field_str != 'undefined') {
             fields = field_str.split(',');
@@ -20,7 +20,7 @@ $(function () {
     });
 
 
-    const $addLink = $('.add_line_universitaire');
+    const $addLink = $('.add_line_info_echeancier');
     $addLink.click(function(e) {
         const $this  = $(this);
         const proto_class = $this.attr('data-protoclass');
@@ -37,7 +37,7 @@ $(function () {
     });
 
     if (index > 0) {
-        $container.children('.row-colonne_universitaire').each(function() {
+        $container.children('.row-colonne_info_echeancier').each(function() {
             const $this = $(this);
             addDeleteLink($this);
             const $select = $this.find("select");
@@ -46,10 +46,10 @@ $(function () {
 
             $select.each(function() {
                 const $this = $(this);
-                init_select2($this, null, '#exampleModalSizeSm2');
+                init_select2($this, null, '.document');
                 if ($this.hasClass('select-type')) {
                     let field_str = $this.find('option:selected').attr('data-require-fields');
-                    const $parent = $this.closest('.row-colonne_universitaire');
+                    const $parent = $this.closest('.row-colonne_info_echeancier');
                     let fields = [];
                     if (typeof field_str != 'undefined') {
                         fields = field_str.split(',');
@@ -80,13 +80,13 @@ $(function () {
             .replace(new RegExp(name, 'g'), index));
 
 
-        init_select2($prototype.find('select'), null, '#exampleModalSizeSm2');
+        init_select2($prototype.find('select'), null );
 
 
         // On ajoute au prototype un lien pour pouvoir supprimer la prestation
         addDeleteLink($prototype, name);
         // On ajoute le prototype modifié à la fin de la balise <div>
-        $container.prepend($prototype);
+        $container.after($prototype);
 
         index++;
     }
@@ -96,7 +96,7 @@ $(function () {
         // Création du lien
         $deleteLink = $('<a href="#" class="btn btn-danger btn-xs" style="margin-top: 21px"><span class="fa fa-trash"></span></a>');
         // Ajout du lien
-        $prototype.find(".del-col_universitaire").append($deleteLink);
+        $prototype.find(".del-col_info_echeancier").append($deleteLink);
 
 
 

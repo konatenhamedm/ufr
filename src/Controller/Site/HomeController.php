@@ -4,10 +4,15 @@ namespace App\Controller\Site;
 
 use App\Controller\FileTrait;
 use App\DTO\InscriptionDTO;
+use App\Entity\BlocEcheancier;
+use App\Entity\Classe;
+use App\Entity\Echeancier;
+use App\Entity\EcheancierProvisoire;
 use App\Entity\Employe;
 use App\Entity\Etudiant;
 use App\Entity\Fonction;
 use App\Entity\InfoEtudiant;
+use App\Entity\InfoInscription;
 use App\Entity\Inscription;
 use App\Entity\NiveauEtudiant;
 use App\Entity\Pays;
@@ -15,17 +20,26 @@ use App\Entity\Preinscription;
 use App\Entity\Utilisateur;
 use App\Entity\UtilisateurGroupe;
 use App\Form\CiviliteType;
+use App\Form\EtudiantAdminNewType;
+use App\Form\EtudiantAdminType;
 use App\Form\EtudiantDocumentType;
 use App\Form\EtudiantType;
+use App\Form\InscriptionPayementType;
 use App\Form\RegisterType;
 use App\Form\UtilisateurInscriptionSimpleType;
 use App\Form\UtilisateurInscriptionType;
 use App\Form\UtilisateurType;
+use App\Repository\ClasseRepository;
+use App\Repository\EcheancierRepository;
 use App\Repository\EmployeRepository;
 use App\Repository\EtudiantRepository;
 use App\Repository\FiliereRepository;
 use App\Repository\FonctionRepository;
+use App\Repository\FraisInscriptionRepository;
+use App\Repository\FraisRepository;
 use App\Repository\GroupeRepository;
+use App\Repository\InscriptionRepository;
+use App\Repository\NaturePaiementRepository;
 use App\Repository\NiveauEtudiantRepository;
 use App\Repository\NiveauRepository;
 use App\Repository\PaysRepository;
@@ -37,8 +51,10 @@ use App\Security\LoginFormAuthenticator;
 use App\Service\ActionRender;
 use App\Service\FormError;
 use App\Service\SendMailService;
+use App\Service\Service;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\QueryBuilder;
 use Omines\DataTablesBundle\Adapter\Doctrine\ORMAdapter;
 use Omines\DataTablesBundle\Column\TextColumn;
 use Omines\DataTablesBundle\DataTableFactory;
@@ -338,7 +354,7 @@ class HomeController extends AbstractController
         if ($form->isSubmitted()) {
             $response = [];
             $redirect = $this->generateUrl('site_information');
-            $data = $preinscriptionRepository->findBy(array('etudiant' => $etudiant, 'etat' => 'attente_informations'));
+            $datas = $preinscriptionRepository->findBy(array('etudiant' => $etudiant, 'etat' => 'attente_informations'));
 
 
 
@@ -350,7 +366,7 @@ class HomeController extends AbstractController
                     $message       = 'Votre dossier a bien été transmis pour validation. Vous recevrez une notification après traitement.';
                     $etudiantRepository->add($etudiant, true);
 
-                    foreach ($data as $key => $value) {
+                    foreach ($datas as $key => $value) {
                         $value->setEtat('attente_validation');
                         $preinscriptionRepository->add($value, true);
                     }
@@ -466,273 +482,6 @@ class HomeController extends AbstractController
 
         //return $this->render('site/admin/pages/informations.html.twig');
     }
-    #[Route(path: '/site/save/data', name: 'site_save_data')]
-    public function savedata(Request $request, PaysRepository $paysRepository): Response
-    {
-
-
-        $tab = [
-            ["val0" => "Afghanistan "],
-            ["val0" => "Afrique du Sud "],
-            ["val0" => "Åland (les Îles)"],
-            ["val0" => "Albanie "],
-            ["val0" => "Algérie "],
-            ["val0" => "Allemagne "],
-            ["val0" => "Andorre "],
-            ["val0" => "Angola "],
-            ["val0" => "Anguilla"],
-            ["val0" => "Antarctique "],
-            ["val0" => "Antigua-et-Barbuda"],
-            ["val0" => "Arabie saoudite "],
-            ["val0" => "Argentine "],
-            ["val0" => "Arménie "],
-            ["val0" => "Aruba"],
-            ["val0" => "Australie "],
-            ["val0" => "Autriche "],
-            ["val0" => "Azerbaïdjan "],
-            ["val0" => "Bahamas "],
-            ["val0" => "Bahreïn"],
-            ["val0" => "Bangladesh "],
-            ["val0" => "Barbade "],
-            ["val0" => "Bélarus "],
-            ["val0" => "Belgique "],
-            ["val0" => "Belize "],
-            ["val0" => "Bénin "],
-            ["val0" => "Bermudes "],
-            ["val0" => "Bhoutan "],
-            ["val0" => "Bolivie (État plurinational de)"],
-            ["val0" => "Bonaire, Saint-Eustache et Saba"],
-            ["val0" => "Bosnie-Herzégovine "],
-            ["val0" => "Botswana "],
-            ["val0" => "Bouvet (l'Île)"],
-            ["val0" => "Brésil "],
-            ["val0" => "Brunéi Darussalam "],
-            ["val0" => "Bulgarie "],
-            ["val0" => "Burkina Faso "],
-            ["val0" => "Burundi "],
-            ["val0" => "Cabo Verde"],
-            ["val0" => "Caïmans (les Îles)"],
-            ["val0" => "Cambodge "],
-            ["val0" => "Cameroun "],
-            ["val0" => "Canada "],
-            ["val0" => "Chili "],
-            ["val0" => "Chine "],
-            ["val0" => "Christmas (l'Île)"],
-            ["val0" => "Chypre"],
-            ["val0" => "Cocos (les Îles) / Keeling (les Îles)"],
-            ["val0" => "Colombie "],
-            ["val0" => "Comores "],
-            ["val0" => "Congo "],
-            ["val0" => "Congo (la République démocratique du)"],
-            ["val0" => "Cook (les Îles)"],
-            ["val0" => "Corée (la République de)"],
-            ["val0" => "Corée (la République populaire démocratique de)"],
-            ["val0" => "Costa Rica "],
-            ["val0" => "Côte d'Ivoire "],
-            ["val0" => "Croatie "],
-            ["val0" => "Cuba"],
-            ["val0" => "Curaçao"],
-            ["val0" => "Danemark "],
-            ["val0" => "Djibouti"],
-            ["val0" => "dominicaine (la République)"],
-            ["val0" => "Dominique "],
-            ["val0" => "Égypte "],
-            ["val0" => "El Salvador"],
-            ["val0" => "Émirats arabes unis "],
-            ["val0" => "Équateur "],
-            ["val0" => "Érythrée "],
-            ["val0" => "Espagne "],
-            ["val0" => "Estonie "],
-            ["val0" => "Eswatini "],
-            ["val0" => "États-Unis d'Amérique "],
-            ["val0" => "Éthiopie "],
-            ["val0" => "Falkland (les Îles) /Malouines (les Îles)"],
-            ["val0" => "Féroé (les Îles)"],
-            ["val0" => "Fidji "],
-            ["val0" => "Finlande "],
-            ["val0" => "France "],
-            ["val0" => "Gabon "],
-            ["val0" => "Gambie "],
-            ["val0" => "Géorgie "],
-            ["val0" => "Géorgie du Sud-et-les Îles Sandwich du Sud "],
-            ["val0" => "Ghana "],
-            ["val0" => "Gibraltar"],
-            ["val0" => "Grèce "],
-            ["val0" => "Grenade "],
-            ["val0" => "Groenland "],
-            ["val0" => "Guadeloupe "],
-            ["val0" => "Guam"],
-            ["val0" => "Guatemala "],
-            ["val0" => "Guernesey"],
-            ["val0" => "Guinée "],
-            ["val0" => "Guinée équatoriale "],
-            ["val0" => "Guinée-Bissau "],
-            ["val0" => "Guyana "],
-            ["val0" => "Guyane française (la)"],
-            ["val0" => "Haïti"],
-            ["val0" => "Heard-et-Îles MacDonald (l'Île)"],
-            ["val0" => "Honduras "],
-            ["val0" => "Hong Kong"],
-            ["val0" => "Hongrie "],
-            ["val0" => "Île de Man"],
-            ["val0" => "Îles mineures éloignées des États-Unis "],
-            ["val0" => "Inde "],
-            ["val0" => "Indien (le Territoire britannique de l'océan)"],
-            ["val0" => "Indonésie "],
-            ["val0" => "Iran (République Islamique d')"],
-            ["val0" => "Iraq "],
-            ["val0" => "Irlande "],
-            ["val0" => "Islande "],
-            ["val0" => "Israël"],
-            ["val0" => "Italie "],
-            ["val0" => "Jamaïque "],
-            ["val0" => "Japon "],
-            ["val0" => "Jersey"],
-            ["val0" => "Jordanie "],
-            ["val0" => "Kazakhstan "],
-            ["val0" => "Kenya "],
-            ["val0" => "Kirghizistan "],
-            ["val0" => "Kiribati"],
-            ["val0" => "Koweït "],
-            ["val0" => "Lao (la République démocratique populaire)"],
-            ["val0" => "Lesotho "],
-            ["val0" => "Lettonie "],
-            ["val0" => "Liban "],
-            ["val0" => "Libéria "],
-            ["val0" => "Libye "],
-            ["val0" => "Liechtenstein "],
-            ["val0" => "Lituanie "],
-            ["val0" => "Luxembourg "],
-            ["val0" => "Macao"],
-            ["val0" => "Macédoine du Nord "],
-            ["val0" => "Madagascar"],
-            ["val0" => "Malaisie "],
-            ["val0" => "Malawi "],
-            ["val0" => "Maldives "],
-            ["val0" => "Mali "],
-            ["val0" => "Malte"],
-            ["val0" => "Mariannes du Nord (les Îles)"],
-            ["val0" => "Maroc "],
-            ["val0" => "Marshall (les Îles)"],
-            ["val0" => "Martinique "],
-            ["val0" => "Maurice"],
-            ["val0" => "Mauritanie "],
-            ["val0" => "Mayotte"],
-            ["val0" => "Mexique "],
-            ["val0" => "Micronésie (États fédérés de)"],
-            ["val0" => "Moldavie (la République de)"],
-            ["val0" => "Monaco"],
-            ["val0" => "Mongolie "],
-            ["val0" => "Monténégro "],
-            ["val0" => "Montserrat"],
-            ["val0" => "Mozambique "],
-            ["val0" => "Myanmar "],
-            ["val0" => "Namibie "],
-            ["val0" => "Nauru"],
-            ["val0" => "Népal "],
-            ["val0" => "Nicaragua "],
-            ["val0" => "Niger "],
-            ["val0" => "Nigéria "],
-            ["val0" => "Niue"],
-            ["val0" => "Norfolk (l'Île)"],
-            ["val0" => "Norvège "],
-            ["val0" => "Nouvelle-Calédonie "],
-            ["val0" => "Nouvelle-Zélande "],
-            ["val0" => "Oman"],
-            ["val0" => "Ouganda "],
-            ["val0" => "Ouzbékistan "],
-            ["val0" => "Pakistan "],
-            ["val0" => "Palaos "],
-            ["val0" => "Palestine, État de"],
-            ["val0" => "Panama "],
-            ["val0" => "Papouasie-Nouvelle-Guinée "],
-            ["val0" => "Paraguay "],
-            ["val0" => "Pays-Bas "],
-            ["val0" => "Pérou "],
-            ["val0" => "Philippines "],
-            ["val0" => "Pitcairn"],
-            ["val0" => "Pologne "],
-            ["val0" => "Polynésie française "],
-            ["val0" => "Porto Rico"],
-            ["val0" => "Portugal "],
-            ["val0" => "Qatar "],
-            ["val0" => "République arabe syrienne "],
-            ["val0" => "République centrAfriqueine "],
-            ["val0" => "Réunion "],
-            ["val0" => "Roumanie "],
-            ["val0" => "Royaume-Uni de Grande-Bretagne et d'Irlande du Nord "],
-            ["val0" => "Russie (la Fédération de)"],
-            ["val0" => "Rwanda "],
-            ["val0" => "Sahara occidental"],
-            ["val0" => "Saint-Barthélemy"],
-            ["val0" => "Sainte-Hélène, Ascension et Tristan da Cunha"],
-            ["val0" => "Sainte-Lucie"],
-            ["val0" => "Saint-Kitts-et-Nevis"],
-            ["val0" => "Saint-Marin"],
-            ["val0" => "Saint-Martin (partie française)"],
-            ["val0" => "Saint-Martin (partie néerlandaise)"],
-            ["val0" => "Saint-Pierre-et-Miquelon"],
-            ["val0" => "Saint-Siège "],
-            ["val0" => "Saint-Vincent-et-les Grenadines"],
-            ["val0" => "Salomon (les Îles)"],
-            ["val0" => "Samoa "],
-            ["val0" => "Samoa américaines "],
-            ["val0" => "Sao Tomé-et-Principe"],
-            ["val0" => "Sénégal "],
-            ["val0" => "Serbie "],
-            ["val0" => "Seychelles "],
-            ["val0" => "Sierra Leone "],
-            ["val0" => "Singapour"],
-            ["val0" => "Slovaquie "],
-            ["val0" => "Slovénie "],
-            ["val0" => "Somalie "],
-            ["val0" => "Soudan "],
-            ["val0" => "Soudan du Sud "],
-            ["val0" => "Sri Lanka"],
-            ["val0" => "Suède "],
-            ["val0" => "Suisse "],
-            ["val0" => "Suriname "],
-            ["val0" => "Svalbard et l'Île Jan Mayen "],
-            ["val0" => "Tadjikistan "],
-            ["val0" => "Taïwan (Province de Chine)"],
-            ["val0" => "Tanzanie (la République-Unie de)"],
-            ["val0" => "Tchad "],
-            ["val0" => "Tchéquie "],
-            ["val0" => "Terres australes françaises "],
-            ["val0" => "Thaïlande "],
-            ["val0" => "Timor-Leste "],
-            ["val0" => "Togo "],
-            ["val0" => "Tokelau "],
-            ["val0" => "Tonga "],
-            ["val0" => "Trinité-et-Tobago "],
-            ["val0" => "Tunisie "],
-            ["val0" => "Turkménistan "],
-            ["val0" => "Turks-et-Caïcos (les Îles)"],
-            ["val0" => "Turquie "],
-            ["val0" => "Tuvalu "],
-            ["val0" => "Ukraine "],
-            ["val0" => "Uruguay "],
-            ["val0" => "Vanuatu "],
-            ["val0" => "Venezuela (République bolivarienne du)"],
-            ["val0" => "Vierges britanniques (les Îles)"],
-            ["val0" => "Vierges des États-Unis (les Îles)"],
-            ["val0" => "Viet Nam "],
-            ["val0" => "Wallis-et-Futuna"],
-            ["val0" => "Yémen "],
-            ["val0" => "Zambie "],
-            ["val0" => "Zimbabwe"],
-        ];
-
-        foreach ($tab as $item) {
-
-            $pays = new Pays();
-            $pays->setLibelle($item['val0']);
-            $this->em->persist($pays);
-            $this->em->flush();
-        }
-
-        return $this->json('success');
-    }
 
 
     #[Route('/inscription/etudiant/admin', name: 'app_inscription_etudiant_admin_index', methods: ['GET', 'POST'])]
@@ -740,16 +489,24 @@ class HomeController extends AbstractController
     {
         $table = $dataTableFactory->create()
             ->add('nom', TextColumn::class, ['label' => 'Nom'])
-            ->add('prenoms', TextColumn::class, ['label' => 'Prénoms'])
+            ->add('prenom', TextColumn::class, ['label' => 'Prénoms'])
             ->add('email', TextColumn::class, ['label' => 'Email',])
 
             ->createAdapter(ORMAdapter::class, [
                 'entity' => Etudiant::class,
+                'query' => function (QueryBuilder $qb) {
+                    $qb->select('etudiant')
+                        ->from(Etudiant::class, 'etudiant')
+                        ->orderBy('etudiant.id', 'DESC');
+                },
             ])
             ->setName('dt_app_inscription_etudiant_admin');
 
         $renders = [
             'edit' =>  new ActionRender(function () {
+                return true;
+            }),
+            'new' =>  new ActionRender(function () {
                 return true;
             }),
             'delete' => new ActionRender(function () {
@@ -783,6 +540,15 @@ class HomeController extends AbstractController
                                 'attrs' => ['class' => 'btn-main'],
                                 'render' => $renders['edit']
                             ],
+                            'new' => [
+                                'target' => '#exampleModalSizeSm2',
+                                'url' => $this->generateUrl('site_information_edit_new', ['id' => $value]),
+                                'ajax' => true,
+                                'stacked' => false,
+                                'icon' => '%icon% bi bi-plus-square',
+                                'attrs' => ['class' => 'btn-primary'],
+                                'render' => $renders['new']
+                            ],
                         ]
 
                     ];
@@ -805,21 +571,86 @@ class HomeController extends AbstractController
     }
 
 
+    #[Route('/all/frais/niveau/{id}', name: 'get_frais', methods: ['GET'])]
+    public function getmatiere(Request $request, FraisRepository  $fraisRepository, $id)
+    {
+        $response = new Response();
+        $tabFrais = array();
 
-    #[Route(path: '/site/information/new', name: 'site_information_new', methods: ['GET', 'POST'])]
+
+        // $id = $request->get('id');
+
+        if ($id) {
+
+
+            $frais = $fraisRepository->findBy(['niveau' => $id]);
+            // dd($frais);
+
+            $i = 0;
+
+            foreach ($frais as $e) {
+                // transformer la réponse de la requete en tableau qui remplira le select pour ensembles
+                $tabFrais[$i]['id'] = $e->getId();
+                $tabFrais[$i]['libelle'] = $e->getTypeFrais()->getLibelle();
+                $tabFrais[$i]['montant'] = $e->getMontant();
+
+                $i++;
+            }
+
+            $dataService = json_encode($tabFrais); // formater le résultat de la requête en json
+
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setContent($dataService);
+        }
+        return $response;
+    }
+
+
+    #[Route(path: '/site/information/new', name: 'site_information_admin_new', methods: ['GET', 'POST'])]
     public function informationAdmin(
         Request $request,
-        UserInterface $user,
         EtudiantRepository $etudiantRepository,
         PersonneRepository $personneRepository,
         FormError $formError,
         NiveauRepository $niveauRepository,
-        UtilisateurRepository $utilisateurRepository,
         PreinscriptionRepository $preinscriptionRepository,
+        FonctionRepository $fonctionRepository,
+        UtilisateurGroupeRepository $utilisateurGroupeRepository,
+        GroupeRepository $groupeRepository,
+        UtilisateurRepository $utilisateurRepository,
+        EntityManagerInterface $entityManager,
+        SendMailService $sendMailService,
+        UserPasswordHasherInterface $userPasswordHasher,
+        ClasseRepository $classeRepository,
+        InscriptionRepository $inscriptionRepository,
+        EcheancierRepository $echeancierRepository,
+        Service $service
         // Etudiant $etudiant
     ): Response {
         $etudiant = new Etudiant();
+        $etudiant->setDateNaissance(new DateTime());
         $info = new InfoEtudiant();
+        $sommeFrais = 0;
+        $frais = $classeRepository->find(1)->getNiveau()->getFrais();
+        //dd($frais->count());
+
+        foreach ($frais as $key => $value) {
+            $sommeFrais += (int)$value->getMontant();
+        }
+        $bloc_echeancier = new BlocEcheancier();
+
+        $bloc_echeancier->setClasse($classeRepository->find(1));
+        $bloc_echeancier->setDateInscription(new DateTime());
+        $bloc_echeancier->setTotal($sommeFrais);
+
+
+        $etudiant->addBlocEcheancier($bloc_echeancier);
+        $echeancierProvisoire = new EcheancierProvisoire();
+        $echeancierProvisoire->setDateVersement(new DateTime());
+        $echeancierProvisoire->setNumero('1');
+        $echeancierProvisoire->setMontant('100');
+
+        $bloc_echeancier->addEcheancierProvisoire($echeancierProvisoire);
 
         if (count($etudiant->getInfoEtudiants()) == 0) {
             $info->setTuteurNomPrenoms('');
@@ -842,15 +673,14 @@ class HomeController extends AbstractController
         $validationGroups = ['Default', 'FileRequired', 'autre'];
         //dd($niveauRepository->findNiveauDisponible(21));
 
-        $form = $this->createForm(EtudiantType::class, $etudiant, [
+        $form = $this->createForm(EtudiantAdminType::class, $etudiant, [
             'method' => 'POST',
-            'type' => 'info',
             'doc_options' => [
                 'uploadDir' => $this->getUploadDir(self::UPLOAD_PATH, true),
                 'attrs' => ['class' => 'filestyle'],
             ],
             'validation_groups' => $validationGroups,
-            'action' => $this->generateUrl('site_information_new')
+            'action' => $this->generateUrl('site_information_admin_new')
         ]);
 
         $data = null;
@@ -863,34 +693,84 @@ class HomeController extends AbstractController
 
         if ($form->isSubmitted()) {
             $response = [];
-            $redirect = $this->generateUrl('site_information_new');
-            $data = $preinscriptionRepository->findBy(array('etudiant' => $etudiant, 'etat' => 'attente_informations'));
+            $redirect = $this->generateUrl('app_inscription_etudiant_admin_index');
 
 
-
+            $blocEcheanciers = $form->get('blocEcheanciers')->getData();
 
             if ($form->isValid()) {
 
-                if ($form->getClickedButton()->getName() === 'valider') {
-                    $etudiant->setEtat('complete');
-                    $message       = 'Votre dossier a bien été transmis pour validation. Vous recevrez une notification après traitement.';
-                    $etudiantRepository->add($etudiant, true);
 
-                    foreach ($data as $key => $value) {
-                        $value->setEtat('attente_validation');
-                        $preinscriptionRepository->add($value, true);
+                if (filter_var($etudiant->getEmail(), FILTER_VALIDATE_EMAIL)) {
+
+                    $etudiant->setFonction($fonctionRepository->findOneBy(['code' => 'ETD']));
+                    $etudiant->setEtat('complete');
+                    $entityManager->persist($etudiant);
+                    $responseRegister = $service->registerEcheancierAdmin($blocEcheanciers, $etudiant);
+
+                    //dd($responseRegister);
+                    if ($responseRegister == true) {
+
+                        $entityManager->flush($etudiant);
+
+                        $utilisateur = new Utilisateur();
+                        $utilisateur->setPassword($userPasswordHasher->hashPassword($utilisateur, $etudiant->getNom() . '_' . 'password'));
+                        $utilisateur->addRole('ROLE_ETUDIANT');
+                        $utilisateur->setEmail($etudiant->getEmail());
+                        $utilisateur->setPersonne($etudiant);
+                        $utilisateur->setUsername($etudiant->getEmail());
+
+                        $utilisateurRepository->add($utilisateur, true);
+
+                        $groupe = new UtilisateurGroupe();
+
+                        $groupe->setUtilisateur($utilisateur);
+                        $groupe->setGroupe($groupeRepository->findOneBy(['libelle' => 'Etudiants']));
+                        $utilisateurGroupeRepository->add($groupe, true);
+
+                        $info_user = [
+                            'login' => $etudiant->getEmail(),
+                            'password' => $etudiant->getNom() . '_' . 'password'
+                        ];
+
+                        $context = compact('info_user');
+
+                        // TO DO
+                        $sendMailService->send(
+                            'konatenhamed@ufrseg.enig-sarl.com',
+                            $etudiant->getEmail(),
+                            'Informations',
+                            'content_mail',
+                            $context
+                        );
+                        $statut = 1;
+                        $message       = 'Opération effectuée avec succès';
+                        $this->addFlash('success', $message);
+                    } else {
+                        $statut = 0;
+                        $message       = "Opération échouée car le montant total à payer est different du montant total de l 'échanece";
+                        $this->addFlash('danger', $message);
                     }
-                } else {
-                    $etudiantRepository->add($etudiant, true);
+
+
+
+
+
+                    /*  $statut = 1;
                     $message       = 'Opération effectuée avec succès';
+                    $this->addFlash('success', $message); */
+                } else {
+                    $statut = 0;
+                    $message       = 'Opération échouée car le mail est invalide';
+                    $this->addFlash('danger', $message);
                 }
 
 
 
                 $data = true;
+                //$message       = 'Opération effectuée avec succès';
+                //$statut = 1;
 
-                $statut = 1;
-                $this->addFlash('success', $message);
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
@@ -911,26 +791,55 @@ class HomeController extends AbstractController
 
         return $this->render('site/admin/informations_admin.html.twig', [
             'etudiant' => $etudiant,
-            'etat' => 'ok',
             'form' => $form->createView(),
+            'frais' => 3,
         ]);
 
         //return $this->render('site/admin/pages/informations.html.twig');
     }
 
-    #[Route(path: '/site/information/edit{id}', name: 'site_information_edit', methods: ['GET', 'POST'])]
+    #[Route(path: '/site/information/edit/{id}', name: 'site_information_edit', methods: ['GET', 'POST'])]
     public function informationAdminEdit(
         Request $request,
-        UserInterface $user,
         EtudiantRepository $etudiantRepository,
         PersonneRepository $personneRepository,
         FormError $formError,
         NiveauRepository $niveauRepository,
         UtilisateurRepository $utilisateurRepository,
         PreinscriptionRepository $preinscriptionRepository,
-        Etudiant $etudiant
+        Etudiant $etudiant,
+        SendMailService $sendMailService,
+        UserPasswordHasherInterface $userPasswordHasher,
+        ClasseRepository $classeRepository,
+        InscriptionRepository $inscriptionRepository,
+        EcheancierRepository $echeancierRepository,
+        EntityManagerInterface $entityManager,
+        Service $service
     ): Response {
 
+
+
+
+        if (count($etudiant->getBlocEcheanciers()) == 0) {
+
+            /* foreach ($frais as $key => $value) {
+            $sommeFrais += (int)$value->getMontant();
+        } */
+            $bloc_echeancier = new BlocEcheancier();
+
+            $bloc_echeancier->setClasse($classeRepository->find(1));
+            $bloc_echeancier->setDateInscription(new DateTime());
+            $bloc_echeancier->setTotal('0');
+
+
+            $etudiant->addBlocEcheancier($bloc_echeancier);
+            $echeancierProvisoire = new EcheancierProvisoire();
+            $echeancierProvisoire->setDateVersement(new DateTime());
+            $echeancierProvisoire->setNumero('1');
+            $echeancierProvisoire->setMontant('0');
+
+            $bloc_echeancier->addEcheancierProvisoire($echeancierProvisoire);
+        }
         $info = new InfoEtudiant();
 
         if (count($etudiant->getInfoEtudiants()) == 0) {
@@ -954,9 +863,8 @@ class HomeController extends AbstractController
         $validationGroups = ['Default', 'FileRequired', 'autre'];
         //dd($niveauRepository->findNiveauDisponible(21));
 
-        $form = $this->createForm(EtudiantType::class, $etudiant, [
+        $form = $this->createForm(EtudiantAdminType::class, $etudiant, [
             'method' => 'POST',
-            'type' => 'info',
             'doc_options' => [
                 'uploadDir' => $this->getUploadDir(self::UPLOAD_PATH, true),
                 'attrs' => ['class' => 'filestyle'],
@@ -977,34 +885,57 @@ class HomeController extends AbstractController
 
         if ($form->isSubmitted()) {
             $response = [];
-            $redirect = $this->generateUrl('site_information_new');
-            $data = $preinscriptionRepository->findBy(array('etudiant' => $etudiant, 'etat' => 'attente_informations'));
+            $redirect = $this->generateUrl('app_inscription_etudiant_admin_index');
 
-
-
+            $user = $utilisateurRepository->findOneBy(['personne' => $etudiant]);
+            $blocEcheanciers = $form->get('blocEcheanciers')->getData();
 
             if ($form->isValid()) {
 
-                if ($form->getClickedButton()->getName() === 'valider') {
-                    $etudiant->setEtat('complete');
-                    $message       = 'Votre dossier a bien été transmis pour validation. Vous recevrez une notification après traitement.';
-                    $etudiantRepository->add($etudiant, true);
+                //dd(filter_var($etudiant->getEmail(), FILTER_VALIDATE_EMAIL));
 
-                    foreach ($data as $key => $value) {
-                        $value->setEtat('attente_validation');
-                        $preinscriptionRepository->add($value, true);
+
+                if (filter_var($etudiant->getEmail(), FILTER_VALIDATE_EMAIL)) {
+
+                    $entityManager->persist($etudiant);
+                    $responseRegister = $service->registerEcheancierAdmin($blocEcheanciers, $etudiant);
+
+                    if ($responseRegister) {
+                        $entityManager->flush();
+
+                        $user->setEmail($etudiant->getEmail());
+                        $utilisateurRepository->add($user, true);
+                        $info_user = [
+                            'login' => $etudiant->getEmail(),
+                            'password' => $etudiant->getNom() . '_' . 'password'
+                        ];
+
+                        $context = compact('info_user');
+                        // TO DO
+                        $sendMailService->send(
+                            'konatenhamed@ufrseg.enig-sarl.com',
+                            $etudiant->getEmail(),
+                            'Informations',
+                            'content_mail',
+                            $context
+                        );
+                        $statut = 1;
+                        $message       = 'Opération effectuée avec succès';
+                        $this->addFlash('success', $message);
+                    } else {
+                        $statut = 0;
+                        $message       = "Opération échouée car le montant total à payer est different du montant total de l 'échanece";
+                        $this->addFlash('danger', $message);
                     }
+
+                    $this->addFlash('success', $message);
                 } else {
-                    $etudiantRepository->add($etudiant, true);
-                    $message       = 'Opération effectuée avec succès';
+                    $statut = 0;
+                    $message       = 'Opération échouée car le mail est invalide';
+                    $this->addFlash('danger', $message);
                 }
 
-
-
                 $data = true;
-
-                $statut = 1;
-                $this->addFlash('success', $message);
             } else {
                 $message = $formError->all($form);
                 $statut = 0;
@@ -1027,6 +958,145 @@ class HomeController extends AbstractController
             'etudiant' => $etudiant,
             'etat' => 'ok',
             'form' => $form->createView(),
+            'frais' => 3,
+        ]);
+
+        //return $this->render('site/admin/pages/informations.html.twig');
+    }
+    #[Route(path: '/site/information/new/{id}', name: 'site_information_edit_new', methods: ['GET', 'POST'])]
+    public function informationAdminNewEdit(
+        Request $request,
+        EtudiantRepository $etudiantRepository,
+        PersonneRepository $personneRepository,
+        FormError $formError,
+        NiveauRepository $niveauRepository,
+        UtilisateurRepository $utilisateurRepository,
+        PreinscriptionRepository $preinscriptionRepository,
+        $id,
+        SendMailService $sendMailService,
+        UserPasswordHasherInterface $userPasswordHasher,
+        ClasseRepository $classeRepository,
+        InscriptionRepository $inscriptionRepository,
+        EcheancierRepository $echeancierRepository,
+        EntityManagerInterface $entityManager,
+        Service $service
+    ): Response {
+
+        $etudiant = new Etudiant();
+
+
+        if (count($etudiant->getBlocEcheanciers()) == 0) {
+
+            /* foreach ($frais as $key => $value) {
+            $sommeFrais += (int)$value->getMontant();
+        } */
+            $bloc_echeancier = new BlocEcheancier();
+
+            $bloc_echeancier->setClasse($classeRepository->find(1));
+            $bloc_echeancier->setDateInscription(new DateTime());
+            $bloc_echeancier->setTotal('0');
+
+
+            $etudiant->addBlocEcheancier($bloc_echeancier);
+            $echeancierProvisoire = new EcheancierProvisoire();
+            $echeancierProvisoire->setDateVersement(new DateTime());
+            $echeancierProvisoire->setNumero('1');
+            $echeancierProvisoire->setMontant('0');
+
+            $bloc_echeancier->addEcheancierProvisoire($echeancierProvisoire);
+        }
+        $info = new InfoEtudiant();
+
+        if (count($etudiant->getInfoEtudiants()) == 0) {
+            $info->setTuteurNomPrenoms('');
+            $info->setTuteurFonction('');
+            $info->setTuteurContact('');
+            $info->setTuteurDomicile('');
+            $info->setTuteurEmail('');
+
+            $info->setCorresNomPrenoms('');
+            $info->setCorresFonction('');
+            $info->setCorresContacts('');
+            $info->setCorresDomicile('');
+            $info->setCorresEmail('');
+
+            $etudiant->addInfoEtudiant($info);
+        }
+
+
+
+        $validationGroups = ['Default', 'FileRequired', 'autre'];
+        //dd($niveauRepository->findNiveauDisponible(21));
+
+        $form = $this->createForm(EtudiantAdminNewType::class, $etudiant, [
+            'method' => 'POST',
+            'doc_options' => [
+                'uploadDir' => $this->getUploadDir(self::UPLOAD_PATH, true),
+                'attrs' => ['class' => 'filestyle'],
+            ],
+            'validation_groups' => $validationGroups,
+            'action' => $this->generateUrl('site_information_edit_new', [
+                'id' =>  $id
+            ])
+        ]);
+
+        $data = null;
+        $statutCode = Response::HTTP_OK;
+
+        $isAjax = $request->isXmlHttpRequest();
+
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            $response = [];
+            $redirect = $this->generateUrl('app_inscription_etudiant_admin_index');
+
+            $user = $utilisateurRepository->findOneBy(['personne' => $etudiant]);
+            $blocEcheanciers = $form->get('blocEcheanciers')->getData();
+
+            if ($form->isValid()) {
+
+                //dd(filter_var($etudiant->getEmail(), FILTER_VALIDATE_EMAIL));
+
+                $responseRegister = $service->registerEcheancierAdmin($blocEcheanciers, $etudiantRepository->find($id));
+
+                if ($responseRegister) {
+                    $etudiantRepository->add($etudiantRepository->find($id), true);
+                    $statut = 1;
+                    $message       = 'Opération effectuée avec succès';
+                    $this->addFlash('success', $message);
+                } else {
+                    $statut = 0;
+                    $message       = "Opération échouée car le montant total à payer est different du montant total de l 'échanece";
+                    $this->addFlash('danger', $message);
+                }
+
+
+                $data = true;
+            } else {
+                $message = $formError->all($form);
+                $statut = 0;
+                $statutCode = 500;
+                if (!$isAjax) {
+                    $this->addFlash('warning', $message);
+                }
+            }
+
+            if ($isAjax) {
+                return $this->json(compact('statut', 'message', 'redirect', 'data'), $statutCode);
+            } else {
+                if ($statut == 1) {
+                    return $this->redirect($redirect, Response::HTTP_OK);
+                }
+            }
+        }
+
+        return $this->render('site/admin/new.html.twig', [
+            'etudiant' => $etudiant,
+            'etat' => 'ok',
+            'form' => $form->createView(),
+            'frais' => 3,
         ]);
 
         //return $this->render('site/admin/pages/informations.html.twig');
@@ -1091,7 +1161,7 @@ class HomeController extends AbstractController
                         $paiement->setCaissiere($this->getUser());
                         $paiement->setModePaiement($mode);
                         $paiement->setMontant($echeancier->getMontant());
-                        $paiement->setEchenacier($echeancier);
+                        /// $paiement->setEchenacier($echeancier);
                         if ($mode->getCode() == 'CHQ') {
 
                             $paiement->setNumeroCheque($form->get('numeroCheque')->getData());

@@ -33,11 +33,17 @@ class Classe
     #[ORM\OneToMany(mappedBy: 'classe', targetEntity: Controle::class)]
     private Collection $controles;
 
+    #[ORM\OneToMany(mappedBy: 'classe', targetEntity: BlocEcheancier::class)]
+    private Collection $blocEcheanciers;
+
+
+
     public function __construct()
     {
         $this->cours = new ArrayCollection();
         $this->inscriptions = new ArrayCollection();
         $this->controles = new ArrayCollection();
+        $this->blocEcheanciers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -165,6 +171,36 @@ class Classe
             // set the owning side to null (unless already changed)
             if ($controle->getClasse() === $this) {
                 $controle->setClasse(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BlocEcheancier>
+     */
+    public function getBlocEcheanciers(): Collection
+    {
+        return $this->blocEcheanciers;
+    }
+
+    public function addBlocEcheancier(BlocEcheancier $blocEcheancier): static
+    {
+        if (!$this->blocEcheanciers->contains($blocEcheancier)) {
+            $this->blocEcheanciers->add($blocEcheancier);
+            $blocEcheancier->setClasse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBlocEcheancier(BlocEcheancier $blocEcheancier): static
+    {
+        if ($this->blocEcheanciers->removeElement($blocEcheancier)) {
+            // set the owning side to null (unless already changed)
+            if ($blocEcheancier->getClasse() === $this) {
+                $blocEcheancier->setClasse(null);
             }
         }
 

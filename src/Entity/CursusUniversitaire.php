@@ -33,7 +33,7 @@ class CursusUniversitaire
     private ?string $mention = null;
 
     #[ORM\ManyToOne(inversedBy: 'cursusUniversitaires')]
-    private ?Personne $personne = null;
+    private ?Etudiant $etudiant = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Veuillez sélectionner un numéro diplome')]
@@ -149,14 +149,14 @@ class CursusUniversitaire
         return $this;
     }
 
-    public function getPersonne(): ?Personne
+    public function getEtudiant(): ?Etudiant
     {
-        return $this->personne;
+        return $this->etudiant;
     }
 
-    public function setPersonne(?Personne $personne): static
+    public function setEtudiant(?Etudiant $etudiant): static
     {
-        $this->personne = $personne;
+        $this->etudiant = $etudiant;
 
         return $this;
     }

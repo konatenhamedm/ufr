@@ -23,7 +23,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
     'employe' => Employe::class,
     'etudiant' => Etudiant::class
 ])]
-//#[UniqueEntity(['email'], message: 'Cet email est déjà utilisé')]
+#[UniqueEntity(['email'], message: 'Cet email est déjà utilisé')]
 class Personne
 {
     #[ORM\Id]
@@ -32,15 +32,12 @@ class Personne
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
-    #[Assert\NotBlank(message: 'Veuillez renseigner le nom')]
     private ?string $nom = null;
 
     #[ORM\Column(length: 150)]
-    #[Assert\NotBlank(message: 'Veuillez renseigner les prénoms')]
     private ?string $prenom = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    //#[Assert\NotBlank(message: 'Veuillez renseigner la date de naissance')]
+    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: false)]
     private ?\DateTimeInterface $dateNaissance = null;
 
     #[ORM\Column(length: 100)]
@@ -48,7 +45,6 @@ class Personne
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true)]
-    #[Assert\NotBlank(message: 'Veuillez sélectionner le sexe')]
     private ?Genre $genre = null;
 
     #[ORM\ManyToOne]
@@ -58,13 +54,12 @@ class Personne
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotBlank(message: 'Veuillez sélectionner une fonction')]
     private ?Fonction $fonction = null;
 
     #[ORM\OneToOne(mappedBy: 'personne', cascade: ['persist', 'remove'])]
     private ?Utilisateur $utilisateur = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $email = null;
 
     #[ORM\Column(length: 50, nullable: true)]
@@ -73,21 +68,11 @@ class Personne
     /*   #[ORM\OneToMany(mappedBy: 'personne', targetEntity: Document::class, orphanRemoval: true, cascade: ['persist'])]
     private Collection $documents; */
 
-    #[ORM\OneToMany(mappedBy: 'personne', targetEntity: CursusUniversitaire::class, orphanRemoval: true, cascade: ['persist'])]
-    private Collection $cursusUniversitaires;
-
-    #[ORM\OneToMany(mappedBy: 'personne', targetEntity: CursusProfessionnel::class, orphanRemoval: true, cascade: ['persist'])]
-    private Collection $cursusProfessionnels;
-
-    #[ORM\OneToMany(mappedBy: 'personne', targetEntity: Stage::class, orphanRemoval: true, cascade: ['persist'])]
-    private Collection $stages;
 
     public function __construct()
     {
         // $this->documents = new ArrayCollection();
-        $this->cursusUniversitaires = new ArrayCollection();
-        $this->cursusProfessionnels = new ArrayCollection();
-        $this->stages = new ArrayCollection();
+
     }
 
     public function getId(): ?int
@@ -223,97 +208,6 @@ class Personne
     public function setContact(string $contact): static
     {
         $this->contact = $contact;
-
-        return $this;
-    }
-
-
-    /**
-     * @return Collection<int, CursusUniversitaire>
-     */
-    public function getCursusUniversitaires(): Collection
-    {
-        return $this->cursusUniversitaires;
-    }
-
-    public function addCursusUniversitaire(CursusUniversitaire $cursusUniversitaire): static
-    {
-        if (!$this->cursusUniversitaires->contains($cursusUniversitaire)) {
-            $this->cursusUniversitaires->add($cursusUniversitaire);
-            $cursusUniversitaire->setPersonne($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCursusUniversitaire(CursusUniversitaire $cursusUniversitaire): static
-    {
-        if ($this->cursusUniversitaires->removeElement($cursusUniversitaire)) {
-            // set the owning side to null (unless already changed)
-            if ($cursusUniversitaire->getPersonne() === $this) {
-                $cursusUniversitaire->setPersonne(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, CursusProfessionnel>
-     */
-    public function getCursusProfessionnels(): Collection
-    {
-        return $this->cursusProfessionnels;
-    }
-
-    public function addCursusProfessionnel(CursusProfessionnel $cursusProfessionnel): static
-    {
-        if (!$this->cursusProfessionnels->contains($cursusProfessionnel)) {
-            $this->cursusProfessionnels->add($cursusProfessionnel);
-            $cursusProfessionnel->setPersonne($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCursusProfessionnel(CursusProfessionnel $cursusProfessionnel): static
-    {
-        if ($this->cursusProfessionnels->removeElement($cursusProfessionnel)) {
-            // set the owning side to null (unless already changed)
-            if ($cursusProfessionnel->getPersonne() === $this) {
-                $cursusProfessionnel->setPersonne(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Stage>
-     */
-    public function getStages(): Collection
-    {
-        return $this->stages;
-    }
-
-    public function addStage(Stage $stage): static
-    {
-        if (!$this->stages->contains($stage)) {
-            $this->stages->add($stage);
-            $stage->setPersonne($this);
-        }
-
-        return $this;
-    }
-
-    public function removeStage(Stage $stage): static
-    {
-        if ($this->stages->removeElement($stage)) {
-            // set the owning side to null (unless already changed)
-            if ($stage->getPersonne() === $this) {
-                $stage->setPersonne(null);
-            }
-        }
 
         return $this;
     }

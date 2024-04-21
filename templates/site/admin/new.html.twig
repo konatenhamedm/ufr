@@ -1,0 +1,92 @@
+{% block page_content %}
+    {% form_theme form 'widget/fields-block.html.twig' %}
+     {% from '_macros/macro_inscription_echeancier.html.twig' import prototype_ligne_colonne_info_echeancier_echenacier %}
+    <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Création d'une écheance</h5>
+        <div class="btn btn-icon btn-sm  ms-2" data-bs-dismiss="modal" aria-label="Close">
+            <span class="svg-icon svg-icon-2x text-white">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<rect opacity="0.5" x="6" y="17.3137" width="16" height="2" rx="1" transform="rotate(-45 6 17.3137)" fill="currentColor"></rect>
+					<rect x="7.41422" y="6" width="16" height="2" rx="1" transform="rotate(45 7.41422 6)" fill="currentColor"></rect>
+				</svg>
+            </span>
+        </div>
+    </div>
+    {{ form_start(form, {'attr': {'role':'form', 'class': 'form'}}) }}
+    <div class="modal-body">
+        {{ include('_includes/ajax/response.html.twig') }}
+        {{ prototype_ligne_colonne_info_echeancier_echenacier(form,frais) }}
+    </div>
+    <div class="modal-footer">
+        {# {{ include('_includes/ajax/loader.html.twig') }} #}
+        <button type="button" class="btn btn-default btn-sm" data-bs-dismiss="modal">Annuler</button>
+        <button type="submit" class="btn btn-main btn-ajax btn-sm"><span class="spinner-border d-none  spinner-ajax spinner-border-sm" role="status" aria-hidden="true"></span> Valider</button>
+    </div>
+      {{ form_widget(form._token) }}
+            {{ form_end(form, {render_rest: false}) }}
+{% endblock %}
+
+{% block java %}
+<script src="{{ asset('assets/parcours/inscription.js') }}"></script>
+<script src="{{ asset('assets/parcours/echeancier.js') }}"></script>
+    <script>
+        $(function () {
+            init_select2('select');
+               const $form_content = $(`#exampleModalSizeSm2`).find('.place_frais');
+     function load_content(id) {
+
+ var resIntervention;
+
+ var somme=0;
+        
+                $.ajax({
+                    url:  '/all/frais/niveau/'+id,
+                    method: 'GET',
+                      async: false,
+                    dataType: 'json',
+                  //  data:id,
+              
+                 
+                    success: function(json){
+                        
+                        $('.place_frais').html('')
+                        $.each(json, function(index, value) { // et une boucle sur la réponse contenu dans la variable passé à la function du success "json"       
+                             
+                            somme = somme + parseInt(value.montant)
+                          //  $("#"+ $('.matiere').attr("id")).append('<option value="'+ value.id +'"  >' + value.libelle +'</option>');
+                         // <option value="2" data-select2-id="select2-data-16283-qrxgsx">TP</option>
+                          resIntervention += ` 
+                           
+                            <div class="row">
+                                        <div class="col-md-3 mb-4">${value.libelle} :</div>
+                                        <div class="col-md-9 mb-4"><input class="form-control form-control-sm input-money input-mnt" type="text"  name="etudiant_admin[blocEcheanciers][0][total]" required="required" value="${value.montant}"></div>
+                                        
+                                      </div>
+                        `;
+                        
+
+                          }); 
+                         $('.total').val(somme)
+                          
+                      
+
+                    }
+                });
+
+                 $form_content.html(resIntervention); 
+                          
+         
+        }
+
+        load_content($('.classe').val());
+     
+        $('.classe').on('change',function(){
+            const $this = $(this);
+
+            load_content($this.val());
+            
+        })
+        });
+       
+    </script>
+{% endblock %}

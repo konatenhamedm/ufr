@@ -34,14 +34,11 @@ class EtudiantType extends AbstractType
                     new NotNull(null, "S'il vous veillez renseigner le champs prénom")
                 )])
                 ->add('dateNaissance', DateType::class, [
-                    // 'widget' => 'single_text',
-                    "constraints" => array(
-                        new NotNull(null, "S'il vous veillez renseigner le champs date de naissance")
-                    ),
+                    'widget' => 'single_text',
                     'label'   => 'Date de naissance',
-                    'format'  => 'dd/MM/yyyy',
-                    'html5' => false,
-                    'attr' => ['class' => 'datepicker no-auto skip-init'], 'widget' => 'single_text',   /*'format' => 'yyyy-MM-dd',*/
+                    // 'format'  => 'dd/MM/yyyy',
+                    'html5' => true,
+                    //  'attr'    => ['autocomplete' => 'off', 'class' => 'datepicker no-auto'],
                 ])
                 ->add('lieuNaissance', TextType::class, ['label' => 'Lieu de naissance', 'required' => true, 'empty_data' => '', "constraints" => array(
                     new NotNull(null, "S'il vous veillez renseigner le champs lieu de  naissance")
@@ -100,7 +97,7 @@ class EtudiantType extends AbstractType
                     'label' => 'Genre',
                     'attr' => ['class' => 'has-select2']
                 ])
-                ->add('civilite', EntityType::class, [
+                /*  ->add('civilite', EntityType::class, [
                     'class' => Civilite::class,
                     'required' => false,
                     'placeholder' => '----',
@@ -108,7 +105,7 @@ class EtudiantType extends AbstractType
                     'choice_label' => 'libelle',
                     'label' => 'Civilité',
                     'attr' => ['class' => 'has-select2']
-                ])
+                ]) */
 
 
                 ->add('ville', TextType::class, ['label' => 'Ville', "constraints" => array(
@@ -265,15 +262,13 @@ class EtudiantType extends AbstractType
                     new NotNull(null, "S'il vous veillez renseigner le champs prénoms")
                 )])
                 ->add('dateNaissance', DateType::class, [
-                    // 'widget' => 'single_text',
-                    "constraints" => array(
-                        new NotNull(null, "S'il vous veillez renseigner le champs date naissance")
-                    ),
+                    'widget' => 'single_text',
                     'label'   => 'Date de naissance',
-                    'format'  => 'dd/MM/yyyy',
-                    'html5' => false,
-                    'attr' => ['class' => 'datepicker no-auto skip-init'], 'widget' => 'single_text',   /*'format' => 'yyyy-MM-dd',*/
+                    // 'format'  => 'dd/MM/yyyy',
+                    'html5' => true,
+                    //  'attr'    => ['autocomplete' => 'off', 'class' => 'datepicker no-auto'],
                 ])
+
                 ->add('lieuNaissance', TextType::class, ['label' => 'Lieu de naissance', 'required' => true, 'empty_data' => '', "constraints" => array(
                     new NotNull(null, "S'il vous veillez renseigner le champs lieu de  naissance")
                 ),])
@@ -292,7 +287,7 @@ class EtudiantType extends AbstractType
                     'label' => 'Sexe',
                     'attr' => ['class' => 'has-select2']
                 ])
-                ->add('civilite', EntityType::class, [
+                /*    ->add('civilite', EntityType::class, [
                     'class' => Civilite::class,
                     'required' => false,
                     'placeholder' => '----',
@@ -300,7 +295,7 @@ class EtudiantType extends AbstractType
                     'choice_label' => 'libelle',
                     'label' => 'Civilité',
                     'attr' => ['class' => 'has-select2']
-                ]);
+                ]) */;
         }
         $builder->add('valider', SubmitType::class, ['label' => 'ENVOYER A LA VALIDATION', 'attr' => ['class' => 'btn btn-danger btn-ajax']]);
         $builder->add('save', SubmitType::class, ['label' => 'Valider', 'attr' => ['class' => 'btn btn-main btn-ajax']]);
@@ -309,7 +304,7 @@ class EtudiantType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Etudiant::class,
+            'data_class' => Personne::class,
             'doc_required' => true,
             'doc_options' => [],
             'validation_groups' => [],

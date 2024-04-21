@@ -1,14 +1,15 @@
 {% extends 'base-layout.html.twig' %}
 
-{% block title %}Etudiants{% endblock %}
-{% block header %}Inscription{% endblock %}
+{% block title %}Liste des echeancier_provisoires{% endblock %}
+{% block header %}echeancier_provisoires{% endblock %}
 {% block breadcrumb %}{% endblock %}
 {% block body %}
 <div class="card shadow-sm">
     <div class="card-header card-header-sm">
-        <h3 class="card-title"> {{ title | default('Inscription étudiant') }}</h3>
+        <h3 class="card-title"> Liste des echeancier_provisoires</h3>
         <div class="card-toolbar">
-            <a href="{{ path('site_information_admin_new') }}" class="btn btn-main btn-sm">
+            <a href="{{ path('app_etudiant_echenacier_echeancier_provisoire_new') }}" class="btn btn-main btn-sm"  
+                data-bs-toggle="modal" data-bs-target="#modal-lg">
                 <i class="bi bi-plus-square text-light"></i>
                 Nouveau
             </a>
@@ -17,7 +18,7 @@
     <div class="card-body">
         <div class="row">
             <div class="col-sm-12">
-                <div id="grid_app_inscription_etudiant_admin" class="grid-dt-wrapper">Chargement....</div>
+                <div id="grid_app_etudiant_echenacier_echeancier_provisoire" class="grid-dt-wrapper">Chargement....</div>
             </div>
         </div>
     </div>
@@ -29,9 +30,9 @@
     <script src="{{ asset('assets/js/datatables.js') }}"></script>
     <script> 
         $(function() { 
-              $('#grid_app_inscription_etudiant_admin').initDataTables({{ datatable_settings(datatable) }}, {
+              $('#grid_app_etudiant_echenacier_echeancier_provisoire').initDataTables({{ datatable_settings(datatable) }}, {
                   searching: true,
-                  ajaxUrl: "{{ path('app_inscription_etudiant_admin_index') }}",
+                  ajaxUrl: "{{ path('app_etudiant_echenacier_echeancier_provisoire_index') }}",
                   language: {
                       url: asset_base_path + "/js/i18n/French.json"
                   }

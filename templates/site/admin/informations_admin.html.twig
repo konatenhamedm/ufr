@@ -8,6 +8,7 @@
    {% from '_macros/macro_info.html.twig' import prototype_ligne_colonne_info %}
    {% from '_macros/macro_cursus_professionnel.html.twig' import prototype_ligne_colonne_professionnel %}
    {% from '_macros/macro_cursus_stage.html.twig' import prototype_ligne_colonne_stage %}
+   {% from '_macros/macro_inscription_echeancier.html.twig' import prototype_ligne_colonne_info_echeancier_echenacier %}
 {% block body %}
     <div class="card shadow-sm">
         <div class="card-header card-header-sm">
@@ -20,7 +21,7 @@
                 </a>#}
             </div>
         </div>
-        <div class="card-body">
+        <div class="card-body " id="modal-lg">
             {% form_theme form 'widget/fields-block.html.twig' %}
             {{ form_start(form, {'attr': {'role':'form', 'class': 'form','enctype':'multipart/form-data'}}) }}
 
@@ -56,7 +57,7 @@
                         <div class="form-group  col-md-12 mb-2">{{ form_row(form.dateNaissance) }}</div>
                         <div class="form-group  col-md-12 mb-2">{{ form_row(form.lieuNaissance) }}</div>
                         <div class="form-group  col-md-12 mb-2">{{ form_row(form.genre) }}</div>
-                        <div class="form-group  col-md-12 mb-2">{{ form_row(form.civilite) }}</div>
+                        {# <div class="form-group  col-md-12 mb-2">{{ form_row(form.civilite) }}</div> #}
                     </div>
                 </div>
                 <div class="tab-pane fade" id="kt_tab_pane_2" role="tabpanel">
@@ -148,6 +149,7 @@
                     <br>
 
                      {{ prototype_ligne_colonne_document(form) }}
+                    
                     <br>
                    
 
@@ -159,16 +161,8 @@
                 
                 </div>
                 <div class="tab-pane fade" id="kt_tab_pane_7" role="tabpanel">
-                   <h1>Comptabilite</h1>
-
-                   <div class="row">
-                     <div class="col-md-6">
-                     <h1>kgkjdg</h1>
-                     </div>
-                     <div class="col-md-6">
-                     <h1>hvjhdgdh</h1>
-                     </div>
-                   </div>
+                   <h1>Comptabilite</h1><br>
+                    {{ prototype_ligne_colonne_info_echeancier_echenacier(form,frais) }}
                 </div>
 
 
@@ -198,14 +192,69 @@
 
 
 {% block java %}
+<script src="{{ asset('assets/parcours/professionnel.js') }}"></script>
 <script src="{{ asset('assets/parcours/universitaire.js') }}"></script>
 <script src="{{ asset('assets/parcours/info.js') }}"></script>
-<script src="{{ asset('assets/parcours/professionnel.js') }}"></script>
+<script src="{{ asset('assets/parcours/inscription.js') }}"></script>
+<script src="{{ asset('assets/parcours/echeancier.js') }}"></script>
 <script src="{{ asset('assets/parcours/stage.js') }}"></script>
 <script src="{{ asset('assets/parcours/document.js') }}"></script>
     <script>
-     const etat = "{{etudiant.etat}}";
+const etat = "{{etudiant.etat}}";
+            const $form_content = $(`#modal-lg`).find('.place_frais');
+     function load_content(id) {
 
+ var resIntervention;
+
+ var somme=0;
+        
+                $.ajax({
+                    url:  '/all/frais/niveau/'+id,
+                    method: 'GET',
+                      async: false,
+                    dataType: 'json',
+                  //  data:id,
+              
+                 
+                    success: function(json){
+                        
+                        $('.place_frais').html('')
+                        $.each(json, function(index, value) { // et une boucle sur la réponse contenu dans la variable passé à la function du success "json"       
+                             
+                            somme = somme + parseInt(value.montant)
+                          //  $("#"+ $('.matiere').attr("id")).append('<option value="'+ value.id +'"  >' + value.libelle +'</option>');
+                         // <option value="2" data-select2-id="select2-data-16283-qrxgsx">TP</option>
+                          resIntervention += ` 
+                           
+                            <div class="row">
+                                        <div class="col-md-3 mb-4">${value.libelle} :</div>
+                                        <div class="col-md-9 mb-4"><input class="form-control form-control-sm input-money input-mnt" type="text"  name="etudiant_admin[blocEcheanciers][0][total]" required="required" value="${value.montant}"></div>
+                                        
+                                      </div>
+                        `;
+                        
+
+                          }); 
+                         $('#etudiant_admin_blocEcheanciers_0_total').val(somme)
+                          
+                      
+
+                    }
+                });
+
+                 $form_content.html(resIntervention); 
+                          
+         
+        }
+
+        load_content($('#etudiant_admin_blocEcheanciers_0_classe').val());
+     
+        $('#etudiant_admin_blocEcheanciers_0_classe').on('change',function(){
+            const $this = $(this);
+
+            load_content($this.val());
+            
+        })
      $('#etudiant_infoEtudiants_0_habiteAvec_placeholder').closest( "label" ).hide()
 
      if(etat == "pas_complet"){
@@ -229,9 +278,9 @@
                 //$this.val(start.format('DD/MM/YYYY'));
             }, null, null, false);
 
-            $id.on('apply.daterangepicker', function (ev, picker) {
+            /*$id.on('apply.daterangepicker', function (ev, picker) {
                 $(this).val(picker.startDate.format('DD/MM/YYYY'));
-            });
+            });*/
         });
 
            if($("#etudiant_statutTravail_0").checked){

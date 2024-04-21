@@ -111,6 +111,17 @@ class Etudiant extends Personne
     #[ORM\OneToMany(mappedBy: 'etudiant', targetEntity: Document::class, orphanRemoval: true, cascade: ['persist'])]
     private Collection $documents;
 
+
+    #[ORM\OneToMany(mappedBy: 'etudiant', targetEntity: CursusUniversitaire::class, orphanRemoval: true, cascade: ['persist'])]
+    private  ?Collection $cursusUniversitaires;
+
+    #[ORM\OneToMany(mappedBy: 'etudiant', targetEntity: CursusProfessionnel::class, orphanRemoval: true, cascade: ['persist'])]
+    private Collection $cursusProfessionnels;
+
+    #[ORM\OneToMany(mappedBy: 'etudiant', targetEntity: Stage::class, orphanRemoval: true, cascade: ['persist'])]
+    private Collection $stages;
+
+
     #[ORM\OneToMany(mappedBy: 'etudiant', targetEntity: InfoEtudiant::class, orphanRemoval: true, cascade: ['persist'])]
     private Collection $infoEtudiants;
 
@@ -132,6 +143,11 @@ class Etudiant extends Personne
     #[ORM\Column(length: 255)]
     private ?string $statutEtudiant = null;
 
+    #[ORM\OneToMany(mappedBy: 'etudiant', targetEntity: BlocEcheancier::class, orphanRemoval: true, cascade: ['persist'])]
+    private Collection $blocEcheanciers;
+
+
+
     public function getNoms()
     {
         return $this->getNom();
@@ -149,6 +165,11 @@ class Etudiant extends Personne
         $this->moyenneMatieres = new ArrayCollection();
         $this->statutEtudiant = 'non';
         $this->statutTravail = 'non';
+
+        $this->cursusUniversitaires = new ArrayCollection();
+        $this->cursusProfessionnels = new ArrayCollection();
+        $this->stages = new ArrayCollection();
+        $this->blocEcheanciers = new ArrayCollection();
     }
 
     /**
@@ -660,6 +681,127 @@ class Etudiant extends Personne
     public function setStatutEtudiant(string $statutEtudiant): static
     {
         $this->statutEtudiant = $statutEtudiant;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CursusUniversitaire>
+     */
+    public function getCursusUniversitaires(): ?Collection
+    {
+        return $this->cursusUniversitaires;
+    }
+
+    public function addCursusUniversitaire(?CursusUniversitaire $cursusUniversitaire): static
+    {
+        if (!$this->cursusUniversitaires->contains($cursusUniversitaire)) {
+            $this->cursusUniversitaires->add($cursusUniversitaire);
+            $cursusUniversitaire->setEtudiant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCursusUniversitaire(?CursusUniversitaire $cursusUniversitaire): static
+    {
+        if ($this->cursusUniversitaires->removeElement($cursusUniversitaire)) {
+            // set the owning side to null (unless already changed)
+            if ($cursusUniversitaire->getEtudiant() === $this) {
+                $cursusUniversitaire->setEtudiant(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CursusProfessionnel>
+     */
+    public function getCursusProfessionnels(): Collection
+    {
+        return $this->cursusProfessionnels;
+    }
+
+    public function addCursusProfessionnel(CursusProfessionnel $cursusProfessionnel): static
+    {
+        //dd('');
+        if (!$this->cursusProfessionnels->contains($cursusProfessionnel)) {
+            $this->cursusProfessionnels->add($cursusProfessionnel);
+            $cursusProfessionnel->setEtudiant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCursusProfessionnel(CursusProfessionnel $cursusProfessionnel): static
+    {
+        if ($this->cursusProfessionnels->removeElement($cursusProfessionnel)) {
+            // set the owning side to null (unless already changed)
+            if ($cursusProfessionnel->getEtudiant() === $this) {
+                $cursusProfessionnel->setEtudiant(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Stage>
+     */
+    public function getStages(): Collection
+    {
+        return $this->stages;
+    }
+
+    public function addStage(Stage $stage): static
+    {
+        if (!$this->stages->contains($stage)) {
+            $this->stages->add($stage);
+            $stage->setEtudiant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStage(Stage $stage): static
+    {
+        if ($this->stages->removeElement($stage)) {
+            // set the owning side to null (unless already changed)
+            if ($stage->getEtudiant() === $this) {
+                $stage->setEtudiant(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BlocEcheancier>
+     */
+    public function getBlocEcheanciers(): Collection
+    {
+        return $this->blocEcheanciers;
+    }
+
+    public function addBlocEcheancier(BlocEcheancier $blocEcheancier): static
+    {
+        if (!$this->blocEcheanciers->contains($blocEcheancier)) {
+            $this->blocEcheanciers->add($blocEcheancier);
+            $blocEcheancier->setEtudiant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBlocEcheancier(BlocEcheancier $blocEcheancier): static
+    {
+        if ($this->blocEcheanciers->removeElement($blocEcheancier)) {
+            // set the owning side to null (unless already changed)
+            if ($blocEcheancier->getEtudiant() === $this) {
+                $blocEcheancier->setEtudiant(null);
+            }
+        }
 
         return $this;
     }

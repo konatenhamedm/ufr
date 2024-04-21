@@ -33,7 +33,7 @@ class CursusProfessionnel
     private ?string $activite = null;
 
     #[ORM\ManyToOne(inversedBy: 'cursusProfessionnels')]
-    private ?Personne $personne = null;
+    private ?Etudiant $etudiant = null;
 
     public function getId(): ?int
     {
@@ -113,14 +113,14 @@ class CursusProfessionnel
         return $this;
     }
 
-    public function getPersonne(): ?Personne
+    public function getEtudiant(): ?Etudiant
     {
-        return $this->personne;
+        return $this->etudiant;
     }
 
-    public function setPersonne(?Personne $personne): static
+    public function setEtudiant(?Etudiant $etudiant): static
     {
-        $this->personne = $personne;
+        $this->etudiant = $etudiant;
 
         return $this;
     }
